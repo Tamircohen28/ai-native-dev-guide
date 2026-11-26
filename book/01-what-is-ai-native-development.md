@@ -67,9 +67,9 @@ flowchart TB
 | Part | Its job | In Claude Code | Read more |
 |---|---|---|---|
 | Model | Predicts the next token; decides what to say or which tool to call | A Claude model, chosen with `/model` | [02](02-llms-tokens-and-the-context-window.md) |
-| Tools | Let the model act: read and edit files, run shell commands, search, call other systems | Built-in tools such as Read, Edit and Bash; more through MCP servers | [03](03-the-agentic-loop-and-tool-use.md), [10](10-mcp-how-it-works.md) |
-| Loop | Runs each tool call the model asks for, feeds the result back, repeats until the model stops | The session; permission checks and hooks run inside it | [03](03-the-agentic-loop-and-tool-use.md), [08](08-settings-and-permissions.md), [14](14-hooks.md) |
-| Context management | Decides what the model sees on every request, and what gets dropped when space runs out | `CLAUDE.md`, memory, skills, compaction, subagents | [04](04-prompt-caching-compaction-and-cost.md), [07](07-claude-md-and-memory.md), [09](09-plan-mode-checkpoints-and-context-management.md) |
+| Tools | Let the model act: read and edit files, run shell commands, search, call other systems | Built-in tools such as Read, Edit and Bash; more through MCP servers | [03](03-the-agentic-loop-and-tool-use.md), [12](12-mcp-how-it-works.md) |
+| Loop | Runs each tool call the model asks for, feeds the result back, repeats until the model stops | The session; permission checks and hooks run inside it | [03](03-the-agentic-loop-and-tool-use.md), [09](09-settings-and-permissions.md), [16](16-hooks.md) |
+| Context management | Decides what the model sees on every request, and what gets dropped when space runs out | `CLAUDE.md`, memory, skills, compaction, subagents | [04](04-prompt-caching-compaction-and-cost.md), [08](08-claude-md-and-memory.md), [10](10-plan-mode-checkpoints-and-context-management.md) |
 
 The table uses names that later chapters explain in full. In one line each: `CLAUDE.md` is a file of project instructions loaded into every session; a **skill** is a packaged prompt whose body loads only when it is invoked; a **hook** is your own script that the harness runs at a fixed point in the loop; **MCP** (Model Context Protocol) is the standard way to connect external tools; a **subagent** is a second agent that the first one starts for a side task; **compaction** replaces the older part of a conversation with a summary.
 
@@ -114,10 +114,10 @@ The same page says that when a session goes wrong, "it's almost always one of th
 
 | What went wrong (docs' wording) | The habit | Where it is taught |
 |---|---|---|
-| "Claude built something different from what you had in mind, or it has to rediscover the same fact at the start of every session" | Tell Claude what it can't see | [07](07-claude-md-and-memory.md), [17](17-explore-plan-implement-verify.md) |
-| "Claude said it was done and it wasn't quite" | Give Claude a check to run | [18](18-testing-and-verification-loops.md) |
-| "Claude did something that must never happen in this repo, or skipped a step that must always happen" | Enforce the rules that can't have exceptions | [08](08-settings-and-permissions.md), [14](14-hooks.md) |
-| "Claude got it right, but it took more time, tokens, or permission prompts than the task was worth" | Change a default | [08](08-settings-and-permissions.md), [25](25-cost-usage-and-observability.md) |
+| "Claude built something different from what you had in mind, or it has to rediscover the same fact at the start of every session" | Tell Claude what it can't see | [08](08-claude-md-and-memory.md), [22](22-explore-plan-implement-verify.md) |
+| "Claude said it was done and it wasn't quite" | Give Claude a check to run | [23](23-testing-and-verification-loops.md) |
+| "Claude did something that must never happen in this repo, or skipped a step that must always happen" | Enforce the rules that can't have exceptions | [09](09-settings-and-permissions.md), [16](16-hooks.md) |
+| "Claude got it right, but it took more time, tokens, or permission prompts than the task was worth" | Change a default | [09](09-settings-and-permissions.md), [30](30-cost-usage-and-observability.md) |
 
 ### A worked example: the same task, specified twice
 
@@ -149,7 +149,7 @@ Don't:     <what must not change>
 Evidence:  <the command you ran and its output>
 ```
 
-If you cannot fill in "Done when", you have found the real first task: build the check. Chapter [18](18-testing-and-verification-loops.md) is about that.
+If you cannot fill in "Done when", you have found the real first task: build the check. Chapter [23](23-testing-and-verification-loops.md) is about that.
 
 ## Workflows versus agents
 
@@ -174,7 +174,7 @@ Two pieces of the post's advice hold up well and shape this book:
 1. **Start simple.** "we recommend finding the simplest solution possible, and only increasing complexity when needed. This might mean not building agentic systems at all. Agentic systems often trade latency and cost for better task performance".
 2. **Autonomy has a price.** "The autonomous nature of agents means higher costs, and the potential for compounding errors." A later Anthropic post puts numbers on it: "agents typically use about 4× more tokens than chat interactions, and multi-agent systems use about 15× more tokens than chats."
 
-What this means in practice: an interactive Claude Code session is an agent. When you call `claude -p` at a fixed step of a CI job, or make a hook run the type checker every time the agent tries to stop, you are wrapping that agent in a workflow, a predefined code path. Mature setups use both. The agent handles the open-ended part; deterministic paths handle the steps that must always happen. Part IV builds these up, from a single verify loop in chapter [17](17-explore-plan-implement-verify.md) to orchestrator-workers in chapter [21](21-multi-agent-orchestration.md).
+What this means in practice: an interactive Claude Code session is an agent. When you call `claude -p` at a fixed step of a CI job, or make a hook run the type checker every time the agent tries to stop, you are wrapping that agent in a workflow, a predefined code path. Mature setups use both. The agent handles the open-ended part; deterministic paths handle the steps that must always happen. Part IV builds these up, from a single verify loop in chapter [22](22-explore-plan-implement-verify.md) to orchestrator-workers in chapter [26](26-multi-agent-orchestration.md).
 
 > **Note:** The post carries a banner: "Much of the tooling landscape described in this post has changed since December 2024." The definitions are still the standard ones; the product names in it are dated. Claude Code also has a feature of its own called dynamic workflows (scripts that orchestrate many subagents), covered in Part IV. In this section the word is the general design term.
 
@@ -211,13 +211,13 @@ So do not adopt this way of working on the promise of a percentage. Adopt it wit
 | Level | Name | What changes for you | Where the book covers it |
 |---|---|---|---|
 | 0 | Autocomplete and chat | You write the code; the model suggests and explains | This chapter and [02](02-llms-tokens-and-the-context-window.md) |
-| 1 | Single interactive agent session | The agent reads, edits and runs commands; you steer and approve | [03](03-the-agentic-loop-and-tool-use.md) to [06](06-cli-slash-commands-and-shortcuts.md), and [09](09-plan-mode-checkpoints-and-context-management.md) |
-| 2 | Project memory and permissions | The repo carries your conventions and limits, so you stop repeating yourself | [07](07-claude-md-and-memory.md) and [08](08-settings-and-permissions.md) |
-| 3 | Extended harness | The agent gains tools and guardrails you built; rules become code | Part III, [10](10-mcp-how-it-works.md) to [16](16-output-styles-statusline-keybindings.md) |
-| 4 | Parallel and multi-agent work | Several agents work at once; you write briefs and review results | [17](17-explore-plan-implement-verify.md) to [21](21-multi-agent-orchestration.md) |
-| 5 | Agents in the pipeline | Agents run unattended; you design the gates and watch the signals | [22](22-headless-ci-and-the-agent-sdk.md) to [26](26-repo-standards-and-team-adoption.md) |
+| 1 | Single interactive agent session | The agent reads, edits and runs commands; you steer and approve | [03](03-the-agentic-loop-and-tool-use.md) to [05](05-inside-the-harness.md) (the loop, cost and the harness itself), [06](06-install-and-first-session.md), [07](07-cli-slash-commands-and-shortcuts.md) and [10](10-plan-mode-checkpoints-and-context-management.md) |
+| 2 | Project memory and permissions | The repo carries your conventions and limits, so you stop repeating yourself | [08](08-claude-md-and-memory.md) and [09](09-settings-and-permissions.md) |
+| 3 | Extended harness | The agent gains tools and guardrails you built; rules become code | Part III: the extension model in [11](11-the-extension-model.md), the mechanisms in [12](12-mcp-how-it-works.md) to [18](18-output-styles-statusline-keybindings.md), and the workshop guides [19](19-guide-write-a-subagent.md) to [21](21-guide-build-and-ship-a-plugin.md) |
+| 4 | Parallel and multi-agent work | Several agents work at once; you write briefs and review results | [22](22-explore-plan-implement-verify.md) to [26](26-multi-agent-orchestration.md) |
+| 5 | Agents in the pipeline | Agents run unattended; you design the gates and watch the signals | [27](27-headless-ci-and-the-agent-sdk.md) to [31](31-repo-standards-and-team-adoption.md) |
 
-Part VI, the field guide ([27](27-troubleshooting-common-problems.md) to [29](29-prompt-cookbook-and-anti-patterns.md)), applies at every level: troubleshooting, case studies and prompts.
+Part VI, the field guide ([32](32-troubleshooting-common-problems.md) to [34](34-prompt-cookbook-and-anti-patterns.md)), applies at every level: troubleshooting, case studies and prompts.
 
 Climbing is not the goal. Most tasks are best done at level 1 or 2, and the "start simple" rule above applies to your own setup too: add a skill, a hook or a second agent when a real problem asks for it.
 
@@ -228,10 +228,11 @@ Every numbered chapter has the same shape: a mental model with a diagram, the co
 | If you... | Read |
 |---|---|
 | Have never used a coding agent | Straight through Parts I and II, doing every "Try it" |
-| Use Claude Code daily, but only by prompting | Skim Part I, then chapters [07](07-claude-md-and-memory.md) to [09](09-plan-mode-checkpoints-and-context-management.md), then Part III |
+| Use Claude Code daily, but only by prompting | Skim Part I (read [05](05-inside-the-harness.md) properly), then chapters [08](08-claude-md-and-memory.md) to [10](10-plan-mode-checkpoints-and-context-management.md), then Part III |
+| Want to build your own subagent, skill or plugin | Chapter [11](11-the-extension-model.md) to choose, then the workshop guides [19](19-guide-write-a-subagent.md) to [21](21-guide-build-and-ship-a-plugin.md) |
 | Already write skills and hooks | Parts IV and V |
-| Are introducing this to a team | Chapters [08](08-settings-and-permissions.md), [24](24-security-and-guardrails.md), [25](25-cost-usage-and-observability.md) and [26](26-repo-standards-and-team-adoption.md) |
-| Have something broken right now | Chapter [27](27-troubleshooting-common-problems.md), then the [cheat sheet](A-cheat-sheet.md) |
+| Are introducing this to a team | Chapters [09](09-settings-and-permissions.md), [29](29-security-and-guardrails.md), [30](30-cost-usage-and-observability.md) and [31](31-repo-standards-and-team-adoption.md) |
+| Have something broken right now | Chapter [32](32-troubleshooting-common-problems.md), then the [cheat sheet](A-cheat-sheet.md) |
 
 Two kinds of evidence appear throughout, and they are kept apart:
 
@@ -265,7 +266,7 @@ The field data in this book comes from the transcripts that were on the author's
 
 The shape of that curve is the most transferable finding: prompt, then memory note, then global rule, then hook, then skill default. Each step up happened only after the weaker one failed to hold. It also went the other way once: a guard was partly removed because carrying it cost more than it saved.
 
-> **Field note:** The author rarely interrupted a running agent: 12 to 19 interrupted main-thread turns, depending on which of two analyses you take, against 218 "status?" pokes (rough counts, read them as plus or minus 30%). Supervision was by polling, which is why silent waits dominate the friction list. Writing the lesson into a project memory did not help: no improvement shows in the following month. The author moved to having the agent watch its own background work and report on each change. See chapter [20](20-parallel-work-worktrees-and-background-tasks.md).
+> **Field note:** The author rarely interrupted a running agent: 12 to 19 interrupted main-thread turns, depending on which of two analyses you take, against 218 "status?" pokes (rough counts, read them as plus or minus 30%). Supervision was by polling, which is why silent waits dominate the friction list. Writing the lesson into a project memory did not help: no improvement shows in the following month. The author moved to having the agent watch its own background work and report on each change. See chapter [25](25-parallel-work-worktrees-and-background-tasks.md).
 
 One more caveat from the same analysis: the data shows which fixes were adopted and cited later, and seldom a before-and-after rate. Whether a given fix worked is mostly unmeasured.
 
@@ -273,12 +274,12 @@ One more caveat from the same analysis: the data shows which fixes were adopted 
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| The agent builds something other than what you wanted | It cannot see your intent; the prompt named no file, symptom or end state | Use the five-line brief; put recurring facts in `CLAUDE.md` ([07](07-claude-md-and-memory.md)) |
-| "Done", but it is not | Nothing runnable told the agent whether the work was finished | Give a pass/fail command and ask for the command output as evidence ([18](18-testing-and-verification-loops.md)) |
-| A rule in your instructions is skipped now and then | Instructions the model reads are guidelines, and the model may decide one does not apply | Move must-always rules to a hook, a deny rule or a managed setting ([14](14-hooks.md)) |
-| You feel much faster but the team ships at the same pace | Review and verification became the bottleneck; people over-estimate their own speedup | Measure cycle time and review load; keep changes small ([19](19-git-prs-and-code-review.md)) |
+| The agent builds something other than what you wanted | It cannot see your intent; the prompt named no file, symptom or end state | Use the five-line brief; put recurring facts in `CLAUDE.md` ([08](08-claude-md-and-memory.md)) |
+| "Done", but it is not | Nothing runnable told the agent whether the work was finished | Give a pass/fail command and ask for the command output as evidence ([23](23-testing-and-verification-loops.md)) |
+| A rule in your instructions is skipped now and then | Instructions the model reads are guidelines, and the model may decide one does not apply | Move must-always rules to a hook, a deny rule or a managed setting ([16](16-hooks.md)) |
+| You feel much faster but the team ships at the same pace | Review and verification became the bottleneck; people over-estimate their own speedup | Measure cycle time and review load; keep changes small ([24](24-git-prs-and-code-review.md)) |
 | You built a multi-agent pipeline for a task one prompt could do | Complexity added before a problem asked for it | "finding the simplest solution possible, and only increasing complexity when needed" |
-| You keep typing "status?" | The agent is silent while it waits, so quiet looks the same as stuck | Have it watch its own background work and report on each change ([20](20-parallel-work-worktrees-and-background-tasks.md)) |
+| You keep typing "status?" | The agent is silent while it waits, so quiet looks the same as stuck | Have it watch its own background work and report on each change ([25](25-parallel-work-worktrees-and-background-tasks.md)) |
 | Advice from a 2024 or 2025 tutorial does not match what you see | The harness and the models changed; several old workarounds were retired | Check `claude --version` and prefer the dated facts in this book |
 
 ## Checklist
@@ -295,7 +296,7 @@ One more caveat from the same analysis: the data shows which fixes were adopted 
 
 1. **Sort last week's work.** List ten tasks you did. Mark each one A (autocomplete would do), C (a chat answer would do) or H (needs a harness: several files, commands to run, a check to pass). For two H tasks, fill in the five-line brief from this chapter.
 2. **Write the check first.** Pick a bug you know about. Before writing any prompt, write the single command that would prove it fixed. If you cannot, note what is missing (a test, a script, a reproducible input). That gap is the first thing to build.
-3. **Compare two prompts.** If Claude Code is already installed (otherwise come back after chapter [05](05-install-and-first-session.md)), give it one small task twice in fresh sessions: once as a single vague line, once with the brief. Count how many corrections each run needed.
+3. **Compare two prompts.** If Claude Code is already installed (otherwise come back after chapter [06](06-install-and-first-session.md)), give it one small task twice in fresh sessions: once as a single vague line, once with the brief. Count how many corrections each run needed.
 
 ## Sources
 

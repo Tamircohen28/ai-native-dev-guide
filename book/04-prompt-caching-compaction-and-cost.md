@@ -274,7 +274,7 @@ single context windows, and interfacing with numerous complex tools", and less f
 
 Fan-out also meets the cache. A fresh subagent has a "Separate cache", so it starts cold and writes
 its own prefix, while a fork (a subagent that starts with a copy of your conversation) shares the
-parent's cache ([chapter 12](12-subagents.md)). For scale, the
+parent's cache ([chapter 14](14-subagents.md)). For scale, the
 Claude Code docs put the average at "around $13 per developer per active day and $150-250 per
 developer per month, with costs remaining below $30 per active day for 90% of users".
 
@@ -390,4 +390,4 @@ tokens and a 90th percentile of 968k, and fell to a median of 33k afterwards.
 
 ---
 
-[← Previous: The agentic loop and tool use](03-the-agentic-loop-and-tool-use.md) · [Contents](README.md) · [Next: Install and first session →](05-install-and-first-session.md)
+[← Previous: The agentic loop and tool use](03-the-agentic-loop-and-tool-use.md) · [Contents](README.md) · [Next: Inside the harness: architecture and what happens under the hood →](05-inside-the-harness.md)

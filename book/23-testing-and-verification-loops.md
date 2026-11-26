@@ -1,4 +1,4 @@
-# 18 — Testing and verification loops
+# 23 — Testing and verification loops
 
 After this chapter you can make an agent's work provable instead of plausible. You can run a test-first loop in which every test is seen to fail before it passes, recognise the ways a "done" claim goes wrong, and prove that each of your gates is able to fail. You can also verify a UI in a real browser, require evidence in the final report, and move verification from a request in a prompt to something the harness or CI enforces.
 
@@ -23,7 +23,7 @@ Pick the rung by the risk of the change. A README edit can stop at the second ru
 
 ## Test-first with an agent
 
-Test-first development (also called red/green/refactor) means: write a test that fails, write the code that makes it pass, then clean up while the tests stay green. It suits agents because the test is exactly the kind of check [chapter 17](17-explore-plan-implement-verify.md) asks for: something the agent can run that comes back pass or fail.
+Test-first development (also called red/green/refactor) means: write a test that fails, write the code that makes it pass, then clean up while the tests stay green. It suits agents because the test is exactly the kind of check [chapter 22](22-explore-plan-implement-verify.md) asks for: something the agent can run that comes back pass or fail.
 
 ```mermaid
 flowchart TD
@@ -61,7 +61,7 @@ tests/. If you believe a test is wrong, stop and tell me why instead.
 
 **Why the test must be seen to fail.** A test that passes before the code exists is not exercising the new behaviour: it imports the wrong module, asserts on a mock, or was never collected by the test runner. Only the red run proves the test is connected to the thing you are about to build.
 
-**Protect the tests.** Anthropic's own long-running-agent harness used this instruction: "It is unacceptable to remove or edit tests because this could lead to missing or buggy functionality." A prompt line is a request. For the implementation step you can add a deny rule to `.claude/settings.json` ([chapter 8](08-settings-and-permissions.md)):
+**Protect the tests.** Anthropic's own long-running-agent harness used this instruction: "It is unacceptable to remove or edit tests because this could lead to missing or buggy functionality." A prompt line is a request. For the implementation step you can add a deny rule to `.claude/settings.json` ([chapter 9](09-settings-and-permissions.md)):
 
 ```json
 {
@@ -182,7 +182,7 @@ test("the web client reads what the service writes", () => {
 });
 ```
 
-Two more rules from the same repos: a gate must sit on the path it guards *and* in a required check ([chapter 19](19-git-prs-and-code-review.md)), and "could not check" must never exit 0. One watchdog workflow documents its exit codes as "0 verified, 1 evidence moved, 2 COULD NOT BE CHECKED — and 2 is not a softer 1."
+Two more rules from the same repos: a gate must sit on the path it guards *and* in a required check ([chapter 24](24-git-prs-and-code-review.md)), and "could not check" must never exit 0. One watchdog workflow documents its exit codes as "0 verified, 1 evidence moved, 2 COULD NOT BE CHECKED — and 2 is not a softer 1."
 
 ## Verify UI and behaviour in a real browser
 
@@ -201,7 +201,7 @@ A type checker cannot see a blank page. The official list of acceptable checks i
 | `/run` | Skill: launch and drive your app |
 | `/run-skill-generator` | Skill: writes a per-project skill that teaches `/run` and `/verify` |
 | `claude --chrome` | Enables Chrome browser integration for web automation and testing |
-| A browser-automation MCP server | For example the Playwright plugin; [chapter 11](11-mcp-in-practice.md) covers adding MCP servers |
+| A browser-automation MCP server | For example the Playwright plugin; [chapter 13](13-mcp-in-practice.md) covers adding MCP servers |
 
 Say which method you want. A prompt that worked in the field data:
 
@@ -243,7 +243,7 @@ A line in a prompt or in `CLAUDE.md` is read by the model, with no guarantee. A 
 | `Stop` hook | Claude Code, when Claude tries to stop | No, unless it can edit the hook |
 | Required CI check | Your CI, on the pushed commit | No, without bypass rights on the branch |
 
-A `Stop` hook ([chapter 14](14-hooks.md)) runs when Claude finishes a response. The docs: "Exit code 2 is what blocks the stop." Their one-line example is `pnpm tsc --noEmit 1>&2 || exit 2`. A fuller version, registered in `.claude/settings.json` (make the script executable with `chmod +x`):
+A `Stop` hook ([chapter 16](16-hooks.md)) runs when Claude finishes a response. The docs: "Exit code 2 is what blocks the stop." Their one-line example is `pnpm tsc --noEmit 1>&2 || exit 2`. A fuller version, registered in `.claude/settings.json` (make the script executable with `chmod +x`):
 
 ```json
 {
@@ -361,4 +361,4 @@ claude plugin eval . --ablation with-without --runs 3 \
 
 ---
 
-[← Previous: Explore, plan, implement, verify](17-explore-plan-implement-verify.md) · [Contents](README.md) · [Next: Git, pull requests and code review →](19-git-prs-and-code-review.md)
+[← Previous: Explore, plan, implement, verify](22-explore-plan-implement-verify.md) · [Contents](README.md) · [Next: Git, pull requests and code review →](24-git-prs-and-code-review.md)

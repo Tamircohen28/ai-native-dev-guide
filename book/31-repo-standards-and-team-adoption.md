@@ -1,4 +1,4 @@
-# 26 — Repo standards and team adoption
+# 31 — Repo standards and team adoption
 
 After this chapter you can make a repository agent-ready with five pieces, write a gate command and prove that it and its documentation are true, and set branch protection so a person and a deterministic check have the last word. You can also plan a staged team rollout with a measure for each stage, and run the loop that turns every incident into a rule, a hook and a memory.
 
@@ -37,7 +37,7 @@ flowchart LR
 
 ### The instruction file
 
-Keep policy in one file and make everything else point at it. Claude Code reads `AGENTS.md` natively (v2.1.277 or later) only when no `CLAUDE.md` applies, so a repository that has both needs the import. Details are in [CLAUDE.md and memory](07-claude-md-and-memory.md) and [One repo, many agents](23-cross-tool-agents-md-cursor-codex-gemini.md).
+Keep policy in one file and make everything else point at it. Claude Code reads `AGENTS.md` natively (v2.1.277 or later) only when no `CLAUDE.md` applies, so a repository that has both needs the import. Details are in [CLAUDE.md and memory](08-claude-md-and-memory.md) and [One repo, many agents](28-cross-tool-agents-md-cursor-codex-gemini.md).
 
 ```markdown
 @AGENTS.md
@@ -57,7 +57,7 @@ A test suite is useful to an agent only if red always means "you broke something
 - **Keep the clock out.** One repo runs its suite nightly under shifted clocks and fails on any test that depends on today's date.
 - **Make a missing test fail.** A manifest lists every test file, so a renamed or deleted file fails CI instead of passing under a "pass with no tests" setting.
 
-Keep model judgement out of the per-change gate. One field repo states it as an invariant: "No release gate depends on a non-deterministic agent decision." Evals that call a model run nightly, not on every push. See [Testing and verification loops](18-testing-and-verification-loops.md).
+Keep model judgement out of the per-change gate. One field repo states it as an invariant: "No release gate depends on a non-deterministic agent decision." Evals that call a model run nightly, not on every push. See [Testing and verification loops](23-testing-and-verification-loops.md).
 
 ### The decision log
 
@@ -210,7 +210,7 @@ jobs:
           done
 ```
 
-AI review is advice, not a gate. The managed Code Review docs say: "By itself, a review doesn't approve or block the pull request." See [Git, pull requests and code review](19-git-prs-and-code-review.md).
+AI review is advice, not a gate. The managed Code Review docs say: "By itself, a review doesn't approve or block the pull request." See [Git, pull requests and code review](24-git-prs-and-code-review.md).
 
 > **Note:** Green is not the same as watched. The product workspace added two watchdog workflows after a required gate sat red on the default branch for about 14.5 hours unnoticed, and another went four days without running: one asks "is the default branch red right now?", the other "has each required gate run recently?".
 
@@ -250,7 +250,7 @@ Other delivery channels are server-managed settings from the claude.ai admin con
 }
 ```
 
-Confirm it applied with `/status`, which shows `Enterprise managed settings (file)`. Keys that only a managed source can set include `allowManagedPermissionRulesOnly`, `allowManagedHooksOnly`, `allowManagedMcpServersOnly`, `strictKnownMarketplaces`, `blockedMarketplaces` and `sandbox.network.allowManagedDomainsOnly`. Scopes and precedence are in [Settings and permissions](08-settings-and-permissions.md); the security reasoning is in [Security and guardrails](24-security-and-guardrails.md).
+Confirm it applied with `/status`, which shows `Enterprise managed settings (file)`. Keys that only a managed source can set include `allowManagedPermissionRulesOnly`, `allowManagedHooksOnly`, `allowManagedMcpServersOnly`, `strictKnownMarketplaces`, `blockedMarketplaces` and `sandbox.network.allowManagedDomainsOnly`. Scopes and precedence are in [Settings and permissions](09-settings-and-permissions.md); the security reasoning is in [Security and guardrails](29-security-and-guardrails.md).
 
 **Shared plugins.** Package the team's skills, agents and hooks as a plugin in a marketplace repository, then name both in the project's `.claude/settings.json`:
 
@@ -265,7 +265,7 @@ Confirm it applied with `/status`, which shows `Enterprise managed settings (fil
 }
 ```
 
-Three facts decide whether this works in practice. Committing the file enables the plugin for collaborators "but doesn't download it": each person still runs `claude plugin install <name>@<marketplace> --scope project`. Auto-update is off by default for every marketplace except Anthropic's official ones. And a manifest that pins a `version` string keeps every user on the cached copy until the author changes that string, however many commits are pushed. The author's plugin repo states the consequence in its release rule: "Pushing commits without bumping `version` does not deliver changes to installed users." More in [Plugins and marketplaces](15-plugins-and-marketplaces.md).
+Three facts decide whether this works in practice. Committing the file enables the plugin for collaborators "but doesn't download it": each person still runs `claude plugin install <name>@<marketplace> --scope project`. Auto-update is off by default for every marketplace except Anthropic's official ones. And a manifest that pins a `version` string keeps every user on the cached copy until the author changes that string, however many commits are pushed. The author's plugin repo states the consequence in its release rule: "Pushing commits without bumping `version` does not deliver changes to installed users." More in [Plugins and marketplaces](17-plugins-and-marketplaces.md).
 
 ## A staged rollout
 
@@ -281,10 +281,10 @@ flowchart LR
 
 | Stage | What you do | What to measure | Move on when |
 |---|---|---|---|
-| 1. Pilot | Two or three volunteers, one or two repos, interactive use only | Cost per active day against the docs' baseline (see [chapter 25](25-cost-usage-and-observability.md)); pull request size; corrections you had to make twice | The volunteers can name what the agent keeps getting wrong |
+| 1. Pilot | Two or three volunteers, one or two repos, interactive use only | Cost per active day against the docs' baseline (see [chapter 30](30-cost-usage-and-observability.md)); pull request size; corrections you had to make twice | The volunteers can name what the agent keeps getting wrong |
 | 2. Shared conventions | `AGENTS.md`, a gate command, a docs index and a drift check in every active repo | Share of repos with a working gate; share of agent pull requests green on first CI run | A new joiner's first agent pull request passes the gate without help |
 | 3. Guardrails | Managed settings, deny rules, hooks for irreversible actions, branch protection with one required check | Hook blocks per week and how many were false; permission prompts per session; incidents | A month with no incident that a rule or hook should have stopped |
-| 4. Automation | Headless jobs, advisory review bots, scheduled runs (see [chapter 22](22-headless-ci-and-the-agent-sdk.md)) | CI queue time; cost per run; review rounds per pull request; rework after merge | Review time per pull request is flat or falling as volume grows |
+| 4. Automation | Headless jobs, advisory review bots, scheduled runs (see [chapter 27](27-headless-ci-and-the-agent-sdk.md)) | CI queue time; cost per run; review rounds per pull request; rework after merge | Review time per pull request is flat or falling as volume grows |
 
 ## The team problems, and what the sources support
 
@@ -387,4 +387,4 @@ Run a retrospective after any rough session. The format that survived in the fie
 
 ---
 
-[← Previous: Cost, usage and observability](25-cost-usage-and-observability.md) · [Contents](README.md) · [Next: Troubleshooting: common problems and fixes →](27-troubleshooting-common-problems.md)
+[← Previous: Cost, usage and observability](30-cost-usage-and-observability.md) · [Contents](README.md) · [Next: Troubleshooting: common problems and fixes →](32-troubleshooting-common-problems.md)

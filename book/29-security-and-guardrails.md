@@ -1,4 +1,4 @@
-# 24 — Security and guardrails
+# 29 — Security and guardrails
 
 After this chapter you can write a threat model for a coding agent, say for every defence whether it is advice or enforcement, and name what each one leaves uncovered. You can open a repository you do not trust without running its configuration, and you can build a guard that stops an irreversible command until a human says yes.
 
@@ -48,7 +48,7 @@ Five classes of problem cover almost every public incident. Write them down for 
 - **Repo files.** READMEs, comments, issue text and test fixtures are all read as context.
 - **Web pages.** Claude Code reduces this risk by design: for most WebFetch fetches a separate model call reads the page and Claude gets that call's answer, not the raw page. It is a reduction, not a guarantee.
 - **Tool results.** Whatever a command, an API or an MCP server returns lands in context. One published attack put a malicious issue in a public repository and got an agent to copy private-repository data into a public pull request. The researchers noted "this is not a flaw in the GitHub MCP server code itself": every component worked as designed.
-- **MCP tool descriptions.** A server's tool descriptions are loaded into context where you never see them. "Tool poisoning" hides instructions there. Related tricks are the rug pull (a description changes after you approved the server) and shadowing (one server's description alters how another server's tools get used). The MCP specification says clients "MUST consider tool annotations to be untrusted unless they come from trusted servers", and that a human SHOULD always be able to deny a tool call. Anthropic states that it "does not security-audit or manage any MCP server". [MCP: how the protocol works](10-mcp-how-it-works.md) covers the spec's human-in-the-loop rule; [MCP in practice](11-mcp-in-practice.md) covers server approval and scopes.
+- **MCP tool descriptions.** A server's tool descriptions are loaded into context where you never see them. "Tool poisoning" hides instructions there. Related tricks are the rug pull (a description changes after you approved the server) and shadowing (one server's description alters how another server's tools get used). The MCP specification says clients "MUST consider tool annotations to be untrusted unless they come from trusted servers", and that a human SHOULD always be able to deny a tool call. Anthropic states that it "does not security-audit or manage any MCP server". [MCP: how the protocol works](12-mcp-how-it-works.md) covers the spec's human-in-the-loop rule; [MCP in practice](13-mcp-in-practice.md) covers server approval and scopes.
 
 ### Malicious project configuration: the documented CVEs
 
@@ -96,7 +96,7 @@ For each layer, ask two questions: who executes it, and what does it not see? Th
 | Permission modes | Mixed: `auto` is a classifier's judgement | Fewer prompts with a safety net. Auto mode blocks force pushes, production deploys and `terraform destroy` by default | "Auto mode reduces permission prompts but does not guarantee safety." `bypassPermissions` "offers no protection against prompt injection or unintended actions" |
 | Sandbox | Enforced by the operating system | Filesystem and network limits on Bash commands and their children. Allowed domains start empty | File tools, WebFetch, hooks, local MCP servers and `!` commands run outside it. Off by default. Reads cover most of the machine, including `~/.ssh`, unless you deny them |
 | Hooks | Enforced by your code | A `PreToolUse` deny blocks even in `bypassPermissions`. Any logic you can script | Only `exit 2` or a JSON deny blocks; by default `exit 1`, a crash or a timeout does not. They match text. A file pulled in with `@` does not trigger `PreToolUse` hooks |
-| CI gates | Enforced off your machine | Tests, secret scans and dependency checks that the session cannot edit away | Damage done before the push. A gate that cannot fail (see [chapter 26](26-repo-standards-and-team-adoption.md)) |
+| CI gates | Enforced off your machine | Tests, secret scans and dependency checks that the session cannot edit away | Damage done before the push. A gate that cannot fail (see [chapter 31](31-repo-standards-and-team-adoption.md)) |
 | Human review | The last word | Judgement, context, accountability | Volume. Anthropic reports that users accept 93% of permission prompts anyway |
 
 Some numbers to calibrate trust, all from Anthropic's own posts: the auto-mode classifier had 0.4% false positives on real traffic, missed 17% of real over-eager actions in a test set and 5.7% of synthetic exfiltration attempts. Sandboxing cut permission prompts by 84% in internal use (no method given). Read these as "useful, not sufficient". Know which mode you are in: as of Nov 2026 a new interactive session starts in `auto` (v2.1.283 or later), while `claude -p` starts in `default`.
@@ -126,7 +126,7 @@ This project `.claude/settings.json` sets deny rules for secrets, an `ask` on ne
 - Keep the network allowlist narrow. The docs warn: "Allowing broad domains such as `github.com` can create paths for data exfiltration". The proxy does not inspect TLS.
 - Add credential directories to `sandbox.filesystem.denyRead`, and remember the split: a `denyRead` entry does not stop the Read tool, and a `Read` deny rule does not stop an arbitrary subprocess. You need both.
 
-Rule syntax and the modes are covered in [Settings and permissions](08-settings-and-permissions.md); hook mechanics in [Hooks](14-hooks.md).
+Rule syntax and the modes are covered in [Settings and permissions](09-settings-and-permissions.md); hook mechanics in [Hooks](16-hooks.md).
 
 ## Opening an untrusted repository
 
@@ -237,7 +237,7 @@ Four design notes:
 
 ## Unattended runs
 
-A run nobody watches has no trust dialog, no permission prompt and no one to press `Esc`. [Headless mode, CI and the Agent SDK](22-headless-ci-and-the-agent-sdk.md) covers the mechanics; the security rules are these.
+A run nobody watches has no trust dialog, no permission prompt and no one to press `Esc`. [Headless mode, CI and the Agent SDK](27-headless-ci-and-the-agent-sdk.md) covers the mechanics; the security rules are these.
 
 | Risk | Control |
 |---|---|
@@ -326,4 +326,4 @@ A security checklist for a team. Each item names an enforced control, not a habi
 
 ---
 
-[← Previous: One repo, many agents: AGENTS.md and cross-tool setups](23-cross-tool-agents-md-cursor-codex-gemini.md) · [Contents](README.md) · [Next: Cost, usage and observability →](25-cost-usage-and-observability.md)
+[← Previous: One repo, many agents: AGENTS.md and cross-tool setups](28-cross-tool-agents-md-cursor-codex-gemini.md) · [Contents](README.md) · [Next: Cost, usage and observability →](30-cost-usage-and-observability.md)

@@ -1,4 +1,4 @@
-# 23 — One repo, many agents: AGENTS.md and cross-tool setups
+# 28 — One repo, many agents: AGENTS.md and cross-tool setups
 
 After this chapter you can set up one repository so that Claude Code, Cursor, Codex CLI, Gemini CLI, OpenCode and GitHub Copilot all work from the same rules, and prove in CI that they still do. You will also know which parts of an agent setup port between tools and which do not, and how to move a half-finished task from one tool to another without losing it.
 
@@ -48,7 +48,7 @@ A workable section set, taken from the template the author uses across 16 reposi
 ## Key files
 ```
 
-Keep it lean, because every tool loads it into every session. [Chapter 7](07-claude-md-and-memory.md) covers what belongs in an instruction file at all.
+Keep it lean, because every tool loads it into every session. [Chapter 8](08-claude-md-and-memory.md) covers what belongs in an instruction file at all.
 
 ## How Claude Code reads `AGENTS.md`
 
@@ -65,7 +65,7 @@ Most older tutorials say Claude Code ignores `AGENTS.md`. Since v2.1.277 it read
 
 ## Six tools, one table
 
-All facts below are from each vendor's docs as read on 2026-11-25; treat them as "as of Nov 2026". The last four columns are the extension points from Part III: skills ([chapter 13](13-skills.md)), hooks ([chapter 14](14-hooks.md)), MCP ([chapter 10](10-mcp-how-it-works.md)) and subagents ([chapter 12](12-subagents.md)).
+All facts below are from each vendor's docs as read on 2026-11-25; treat them as "as of Nov 2026". The last four columns are the extension points from Part III: skills ([chapter 15](15-skills.md)), hooks ([chapter 16](16-hooks.md)), MCP ([chapter 12](12-mcp-how-it-works.md)) and subagents ([chapter 14](14-subagents.md)).
 
 | Tool | Instruction file | Scoping | Skills / commands | Hooks | MCP | Subagents |
 |---|---|---|---|---|---|---|
@@ -90,7 +90,7 @@ Details the table cannot hold:
 Three convergence points are real:
 
 1. **`AGENTS.md`** can be read by all six tools: natively, as a fallback, or in Gemini CLI through the one-line `context.fileName` setting.
-2. **`SKILL.md` folders** are a shared format. The Agent Skills spec says it "was originally developed by Anthropic, released as an open standard", and Cursor, Copilot and OpenCode load `.claude/skills/` explicitly. The standard requires `name` and `description`; "all fields optional" is true only inside Claude Code ([chapter 13](13-skills.md)).
+2. **`SKILL.md` folders** are a shared format. The Agent Skills spec says it "was originally developed by Anthropic, released as an open standard", and Cursor, Copilot and OpenCode load `.claude/skills/` explicitly. The standard requires `name` and `description`; "all fields optional" is true only inside Claude Code ([chapter 15](15-skills.md)).
 3. **`.agents/skills/`** is emerging as the neutral skills directory (Codex, Cursor, Gemini and Antigravity, OpenCode, Copilot). Claude Code keeps skills in `.claude/skills/` and lists `.agents/` among the places it does not read for instructions, which is why cross-tool repositories keep both and check that they match.
 
 Slash commands are also converging: they are being folded into skills in Claude Code, Cursor and Antigravity. The rest does not port:
@@ -253,7 +253,7 @@ There is no standard format for this note. As one example, this is the block the
 - **Last agent:** claude, 2026-11-25T14:10Z
 ```
 
-**Next** is one concrete action, not a plan. **Decisions** is the field that matters most, because choices and their reasons are exactly what a session's context loses. The tool name is metadata: it never goes into a branch name or a worktree path, so the same branch works from any tool. [Chapter 21](21-multi-agent-orchestration.md) uses the same idea for handoffs between agents inside one tool.
+**Next** is one concrete action, not a plan. **Decisions** is the field that matters most, because choices and their reasons are exactly what a session's context loses. The tool name is metadata: it never goes into a branch name or a worktree path, so the same branch works from any tool. [Chapter 26](26-multi-agent-orchestration.md) uses the same idea for handoffs between agents inside one tool.
 
 ## From the field
 
@@ -307,4 +307,4 @@ There is no standard format for this note. As one example, this is the block the
 
 ---
 
-[← Previous: Headless mode, CI and the Agent SDK](22-headless-ci-and-the-agent-sdk.md) · [Contents](README.md) · [Next: Security and guardrails →](24-security-and-guardrails.md)
+[← Previous: Headless mode, CI and the Agent SDK](27-headless-ci-and-the-agent-sdk.md) · [Contents](README.md) · [Next: Security and guardrails →](29-security-and-guardrails.md)

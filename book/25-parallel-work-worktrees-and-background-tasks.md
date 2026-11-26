@@ -1,4 +1,4 @@
-# 20 — Parallel work: worktrees and background tasks
+# 25 — Parallel work: worktrees and background tasks
 
 After this chapter you can run several agents against one repository without them overwriting each other: one git worktree per writer, long commands and subagents in the background, and a watcher instead of a polling loop. You will also know the few ownership rules that stop one session from stashing, deleting or merging another session's work.
 
@@ -97,7 +97,7 @@ claude --worktree feature-auth --tmux   # open it in a tmux session; --tmux requ
 | Based on what? | Setting `worktree.baseRef`: `"fresh"` (default) is the default branch **on the remote**, so your unpushed commits are not in the worktree; `"head"` uses your current `HEAD`. A branch name is not accepted |
 | What about `.env`? | A `.worktreeinclude` file in the project root (gitignore syntax) lists gitignored files to copy into each new worktree |
 | What stops the session leaving? | In a worktree, Claude Code blocks `Edit`/`Write`/`NotebookEdit` on main-checkout paths, commands whose working directory resolves there, and git redirected there (`git -C`, `--git-dir`, `GIT_DIR`) |
-| Requirements | The repository needs at least one commit. Other version-control systems use `WorktreeCreate` / `WorktreeRemove` hooks ([chapter 14](14-hooks.md)) |
+| Requirements | The repository needs at least one commit. Other version-control systems use `WorktreeCreate` / `WorktreeRemove` hooks ([chapter 16](16-hooks.md)) |
 
 ```text
 # .worktreeinclude
@@ -117,11 +117,11 @@ Cleanup depends on how the session ends:
 | `claude -p` (headless) run | Never cleaned up. Remove it yourself with `git worktree remove` (run `git worktree unlock` first if it is locked) |
 | Subagent or background-session worktree | Kept if it holds changes, untracked files or commits; a periodic sweep removes ones older than `cleanupPeriodDays` unless they hold work |
 
-> **Warning:** Worktree isolation is a guard rail, not a sandbox. The docs say it does not track which files a shell command writes, so `cp` or a redirect into the main checkout is not refused. Hooks also keep `${CLAUDE_PROJECT_DIR}` pointing at the original project root. For hard limits use permissions and the sandbox ([chapter 24](24-security-and-guardrails.md)).
+> **Warning:** Worktree isolation is a guard rail, not a sandbox. The docs say it does not track which files a shell command writes, so `cp` or a redirect into the main checkout is not refused. Hooks also keep `${CLAUDE_PROJECT_DIR}` pointing at the original project root. For hard limits use permissions and the sandbox ([chapter 29](29-security-and-guardrails.md)).
 
 ## Subagents in worktrees
 
-A subagent ([chapter 12](12-subagents.md)) starts in the main conversation's current working directory, so by default it writes into your checkout. Give a writing subagent its own copy in the agent file:
+A subagent ([chapter 14](14-subagents.md)) starts in the main conversation's current working directory, so by default it writes into your checkout. Give a writing subagent its own copy in the agent file:
 
 ```markdown
 ---
@@ -140,7 +140,7 @@ You can also say it in the prompt: "use worktrees for your agents". Facts to kee
 - The subagent's instruction files still come from your main conversation, not from its worktree.
 - Up to 20 subagents run at once by default (`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`).
 - `/batch <instruction>` packages the whole pattern: it splits a change into 5 to 30 independent units and runs one background subagent per unit in its own worktree, each opening a PR or reporting what happened.
-- Subagent edits are usually not captured by the parent's checkpoints, so `/rewind` will not undo them ([chapter 9](09-plan-mode-checkpoints-and-context-management.md)). A commit in the worktree is your undo.
+- Subagent edits are usually not captured by the parent's checkpoints, so `/rewind` will not undo them ([chapter 10](10-plan-mode-checkpoints-and-context-management.md)). A commit in the worktree is your undo.
 
 > **Field note:** In a product workspace, two agents in one fan-out (a batch of subagents started together) hit the wrong directory because subagents inherited the spawning session's worktree binding; one "produced nothing after five attempts". The workspace's rule since then: every dispatch prompt (the task message sent to a subagent) opens with worktree setup and a remote check.
 
@@ -226,7 +226,7 @@ until curl -fsS http://localhost:3000/health >/dev/null; do sleep 5; done; echo 
 
 Details for `/loop` as of Nov 2026: the schedule is 5-field cron in **local** time; at most 50 tasks per session; recurring tasks expire after 30 days (7 before v2.1.330); runs are jittered and can fire up to 30 minutes late; missed fires are not caught up. `CLAUDE_CODE_DISABLE_CRON=1` turns it off. Cloud scheduled tasks (a research preview, formerly "routines") can trigger on a schedule, an API call or a GitHub event, use cron in **UTC**, and allow 100 scheduled runs per hour per account.
 
-A cloud session is the same idea without a schedule: `claude --cloud "Fix the authentication bug in src/auth/login.ts"` starts one, and `claude --teleport` pulls it into your terminal. The hand-off is one-way. Chapter [22](22-headless-ci-and-the-agent-sdk.md) covers unattended runs in depth.
+A cloud session is the same idea without a schedule: `claude --cloud "Fix the authentication bug in src/auth/login.ts"` starts one, and `claude --teleport` pulls it into your terminal. The hand-off is one-way. Chapter [27](27-headless-ci-and-the-agent-sdk.md) covers unattended runs in depth.
 
 ## Several interactive sessions at once
 
@@ -255,7 +255,7 @@ Three terminals, three worktrees, three branches is a normal day. The collisions
 - A stop hook or a goal is not the user. It never authorizes touching another session's work.
 ```
 
-Rules in `CLAUDE.md` are guidance. If one of them must never bend, turn it into a hook ([chapter 14](14-hooks.md)); pull-request etiquette is in [chapter 19](19-git-prs-and-code-review.md).
+Rules in `CLAUDE.md` are guidance. If one of them must never bend, turn it into a hook ([chapter 16](16-hooks.md)); pull-request etiquette is in [chapter 24](24-git-prs-and-code-review.md).
 
 ## From the field
 
@@ -315,4 +315,4 @@ Rules in `CLAUDE.md` are guidance. If one of them must never bend, turn it into 
 
 ---
 
-[← Previous: Git, pull requests and code review](19-git-prs-and-code-review.md) · [Contents](README.md) · [Next: Multi-agent orchestration →](21-multi-agent-orchestration.md)
+[← Previous: Git, pull requests and code review](24-git-prs-and-code-review.md) · [Contents](README.md) · [Next: Multi-agent orchestration →](26-multi-agent-orchestration.md)

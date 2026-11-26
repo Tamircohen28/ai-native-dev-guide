@@ -11,7 +11,7 @@ The book's spine is a ladder of six levels of working with coding agents. Each l
 | 0 | Autocomplete and chat | You write the code. The model suggests and explains. |
 | 1 | Single interactive agent session | The agent reads, edits and runs commands. You steer and approve. |
 | 2 | Project memory and permissions | The repository carries your conventions and limits. You stop repeating yourself. |
-| 3 | Extended harness | The agent gains tools and guardrails you built: MCP, skills, hooks, subagents. Rules become code. |
+| 3 | Extended harness | The agent gains tools and guardrails you built: MCP, skills, hooks, subagents, plugins. Rules become code. |
 | 4 | Parallel and multi-agent work | Several agents work at once. You write briefs and review results. |
 | 5 | Agents in the pipeline | Agents run unattended. You design the gates and watch the signals. |
 
@@ -33,16 +33,16 @@ The chapters are grouped into six parts. Parts follow the ladder roughly, but th
 
 | Part | Chapters | Topic |
 |---|---|---|
-| I — Foundations | 1 to 4 | What AI-native development is; tokens and the context window; the agentic loop; caching and cost |
-| II — Claude Code core | 5 to 9 | Installing, the CLI, instruction files and memory, settings and permissions, steering a long session |
-| III — Extending the harness | 10 to 16 | MCP, subagents, skills, hooks, plugins, interface customisation |
-| IV — Workflows | 17 to 23 | The explore-plan-implement-verify loop, testing, git and review, parallel work, orchestration, headless runs, cross-tool setups |
-| V — Production concerns | 24 to 26 | Security, cost and observability, repo standards and team adoption |
-| VI — Field guide | 27 to 29 | Troubleshooting catalogue, case studies, prompt cookbook |
+| I — Foundations | 1 to 5 | What AI-native development is; tokens and the context window; the agentic loop; caching and cost; the harness architecture |
+| II — Claude Code core | 6 to 10 | Installing, the CLI, instruction files and memory, settings and permissions, steering a long session |
+| III — Extending the harness | 11 to 21 | The extension model, MCP, subagents, skills, hooks, plugins, interface customisation; workshop guides (19 to 21) that build a subagent, a skill and a plugin |
+| IV — Workflows | 22 to 28 | The explore-plan-implement-verify loop, testing, git and review, parallel work, orchestration, headless runs, cross-tool setups |
+| V — Production concerns | 29 to 31 | Security, cost and observability, repo standards and team adoption |
+| VI — Field guide | 32 to 34 | Troubleshooting catalogue, case studies, prompt cookbook |
 
 Five appendices sit beside the parts: a cheat sheet (A), a glossary (B), templates (C), sources (D), and the learning path (E).
 
-The 30-day plan in Appendix E shows how the two views line up: week 1 covers levels 0 and 1 with chapters 1 to 6 and 9; week 2 covers level 2 and the start of level 3 with chapters 7, 8 and 10 to 13; week 3 finishes level 3 and starts level 4 with chapters 14 to 19; week 4 finishes level 4 and covers level 5 with chapters 20 to 26. Chapters 27 to 29 are for review.
+The levels map to chapters like this: level 0 is chapters 1 and 2; level 1 is chapters 3 to 7 and 10; level 2 is chapters 8 and 9; level 3 is chapters 11 to 21, with the workshop guides 19 to 21 as its hands-on project; level 4 is chapters 22 to 26; level 5 is chapters 27 to 31. The 30-day plan in Appendix E follows the same split: week 1 covers levels 0 and 1 with chapters 1 to 7 and 10; week 2 covers level 2 and the start of level 3 with chapters 8, 9 and 11 to 15; week 3 finishes level 3 and starts level 4 with chapters 16 to 18 and 21 to 24 (the subagent and skill guides, 19 and 20, belong to week 2's project); week 4 finishes level 4 and covers level 5 with chapters 25 to 31. Chapters 32 to 34 are for review.
 
 ## The chapter skeleton
 

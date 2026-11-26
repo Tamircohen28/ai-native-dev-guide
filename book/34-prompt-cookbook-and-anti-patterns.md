@@ -1,4 +1,4 @@
-# 29 — Prompt cookbook and anti-patterns
+# 34 — Prompt cookbook and anti-patterns
 
 After this chapter you can write a prompt that an agent can finish without you, pick a ready template for the most common jobs, and spot the ten prompt habits that cause rework. You will also know when a five-word prompt is the right one.
 
@@ -6,7 +6,7 @@ After this chapter you can write a prompt that an agent can finish without you, 
 
 A prompt is a brief to a capable colleague who has read the repository but cannot read your mind. The official guidance starts from an encouraging place: "in most cases, your first plain prompt in a fresh session already does the right thing". What you add on top is whatever the agent cannot find for itself: the goal behind the task, the facts that are not in the repo, the limits, and the check that says it is finished.
 
-A prompt is also the weakest layer of control. The model reads it and may decide a line does not apply. So a prompt is for direction, and a hook or deny rule is for anything that has to hold every time (see [Chapter 14](14-hooks.md) and [Chapter 24](24-security-and-guardrails.md)).
+A prompt is also the weakest layer of control. The model reads it and may decide a line does not apply. So a prompt is for direction, and a hook or deny rule is for anything that has to hold every time (see [Chapter 16](16-hooks.md) and [Chapter 29](29-security-and-guardrails.md)).
 
 ```mermaid
 flowchart TD
@@ -34,7 +34,7 @@ flowchart TD
 | Definition of done | Which check comes back pass or fail? | "Twenty consecutive runs of `npm test -- checkout` pass." |
 | Proof | What must the reply show? | "Show the root cause, the diff, and the command with its output." |
 
-[Chapter 17](17-explore-plan-implement-verify.md) calls this a task brief and sorts the parts by need: goal, constraints, definition of done and a proof command are required; context the repo does not show and a budget are added when they apply.
+[Chapter 22](22-explore-plan-implement-verify.md) calls this a task brief and sorts the parts by need: goal, constraints, definition of done and a proof command are required; context the repo does not show and a budget are added when they apply.
 
 The same request, before and after:
 
@@ -188,7 +188,7 @@ Give me the top three bottlenecks with evidence. For each: the change you propos
 
 ### Delegation brief for a subagent
 
-**12. Worker brief.** A subagent that is not a fork starts without your conversation, so the brief must stand alone ([Chapter 12](12-subagents.md)). The four parts Anthropic's own multi-agent write-up asks for are an objective, an output format, guidance on tools, and clear boundaries.
+**12. Worker brief.** A subagent that is not a fork starts without your conversation, so the brief must stand alone ([Chapter 14](14-subagents.md)). The four parts Anthropic's own multi-agent write-up asks for are an objective, an output format, guidance on tools, and clear boundaries.
 
 ```text
 Objective: <one outcome, in one sentence>.
@@ -213,7 +213,7 @@ the next three steps, starting with the exact next command; open questions for m
 
 ### Incident follow-up
 
-**14. Turn this into a rule and a hook.** The retro form from [Chapter 28](28-case-studies-from-real-work.md), as a prompt.
+**14. Turn this into a rule and a hook.** The retro form from [Chapter 33](33-case-studies-from-real-work.md), as a prompt.
 
 ```text
 <What happened, in one or two sentences>. Run a retro on it. Do not change any file yet.
@@ -355,4 +355,4 @@ Plan approved.
 
 ---
 
-[← Previous: Case studies from real work](28-case-studies-from-real-work.md) · [Contents](README.md) · [Next: Cheat sheet →](A-cheat-sheet.md)
+[← Previous: Case studies from real work](33-case-studies-from-real-work.md) · [Contents](README.md) · [Next: Cheat sheet →](A-cheat-sheet.md)

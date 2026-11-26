@@ -1,4 +1,4 @@
-# 09 — Plan mode, checkpoints and context management
+# 10 — Plan mode, checkpoints and context management
 
 After this chapter you can steer a long session instead of only starting one: make Claude plan before it edits, choose how hard it thinks, read what is filling the context window, and pick between compacting, clearing and starting over. You will also know exactly what `/rewind` can and cannot undo, and how to write a handoff note that lets a fresh session continue the work.
 
@@ -36,7 +36,7 @@ Two facts shape the rest of the chapter. First, current models have a 1M-token w
 
 ## Plan mode
 
-**Plan mode** is a permission mode ([chapter 08](08-settings-and-permissions.md)) in which "Claude reads files, runs shell commands to explore, and writes a plan, but does not edit your source."
+**Plan mode** is a permission mode ([chapter 09](09-settings-and-permissions.md)) in which "Claude reads files, runs shell commands to explore, and writes a plan, but does not edit your source."
 
 ### Enter and leave
 
@@ -64,7 +64,7 @@ File edits stay blocked until you approve the plan (the warning below gives the 
 | Auto mode available (`useAutoModeDuringPlan` is on by default) | A classifier reviews shell commands instead of prompting you; approved ones run, rejected ones are blocked |
 | Anything else | Commands outside the built-in read-only set prompt you for approval |
 
-Subagents ([chapter 12](12-subagents.md)) follow the main conversation: "When the main conversation is in `plan` mode, the subagent stays in plan mode whichever `permissionMode` you set". The built-in Plan subagent gathers context with read-only tools; Write and Edit are denied to it.
+Subagents ([chapter 14](14-subagents.md)) follow the main conversation: "When the main conversation is in `plan` mode, the subagent stays in plan mode whichever `permissionMode` you set". The built-in Plan subagent gathers context with read-only tools; Write and Edit are denied to it.
 
 > **Warning:** The docs say it plainly: "In interactive terminal sessions with bypass permissions available, don't rely on plan mode's blocks." If you launch with bypass permissions, plan mode is a working convention, not a guard.
 
@@ -94,7 +94,7 @@ The costs page credits plan mode with "preventing expensive re-work when the ini
 | A wrong start is expensive: migrations, public APIs, anything hard to undo | A wrong start costs one `/rewind` |
 | The work will run unattended or be split across agents | You are watching and can press `Esc` |
 
-For bigger work the docs go one step further than plan mode: "Ask Claude to interview you instead", save the answers as `SPEC.md`, then "start a fresh session to build from it". [Chapter 17](17-explore-plan-implement-verify.md) builds a full workflow on that idea.
+For bigger work the docs go one step further than plan mode: "Ask Claude to interview you instead", save the answers as `SPEC.md`, then "start a fresh session to build from it". [Chapter 22](22-explore-plan-implement-verify.md) builds a full workflow on that idea.
 
 ## Model, effort and thinking
 
@@ -128,7 +128,7 @@ Per the docs it also "Shows optimization suggestions for context-heavy tools, me
 2. **What is the biggest item in the conversation?** It is often one tool result or one large file, not the chat itself.
 3. **How far am I from the auto-compact threshold?** If you are close and still mid-task, compact now with your own focus instead of waiting for the automatic summary.
 
-To watch the number all the time, put `context_window.used_percentage` in your status line ([chapter 16](16-output-styles-statusline-keybindings.md)).
+To watch the number all the time, put `context_window.used_percentage` in your status line ([chapter 18](18-output-styles-statusline-keybindings.md)).
 
 ## Compact, clear or new session
 
@@ -148,7 +148,7 @@ Choose with this table:
 | A quick side question | `/btw <question>` | Answered from the current context "without adding to the conversation" |
 | You want to try an alternative and keep this thread | `/branch [name]` | Copies the conversation into a new session; the original stays reachable with `/resume` |
 | Only the last stretch went wrong | `/rewind` | Restore, or summarise from a chosen message (see below) |
-| Different directory or worktree, or work in parallel | New session | Separate window, separate transcript ([chapter 20](20-parallel-work-worktrees-and-background-tasks.md)) |
+| Different directory or worktree, or work in parallel | New session | Separate window, separate transcript ([chapter 25](25-parallel-work-worktrees-and-background-tasks.md)) |
 | Stopping for the day, or handing over | Handoff note, then exit | A file on disk outlives the summary, the cache and the transcript |
 
 > **Note:** Coming back after a break is a natural decision point. The prompt cache "lasts about an hour on a subscription and five minutes on an API key, cloud provider, or usage credits", and the costs page lists cache misses after a break among the reasons a session keeps spending. If you no longer need the old context, `/clear` before your next prompt, not after it.
@@ -180,7 +180,7 @@ A compaction is a lossy summary: "The summary keeps your requests and key code s
 
 Three ways to protect what matters:
 
-1. **Tell the summariser what to keep.** Add a section to CLAUDE.md ([chapter 07](07-claude-md-and-memory.md)):
+1. **Tell the summariser what to keep.** Add a section to CLAUDE.md ([chapter 08](08-claude-md-and-memory.md)):
 
 ```markdown
 # Compact instructions
@@ -193,7 +193,7 @@ When compacting, always keep:
 ```
 
 2. **Move must-survive rules to a place that is re-injected.** That means the project-root CLAUDE.md or an unscoped rule. For a path-scoped rule that must persist, the docs say to "drop the `paths:` frontmatter".
-3. **Re-inject with a hook.** Claude Code runs `SessionStart` hooks that match the `compact` source and adds their output to the compacted context ([chapter 14](14-hooks.md)).
+3. **Re-inject with a hook.** Claude Code runs `SessionStart` hooks that match the `compact` source and adds their output to the compacted context ([chapter 16](16-hooks.md)).
 
 If one huge file or tool result refills the window right after every summary, "Claude Code stops auto-compacting after a few attempts and shows an error instead of looping." The documented recovery: read the big file in chunks, run `/compact keep only the plan and the diff`, move the work to a subagent, or `/clear`.
 
@@ -284,7 +284,7 @@ git clean -f path/to/new-file   # then delete only the ones you do not want
 
 6. **Undo remote effects by hand.** Roll back the migration, redeploy the previous build, revert the pushed commit. Neither rewind nor a local `git restore` reaches them.
 
-> **Warning:** `git clean -f` deletes untracked files permanently. Run the `-n` preview every time. [Chapter 19](19-git-prs-and-code-review.md) covers the wider git workflow.
+> **Warning:** `git clean -f` deletes untracked files permanently. Run the `-n` preview every time. [Chapter 24](24-git-prs-and-code-review.md) covers the wider git workflow.
 
 ## Write a handoff note
 
@@ -334,7 +334,7 @@ claude "Read HANDOFF.md, check the State section against git, then continue from
 The first two items come from a rolling window of about four weeks of one developer's transcripts: 76 sessions with a response, 44 of them interactive. The third comes from a product workspace's decision log, with numbers as recorded there. They describe one working style and are not benchmarks.
 
 - **Compaction was common, and nobody typed it.** 20 sessions (45% of the interactive ones) hit main-thread compaction, 84 times in total: a median of 3 per compacting session, 11 at most. The main-thread context at compaction had a median of 423k tokens and fell to a median of 33k. Every compaction was triggered automatically, and no `/compact` or `/resume` command appears in the logs (unused or not logged; the data cannot say which). As far as the logs show, every summary was written without a `/compact` focus from the user.
-- **Plan mode was rare; planning was not.** Plan mode appears in 2 of the 44 interactive sessions (4.5%). In the same window a planning skill was activated 22 times and the built-in Plan subagent was launched 17 times. The author's planning runs through a skill that turns a request into a written plan and issues, which outlive any one session. That is the spec-first pattern, built with a skill instead of the mode ([chapter 13](13-skills.md)).
+- **Plan mode was rare; planning was not.** Plan mode appears in 2 of the 44 interactive sessions (4.5%). In the same window a planning skill was activated 22 times and the built-in Plan subagent was launched 17 times. The author's planning runs through a skill that turns a request into a written plan and issues, which outlive any one session. That is the spec-first pattern, built with a skill instead of the mode ([chapter 15](15-skills.md)).
 - **Context economics: measure before you blame.** In a product workspace one session grew to a 221 MB transcript with 214 compactions. When it was measured, re-injected attachments made up 46% of it and all tool results about 9%. A task list holding 100 completed tasks had been re-injected 1,263 times, and hooks had fired 33,295 times, including a hook plugin with no rules configured. The fix was to prune completed tasks and disable unused plugins. The lesson recorded in the repo: "Measure before diagnosing." The same repo notes that "auto-compact cannot defend against one giant tool result".
 
 > **Field note:** Compaction also loses state. After one compaction, an empty pull-request list was read as "the agents died" and the agents were dispatched again, duplicating work. In another session, an approval given earlier survived only as reported speech in the summary. The adopted fixes put state on disk: a `PreCompact` hook writes a snapshot (branch and uncommitted state) to a file, and a resume rule says to check `git log` and the open pull requests before writing any code.
@@ -387,4 +387,4 @@ The first two items come from a rolling window of about four weeks of one develo
 
 ---
 
-[← Previous: Settings and permissions](08-settings-and-permissions.md) · [Contents](README.md) · [Next: MCP: how the protocol works →](10-mcp-how-it-works.md)
+[← Previous: Settings and permissions](09-settings-and-permissions.md) · [Contents](README.md) · [Next: The extension model: what each piece is and how to choose →](11-the-extension-model.md)

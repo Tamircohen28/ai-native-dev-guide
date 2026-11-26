@@ -153,7 +153,7 @@ Compaction is lossy, and the docs say exactly where: "The summary keeps your req
 | Files Claude read or edited | "Claude Code re-reads up to five, most recently modified first" |
 | Everything else in the conversation | Whatever made it into the summary |
 
-Chapter [04](04-prompt-caching-compaction-and-cost.md) covers compaction and its cost in depth; chapter [09](09-plan-mode-checkpoints-and-context-management.md) covers the commands.
+Chapter [04](04-prompt-caching-compaction-and-cost.md) covers compaction and its cost in depth; chapter [10](10-plan-mode-checkpoints-and-context-management.md) covers the commands.
 
 ## Models and prices (as of Nov 2026)
 
@@ -256,8 +256,8 @@ The post names four techniques. Claude Code ships all four.
 |---|---|---|---|
 | Just-in-time retrieval | Agents "maintain lightweight identifiers (file paths, stored queries, web links, etc.) and use these references to dynamically load data into context at runtime using tools" | Claude searches and reads files when it needs them instead of relying on a pre-built index | [03](03-the-agentic-loop-and-tool-use.md) |
 | Compaction | "taking a conversation nearing the context window limit, summarizing its contents, and reinitiating a new context window with the summary" | Automatic, or `/compact` with a focus | [04](04-prompt-caching-compaction-and-cost.md) |
-| Structured note-taking | "the agent regularly writes notes persisted to memory outside of the context window" | `CLAUDE.md`, auto memory, a spec or progress file you ask for | [07](07-claude-md-and-memory.md) |
-| Sub-agents | "Each subagent might explore extensively, using tens of thousands of tokens or more, but returns only a condensed, distilled summary of its work (often 1,000-2,000 tokens)." | Subagents and forks | [12](12-subagents.md) |
+| Structured note-taking | "the agent regularly writes notes persisted to memory outside of the context window" | `CLAUDE.md`, auto memory, a spec or progress file you ask for | [08](08-claude-md-and-memory.md) |
+| Sub-agents | "Each subagent might explore extensively, using tens of thousands of tokens or more, but returns only a condensed, distilled summary of its work (often 1,000-2,000 tokens)." | Subagents and forks | [14](14-subagents.md) |
 
 The post also says which to reach for: "Compaction maintains conversational flow for tasks requiring extensive back-and-forth;" "Note-taking excels for iterative development with clear milestones;" "Multi-agent architectures handle complex research and analysis where parallel exploration pays dividends."
 
@@ -271,7 +271,7 @@ flowchart TB
     Q -->|"Tool definitions"| T["Trim MCP servers"]
 ```
 
-> **Note:** Older guides say a subagent "sees nothing" of your session. The current docs are more precise: "A subagent starts fresh unless it's a fork, which starts with a copy of your conversation so far. Either way, the subagent's tool calls stay out of your context, and Claude gets back a summary when the subagent finishes." A fresh subagent is not empty either: it still loads your `CLAUDE.md` files, a git status snapshot and any preloaded skills. Chapter [12](12-subagents.md) has the details.
+> **Note:** Older guides say a subagent "sees nothing" of your session. The current docs are more precise: "A subagent starts fresh unless it's a fork, which starts with a copy of your conversation so far. Either way, the subagent's tool calls stay out of your context, and Claude gets back a summary when the subagent finishes." A fresh subagent is not empty either: it still loads your `CLAUDE.md` files, a git status snapshot and any preloaded skills. Chapter [14](14-subagents.md) has the details.
 
 ## What the 1M window changes, and what it does not
 

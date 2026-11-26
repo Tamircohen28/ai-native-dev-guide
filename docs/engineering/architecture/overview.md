@@ -6,7 +6,7 @@ The repository is a book plus the infrastructure that keeps it correct. Nothing 
 
 ```text
 ai-native-dev-guide/
-  book/                 the book: cover page, 29 chapters, appendices A to E
+  book/                 the book: cover page, 34 chapters, appendices A to E
     assets/             17 SVG figures and charts
       _src/             the scripts that generate them
   scripts/              check-book.py and the repository checks

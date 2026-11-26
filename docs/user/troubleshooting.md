@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Problems with reading or checking the book. For problems with coding agents themselves, the book has its own catalogue: [chapter 27](../../book/27-troubleshooting-common-problems.md).
+Problems with reading or checking the book. For problems with coding agents themselves, the book has its own catalogue: [chapter 32](../../book/32-troubleshooting-common-problems.md).
 
 ## Quick lookup
 

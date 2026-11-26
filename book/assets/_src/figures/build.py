@@ -157,8 +157,8 @@ def agent_loop():
     # bottom row: gates and execution
     f.node(688, 436, 240, 84, '`PreToolUse` hooks', ['your code runs first;', 'exit code 2 blocks the call'],
            fill=AMBER_T, stroke=AMBER)
-    f.node(360, 436, 240, 84, 'Permission rules, then mode',
-           ['`deny`, then `ask`, then `allow`;', 'the mode settles the rest'], fill=TEAL_T, stroke=TEAL)
+    f.node(360, 436, 240, 84, 'Rules, mode, rules',
+           ['`deny`, then `ask`, then the', 'mode, then `allow`'], fill=TEAL_T, stroke=TEAL)
     f.node(32, 436, 240, 84, 'Tool runs', ['the harness executes it,', 'never the model'],
            fill=CARD, stroke=INK2)
     f.line(808, 346, 808, 432, arrow=True)

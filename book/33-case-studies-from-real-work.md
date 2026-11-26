@@ -1,4 +1,4 @@
-# 28 — Case studies from real work
+# 33 — Case studies from real work
 
 After this chapter you can read an agent incident the way a good retro does: what happened, how it was caught, why it happened, and which layer the fix belongs in. You can then run the same analysis on your own mishaps and tell a one-off from a pattern that needs a rule, a hook or a test.
 
@@ -204,7 +204,7 @@ echo "ok: 'make check' failed on sabotaged code, as it should"
 - **Root cause.** During a wait, nothing wakes the agent, so it reports only on completion or when asked. From outside, silence looks the same as being stuck.
 - **Durable fix (attempted).** A watcher that exits on every terminal state, with a report on each wake-up. Phone notifications. A global rule: one background `gh pr checks --watch`, never sleep-poll. Two project memories recorded the lesson.
 - **What the data shows.** The habit persisted. Status checks were 13–17% of prompts in October and 21–22% in November, after the memories were written. A per-project note did not carry over to other projects.
-- **What to copy.** Count again after a fix. If the number did not move, the fix is in the wrong layer. Here the candidates are a cadence line in the opening prompt (see [Chapter 29](29-prompt-cookbook-and-anti-patterns.md)) and a watcher that the workflow arms by default.
+- **What to copy.** Count again after a fix. If the number did not move, the fix is in the wrong layer. Here the candidates are a cadence line in the opening prompt (see [Chapter 34](34-prompt-cookbook-and-anti-patterns.md)) and a watcher that the workflow arms by default.
 
 ## How the rule set grew
 
@@ -221,7 +221,7 @@ Rows before October rest on memory files and file dates only. The shape is the l
 
 ## Patterns that recur across the cases
 
-1. **Prose did not hold; mechanism did.** In Case 9, two written notes changed nothing. The shell-dialect errors in [Chapter 27](27-troubleshooting-common-problems.md) went the same way: notes in three projects, then a global rule, then a hook that finally held. Case 1 went straight to a hook, because one more miss would have been permanent. The official guidance agrees: if something has to happen every time, make it a hook, a deny rule or a managed setting.
+1. **Prose did not hold; mechanism did.** In Case 9, two written notes changed nothing. The shell-dialect errors in [Chapter 32](32-troubleshooting-common-problems.md) went the same way: notes in three projects, then a global rule, then a hook that finally held. Case 1 went straight to a hook, because one more miss would have been permanent. The official guidance agrees: if something has to happen every time, make it a hook, a deny rule or a managed setting.
 2. **A proxy was checked instead of the thing.** A green gate (6), a green PR (4), a guess about context (8), a script that ran (7). Ask what the check would look like if the thing were broken.
 3. **Benign names and shared triggers.** "Restore" (1), "test" (2) and "Change visibility" (5) each named something safe and did something else. Name the side effect before the command.
 4. **Authority without ownership.** The agent could merge someone else's PR (4) and clear someone else's stashes (3). Being able to reach something is not the same as owning it.
@@ -285,4 +285,4 @@ Rows before October rest on memory files and file dates only. The shape is the l
 
 ---
 
-[← Previous: Troubleshooting: common problems and fixes](27-troubleshooting-common-problems.md) · [Contents](README.md) · [Next: Prompt cookbook and anti-patterns →](29-prompt-cookbook-and-anti-patterns.md)
+[← Previous: Troubleshooting: common problems and fixes](32-troubleshooting-common-problems.md) · [Contents](README.md) · [Next: Prompt cookbook and anti-patterns →](34-prompt-cookbook-and-anti-patterns.md)

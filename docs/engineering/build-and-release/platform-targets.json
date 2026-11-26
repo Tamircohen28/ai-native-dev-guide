@@ -42,10 +42,10 @@
       ],
       "capability_gaps": {
         "extension_install": "Claude installs plugins, not git-URL extensions.",
-        "hooks": "No hooks are shipped: there is no .claude/settings.json (reserved for the owner) and no hooks/ directory. Claude Code supports hooks; book chapter 14 shows how to add them.",
-        "mcp": "No .mcp.json is shipped, so this repo declares no MCP servers. Book chapters 10 and 11 cover adding one.",
+        "hooks": "No hooks are shipped: there is no .claude/settings.json (reserved for the owner) and no hooks/ directory. Claude Code supports hooks; book chapter 16 shows how to add them.",
+        "mcp": "No .mcp.json is shipped, so this repo declares no MCP servers. Book chapters 12 and 13 cover adding one.",
         "plugin_marketplace": "This repo is a book, not a plugin: it ships no plugin manifest and is not listed in any marketplace.",
-        "statusline": "No status line script is shipped. Book chapter 16 covers configuring one."
+        "statusline": "No status line script is shipped. Book chapter 18 covers configuring one."
       }
     },
     "codex": {
