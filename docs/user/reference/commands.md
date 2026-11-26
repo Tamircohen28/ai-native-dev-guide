@@ -38,7 +38,7 @@ Reading the book needs none of these.
 
 | Target | What it does | Needs |
 |---|---|---|
-| `make pdf` | Builds the whole book as one PDF, `dist/AI-Native Development.pdf`: a cover with the version, commit, license and build time, a table of contents with page numbers, page numbers at the bottom of every page, and PDF metadata. It then checks the metadata and that every internal link resolves | Node.js 22.12 or later, Python 3 with `pypdf` |
+| `make pdf` | Builds the whole book as one PDF, `dist/AI-Native Development.pdf`: a cover with the version, commit, license and build time, a clickable table of contents with page numbers, the 34 chapters, page numbers at the bottom of every page, and PDF metadata. The appendices are not printed: the contents lists them as links to their files on GitHub, and every link to an appendix opens it there. In each chapter, external links carry a numbered citation marker, `[n]`, and the Sources section is printed as the matching numbered reference list. It then checks the metadata and that every internal link resolves | Node.js 22.12 or later, Python 3 with `pypdf` |
 | `make clean` | Also removes `dist/`, where the PDF is written | Nothing |
 
 Run `make agent:check` and `make check-book` before every pull request. The first is what CI will run; the second is the only one that proves the diagrams render. `make agent:check` does not include the documentation standard, so run `make lint` as well when you change `README.md` or `docs/`.
@@ -120,7 +120,7 @@ npm install -g @mermaid-js/mermaid-cli
 
 ## scripts/pdf/build.mjs
 
-The PDF build behind `make pdf`. It reads the reading order from the Contents tables in `book/README.md`, renders each file with markdown-it, renders every Mermaid block to inline SVG with the Mermaid CLI, paginates with Paged.js in headless Chromium, and writes the metadata with `scripts/pdf/metadata.py`. A Mermaid block that fails to render, a link to a missing anchor, or content wider than the page fails the build.
+The PDF build behind `make pdf`. It reads the reading order from the Contents tables in `book/README.md`, renders each file with markdown-it, renders every Mermaid block to inline SVG with the Mermaid CLI, paginates with Paged.js in headless Chromium, and writes the metadata with `scripts/pdf/metadata.py`. The appendices part of the Contents tables is left out of the print and listed in the contents as links to `book/<file>` on GitHub; links to an appendix become links to that file, keeping any `#anchor`. In each chapter, every external link gets a citation marker numbered in order of first appearance, and `## Sources` becomes a numbered reference list (`[n] title — domain`) using the same numbers; a URL listed only under Sources takes the next number. A Mermaid block that fails to render, a link to a missing anchor, or content wider than the page fails the build.
 
 `make pdf` runs `npm ci` when `node_modules/` is missing; the first run downloads a headless Chrome for puppeteer. Install the Python dependency once:
 

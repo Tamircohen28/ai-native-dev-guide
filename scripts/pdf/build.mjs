@@ -6,7 +6,10 @@
 // Pipeline:
 //   1. Read the reading order from the "## Contents" tables in book/README.md.
 //   2. Render each Markdown file to HTML with markdown-it. The footer navigation line is
-//      dropped and links between chapters become in-document anchors.
+//      dropped and links between chapters become in-document anchors. The appendices are
+//      not printed: the contents lists them as links to their files on GitHub, and every
+//      link to an appendix points there. In each chapter, external links get numbered
+//      citation markers and "## Sources" becomes the matching numbered reference list.
 //   3. Render every ```mermaid block to inline SVG with @mermaid-js/mermaid-cli. A block
 //      that fails to render fails the build.
 //   4. Paginate with Paged.js inside headless Chromium (puppeteer) and print to PDF:
@@ -125,7 +128,21 @@ const escapeHtml = (s) =>
   String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 function makeRenderer(knownFiles, mermaidBlocks) {
-  const md = new MarkdownIt({ html: false, linkify: false, typographer: false });
+  // linkify turns a bare http(s) URL in prose into a link, so it can be cited like any
+  // other; fuzzy matching stays off so "example.com" in prose is left alone.
+  const md = new MarkdownIt({ html: false, linkify: true, typographer: false });
+  md.linkify.set({ fuzzyLink: false, fuzzyEmail: false, fuzzyIP: false });
+  md.core.ruler.after("linkify", "short-bare-urls", (state) => {
+    for (const blk of state.tokens) {
+      if (blk.type !== "inline" || !blk.children) continue;
+      blk.children.forEach((t, i) => {
+        const next = blk.children[i + 1];
+        if (t.type === "link_open" && t.markup === "linkify" && next && next.type === "text") {
+          next.content = next.content.replace(/^https?:\/\//, "");
+        }
+      });
+    }
+  });
   const blobBase = `${BOOK.repo}/blob/main/`;
 
   const resolveHref = (href, env) => {
@@ -141,10 +158,31 @@ function makeRenderer(knownFiles, mermaidBlocks) {
     return blobBase + rel + (hash ? `#${hash}` : "");
   };
 
+  // External links in a chapter's body get a citation marker after the link text: [n],
+  // numbered per chapter in order of first appearance (env.cite, see citeNumber). Links
+  // into this repo (including the online appendices) are marked "online" instead.
   md.renderer.rules.link_open = (tokens, idx, opts, env, self) => {
     const t = tokens[idx];
-    t.attrSet("href", resolveHref(t.attrGet("href"), env));
+    const href = resolveHref(t.attrGet("href"), env);
+    t.attrSet("href", href);
+    let kind = null;
+    if (href.startsWith(BOOK.repo)) {
+      kind = "online";
+      t.attrJoin("class", "online");
+    } else if (/^https?:/i.test(href) && env.cite) {
+      kind = "cite";
+    }
+    (env.linkStack ||= []).push({ href, kind });
     return self.renderToken(tokens, idx, opts);
+  };
+  md.renderer.rules.link_close = (tokens, idx, opts, env, self) => {
+    const open = (env.linkStack || []).pop();
+    let html = self.renderToken(tokens, idx, opts);
+    if (open && open.kind === "cite") {
+      const n = citeNumber(env.cite, open.href, null);
+      html += `<sup class="cite"><a href="${escapeHtml(open.href)}">[${n}]</a></sup>`;
+    }
+    return html;
   };
 
   md.renderer.rules.image = (tokens, idx, opts, env, self) => {
@@ -187,6 +225,140 @@ function makeRenderer(knownFiles, mermaidBlocks) {
   md.renderer.rules.table_open = () => '<div class="table-wrap"><table>\n';
   md.renderer.rules.table_close = () => "</table></div>\n";
   return md;
+}
+
+// --- Citations ----------------------------------------------------------------------
+
+// A chapter's citation table: URL -> { n, title }. The first appearance fixes the number.
+function citeNumber(cite, url, title) {
+  let e = cite.get(url);
+  if (!e) cite.set(url, (e = { n: cite.size + 1, title: null }));
+  if (title && !e.title) e.title = title;
+  return e.n;
+}
+
+// Split a chapter at its "## Sources" heading (outside code fences): [body, sources|null].
+// The Sources section runs to the next "## " heading, which stays in the body.
+function splitSources(text) {
+  const lines = text.split("\n");
+  let fence = null;
+  let start = -1;
+  let end = lines.length;
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(/^\s*(`{3,}|~{3,})/);
+    if (m) {
+      if (!fence) fence = m[1][0];
+      else if (m[1][0] === fence) fence = null;
+      continue;
+    }
+    if (fence) continue;
+    if (start < 0 && lines[i].trim() === "## Sources") start = i;
+    else if (start >= 0 && /^## /.test(lines[i])) {
+      end = i;
+      break;
+    }
+  }
+  if (start < 0) return [text, null];
+  return [
+    [...lines.slice(0, start), ...lines.slice(end)].join("\n"),
+    lines.slice(start + 1, end).join("\n"),
+  ];
+}
+
+// The words around a URL in a Sources line, without separators: "Hooks guide:" -> "Hooks guide".
+function cleanLabel(s) {
+  let prev;
+  s = s.replace(/\(\s*\)/g, " ");
+  do {
+    prev = s;
+    s = s
+      .trim()
+      .replace(/^(?:[-—–:;,·|]|and\b|or\b)+/i, "")
+      .replace(/(?:[-—–:;,·|(]|\band|\bor)+$/i, "")
+      .trim();
+  } while (s !== prev);
+  if (/^\([^()]*\)$/.test(s)) s = s.slice(1, -1).trim();
+  return /[\p{L}\p{N}]/u.test(s) ? s : "";
+}
+
+// Parse a Sources section: every [text](url) and bare URL becomes a citation (reusing the
+// body's number for a URL already cited); lines without a URL are kept as notes.
+function parseSources(src, cite) {
+  const notes = [];
+  for (const line of src.split("\n")) {
+    const item = line.match(/^\s*[-*]\s+(.*)$/);
+    const text = item ? item[1] : line;
+    const re = /\[((?:[^\[\]]|\[[^\]]*\])+)\]\((https?:\/\/[^)\s]+)\)|(https?:\/\/[^\s<>]+)/g;
+    const found = [];
+    let m;
+    let last = 0;
+    while ((m = re.exec(text))) {
+      let url = m[2] || m[3];
+      let len = m[0].length;
+      if (m[3]) {
+        const trimmed = url.replace(/[.,;:)\]]+$/, "");
+        len -= url.length - trimmed.length;
+        url = trimmed;
+      }
+      found.push({ url, linkText: m[1] || null, pre: text.slice(last, m.index) });
+      last = m.index + len;
+      re.lastIndex = last;
+    }
+    if (!found.length) {
+      notes.push(line);
+      continue;
+    }
+    const head = cleanLabel(found[0].pre);
+    // Trailing words describe the URL only as "url (what it is)" with a single URL.
+    const rest = text.slice(last).trim();
+    const tail = found.length === 1 && /^\(.*\)$/.test(rest) ? cleanLabel(rest) : "";
+    for (const f of found) {
+      const title = f.linkText || cleanLabel(f.pre) || head || tail || pathTitle(f.url);
+      citeNumber(cite, f.url, title);
+    }
+  }
+  return notes.join("\n").trim();
+}
+
+// A title for a URL listed without one: its last path segment, "permission-modes" ->
+// "Permission modes"; the domain when the path is empty.
+function pathTitle(url) {
+  const { host, path: p } = shortUrl(url);
+  let seg = p.split("/").filter(Boolean).pop();
+  if (!seg) return host;
+  try {
+    seg = decodeURIComponent(seg);
+  } catch {}
+  seg = seg.replace(/\.(html?|md|pdf)$/i, "").replace(/[-_]+/g, " ").trim();
+  return seg ? seg[0].toUpperCase() + seg.slice(1) : host;
+}
+
+function shortUrl(url) {
+  try {
+    const u = new URL(url);
+    return { host: u.hostname.replace(/^www\./, ""), path: u.pathname.replace(/\/$/, "") };
+  } catch {
+    return { host: url, path: "" };
+  }
+}
+
+// The numbered reference list: "[n] title — domain", each entry a link to its URL. Where
+// two entries share a title, the domain gains the last path segment to tell them apart.
+function referencesHtml(cite, md) {
+  const entries = [...cite.entries()].map(([url, e]) => ({ url, n: e.n, title: e.title || pathTitle(url) })).sort((a, b) => a.n - b.n);
+  const count = new Map();
+  for (const e of entries) count.set(e.title, (count.get(e.title) || 0) + 1);
+  const items = entries.map((e) => {
+    const { host, path: p } = shortUrl(e.url);
+    let where = host;
+    if (count.get(e.title) > 1) {
+      const seg = p.split("/").filter(Boolean).pop();
+      if (seg) where += `/…/${seg.length > 40 ? seg.slice(0, 38) + "…" : seg}`;
+    }
+    const title = md.renderInline(e.title.replace(/^\p{Ll}/u, (c) => c.toUpperCase()), { id: "ref" });
+    return `<li><a href="${escapeHtml(e.url)}"><span class="ref-n">[${e.n}]</span><span class="ref-body"><span class="ref-title">${title}</span> <span class="ref-host">— ${escapeHtml(where)}</span></span></a></li>`;
+  });
+  return `<ol class="references">${items.join("")}</ol>`;
 }
 
 // Remove the trailing "← Previous · Contents · Next →" line and the rule above it.
@@ -284,10 +456,11 @@ function coverHtml(id) {
 </section>`;
 }
 
-function tocHtml(parts, titles) {
+function tocHtml(parts, titles, online) {
   const entry = (href, label, cls) =>
     `<li class="${cls}"><a href="#${href}"><span class="toc-label">${escapeHtml(label)}</span><span class="toc-dots"></span></a></li>`;
-  let html = `<section class="toc" id="toc"><h1>Contents</h1><ul>`;
+  let html = `<section class="toc" id="toc"><h1>Contents</h1>`;
+  html += `<p class="toc-hint">Every entry is a link — click to jump to that page.</p><ul>`;
   html += entry("about", "About this book", "toc-front");
   parts.forEach((p, pi) => {
     html += `<li class="toc-part"><a href="#part-${pi}"><span class="toc-label">${escapeHtml(p.label)}</span><span class="toc-dots"></span></a></li>`;
@@ -296,32 +469,63 @@ function tocHtml(parts, titles) {
       for (const f of g.files) html += entry(fileId(f.file), titles.get(f.file), "toc-chapter");
     }
   });
+  // The appendices are not printed: they are links to their files in the repository.
+  for (const p of online) {
+    html += `<li class="toc-part toc-part-online"><span class="toc-label">${escapeHtml(p.label)} (online)</span></li>`;
+    for (const f of p.files) {
+      html += `<li class="toc-chapter toc-online"><a href="${BOOK.repo}/blob/main/book/${f.file}"><span class="toc-label">${escapeHtml(f.title)}</span><span class="toc-dots"></span><span class="toc-where">github.com ↗</span></a></li>`;
+    }
+  }
   return html + `</ul></section>`;
 }
 
 async function main() {
   const id = buildIdentity();
   log(`version ${id.version}, commit ${id.short}, built ${id.timestamp}`);
-  const parts = readingOrder();
+  // The appendices part is not printed; the contents links to the files on GitHub.
+  const allParts = readingOrder();
+  const isAppendices = (p) => /^appendi/i.test(p.label);
+  const parts = allParts.filter((p) => !isAppendices(p));
+  const online = allParts.filter(isAppendices).map((p) => ({
+    label: p.label,
+    files: p.groups.flatMap((g) => g.files).map((f) => {
+      const h1 = fs.readFileSync(path.join(bookDir, f.file), "utf8").match(/^# (.+)$/m);
+      return { ...f, title: h1 ? h1[1].replace(/`/g, "").trim() : f.file };
+    }),
+  }));
   const files = parts.flatMap((p) => p.groups.flatMap((g) => g.files.map((f) => f.file)));
   const knownFiles = new Set(["README.md", ...files]);
   const mermaidBlocks = [];
   const md = makeRenderer(knownFiles, mermaidBlocks);
 
-  const render = (file, text) => md.render(text, { file, id: fileId(file), slugs: new Map(), mermaidCount: 0 });
+  const render = (file, text, cite = null) =>
+    md.render(text, { file, id: fileId(file), slugs: new Map(), mermaidCount: 0, cite });
   const titles = new Map();
   const about = render("README.md", aboutMarkdown(fs.readFileSync(path.join(bookDir, "README.md"), "utf8")));
   const chapters = new Map();
+  let citations = 0;
   for (const file of files) {
     const text = stripFooter(fs.readFileSync(path.join(bookDir, file), "utf8"));
     const h1 = text.match(/^# (.+)$/m);
     if (!h1) fail(`book/${file} has no '# ' title`);
     titles.set(file, h1[1].replace(/`/g, "").trim());
-    chapters.set(file, render(file, text));
+    // Body first, so its links take the low citation numbers; then the Sources section,
+    // whose URLs reuse those numbers or take the next ones.
+    const [bodyMd, sourcesMd] = splitSources(text);
+    const cite = new Map();
+    let html = render(file, bodyMd, cite);
+    if (sourcesMd !== null || cite.size) {
+      const notes = sourcesMd === null ? "" : parseSources(sourcesMd, cite);
+      html += `<section class="sources"><h2 id="${fileId(file)}--sources">Sources</h2>${referencesHtml(cite, md)}`;
+      if (notes) html += `<div class="source-notes">${render(file, notes)}</div>`;
+      html += `</section>`;
+      citations += cite.size;
+    }
+    chapters.set(file, html);
   }
-  log(`${files.length} chapters and appendices, ${mermaidBlocks.length} Mermaid blocks`);
+  log(`${files.length} chapters, ${mermaidBlocks.length} Mermaid blocks, ${citations} numbered sources; appendices online`);
 
-  let body = coverHtml(id) + tocHtml(parts, titles) + `<section class="chapter front" id="sec-about">${about}</section>`;
+  let body = coverHtml(id) + tocHtml(parts, titles, online) + `<section class="chapter front" id="sec-about">${about}</section>`;
   parts.forEach((p, pi) => {
     body += `<section class="part-title" id="part-${pi}"><h1>${escapeHtml(p.label)}</h1></section>`;
     for (const g of p.groups) for (const f of g.files) body += `<section class="chapter">${chapters.get(f.file)}</section>`;
