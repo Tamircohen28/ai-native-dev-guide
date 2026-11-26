@@ -104,12 +104,14 @@ dir=$(jq -r '.cwd // "."' <<<"$input" 2>/dev/null)
 default=${PR_HELPER_DEFAULT_BRANCH:-main}
 
 [[ "$PR_HELPER_ALLOW_FORCE_PUSH" == 1 || "$cmd" == *PR_HELPER_ALLOW_FORCE_PUSH=1* ]] && exit 0
+# The shell strips quotes before git runs, so 'HEAD:main' and "--force" must match too.
+cmd=${cmd//[\"\']/}
 # A leading + on a refspec (+HEAD:main, +main) forces that ref exactly like --force.
 grep -Eq 'git[^;&|]*push[^;&|]*(--force([^-]|$)|[[:space:]]-f([[:space:]]|$)|[[:space:]]\+[^[:space:]])' \
   <<<"$cmd" || exit 0
 
 current=$(git -C "$dir" branch --show-current 2>/dev/null)
-if grep -Eq "(^|[[:space:]:+/])$default([[:space:]]|$)" <<<"$cmd" || [[ "$current" == "$default" ]]; then
+if grep -Eq "(^|[[:space:]:+/])$default([[:space:];&|]|$)" <<<"$cmd" || [[ "$current" == "$default" ]]; then
   echo "pr-helper: force-push to '$default' blocked. Stop and ask the user;" \
        "only after an explicit yes, re-run with PR_HELPER_ALLOW_FORCE_PUSH=1." >&2
   exit 2
@@ -128,7 +130,7 @@ echo '{"tool_name":"Bash","tool_input":{"command":"git push --force origin main"
 |---|---|
 | `git push --force origin main` | stderr `pr-helper: force-push to 'main' blocked. …`, `exit=2` |
 | `git push -f origin main` | blocked, `exit=2` |
-| `git push origin +HEAD:main`, `+main` or `+refs/heads/main` | blocked, `exit=2` (a `+` refspec is a force-push) |
+| `git push origin +HEAD:main`, `+main`, `+refs/heads/main`, or `--force origin 'HEAD:main'` | blocked, `exit=2` (a `+` refspec forces; quotes are stripped first, as the shell would) |
 | `git push --force origin feature/login` or `git push origin +HEAD:feature` | `exit=0` |
 | `git push --force-with-lease origin main` | `exit=0` (a lease is allowed by design) |
 | `git push origin main && rm -f tmp.txt` | `exit=0` (the `-f` belongs to `rm`) |

@@ -165,6 +165,7 @@ Eleven groups. Each opens with why the problem exists, because a fix you underst
 #!/usr/bin/env bash
 # PreToolUse hook on the Bash tool. The payload arrives as JSON on stdin.
 cmd="$(jq -r '.tool_input.command // empty')"
+cmd="${cmd//[\"\']/}"   # the shell strips quotes before git runs
 if printf '%s' "$cmd" | grep -qE 'git push ([^;&|]* )?(--force|-f|\+[^ ]+)( |$)'; then
   echo "Blocked: force push. Stop and ask the user." >&2
   exit 2        # exit 1 here would be a non-blocking error: the push would run

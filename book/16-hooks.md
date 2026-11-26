@@ -186,7 +186,8 @@ def main():
     # text and never reaches this process's environment.
     if os.environ.get("ALLOW_FORCE_PUSH") == "1" or OVERRIDE.search(command):
         sys.exit(0)
-    hit = next((s.strip() for s in SEPARATORS.split(command) if FORCE.search(s)), None)
+    plain = re.sub(r"[\"']", "", command)             # the shell strips quotes before git runs
+    hit = next((s.strip() for s in SEPARATORS.split(plain) if FORCE.search(s)), None)
     if not hit:
         sys.exit(0)                                   # exit 0 with no output = no decision
     reason = (f"BLOCKED by force-push-guard: `{hit}` rewrites remote history. "
