@@ -4,13 +4,13 @@ After this chapter you can say what a session cost and why, pick a model and eff
 
 ## Mental model
 
-You do not pay per prompt. You pay per **API call**, and one prompt starts a loop of many calls (see [The agentic loop and tool use](03-the-agentic-loop-and-tool-use.md)). Every call carries the whole conversation so far. The docs say it plainly: "Claude Code sends your full conversation with every request".
+You do not pay per prompt. You pay per **API call**, and one prompt starts a loop of many calls (see [The agentic loop and tool use](03-the-agentic-loop-and-tool-use.md)). Every call carries the whole conversation so far. The docs say it plainly: ["Claude Code sends your full conversation with every request"](https://code.claude.com/docs/en/costs).
 
 So the bill has three parts:
 
 1. **Re-reading the context.** Most of it comes from the prompt cache at a small fraction of the input price, but it is re-read on every call, so the volume is enormous.
 2. **Writing the cache.** Whenever the start of the conversation changes or the cache expires, the context is written again at more than the normal input price.
-3. **Output and thinking.** The fewest tokens and the highest price per token. "Thinking tokens are billed as output tokens".
+3. **Output and thinking.** The fewest tokens and the highest price per token. ["Thinking tokens are billed as output tokens"](https://code.claude.com/docs/en/costs).
 
 ```mermaid
 flowchart TD
@@ -34,14 +34,14 @@ The mechanics of caching and compaction are in [Prompt caching, compaction and c
 
 | Where | What you get | Notes |
 |---|---|---|
-| `/usage` | "Show session cost, plan usage limits, and activity stats". `/cost` and `/stats` are aliases | The dollar figure is computed locally "from token counts at list price". Totals reset on `/clear` |
-| `/usage`, subscription | Plan usage bars plus an attribution breakdown by skills, subagents, plugins and MCP servers, with recommendations | The Session cost block "is intended for API users" |
-| `/usage`, cache line | A `Prompt cache (main)` line with a likely cause when the cache missed | First place to look after a surprisingly slow or costly turn. It covers the main conversation only, not subagents |
-| `/context` or `/context all` | "Visualize current context usage as a colored grid" | Also suggests fixes for context-heavy tools and memory bloat; `all` expands the per-item breakdown |
-| `claude -p … --output-format json` | `total_cost_usd` and a per-model cost breakdown in the result | Both are client-side estimates. See [chapter 27](27-headless-ci-and-the-agent-sdk.md) |
-| Organisation views | Teams and Enterprise spend report; Console workspaces and the Claude Code Analytics API; OpenTelemetry | For anything beyond one person |
+| `/usage` | ["Show session cost, plan usage limits, and activity stats"](https://code.claude.com/docs/en/commands). `/cost` and `/stats` are aliases | The dollar figure is computed locally ["from token counts at list price"](https://code.claude.com/docs/en/costs). Totals reset on `/clear` |
+| `/usage`, subscription | Plan usage bars plus an attribution breakdown by skills, subagents, plugins and MCP servers, with recommendations | The Session cost block ["is intended for API users"](https://code.claude.com/docs/en/costs) |
+| `/usage`, cache line | A `Prompt cache (main)` line with [a likely cause when the cache missed](https://code.claude.com/docs/en/prompt-caching) | First place to look after a surprisingly slow or costly turn. It covers the main conversation only, not subagents |
+| `/context` or `/context all` | ["Visualize current context usage as a colored grid"](https://code.claude.com/docs/en/commands) | Also suggests fixes for context-heavy tools and memory bloat; `all` expands the per-item breakdown |
+| `claude -p … --output-format json` | `total_cost_usd` and [a per-model cost breakdown](https://code.claude.com/docs/en/headless) in the result | Both are client-side estimates. See [chapter 27](27-headless-ci-and-the-agent-sdk.md) |
+| Organisation views | Teams and Enterprise spend report; Console workspaces and the Claude Code Analytics API; [OpenTelemetry](https://code.claude.com/docs/en/monitoring-usage) | For anything beyond one person |
 
-A baseline to compare yourself against, from the costs page as of Nov 2026: "around $13 per developer per active day and $150-250 per developer per month, with costs remaining below $30 per active day for 90% of users".
+A baseline to compare yourself against, from [the costs page](https://code.claude.com/docs/en/costs) as of Nov 2026: "around $13 per developer per active day and $150-250 per developer per month, with costs remaining below $30 per active day for 90% of users".
 
 > **Note:** On a subscription the dollar figure is an estimate of what the tokens would cost at API list prices. It is not a bill. It is still the best single number for comparing one session with another.
 
@@ -49,33 +49,33 @@ A baseline to compare yourself against, from the costs page as of Nov 2026: "aro
 
 | Driver | Why it costs | How to see it | Lever |
 |---|---|---|---|
-| Context length | The full history is resent on every call | `/context`; total tokens in `/usage` | `/clear` between unrelated tasks ("`/clear` costs nothing"); `/compact <focus>` |
-| Cache misses | A cache write costs 1.25x the input price (5-minute cache) or 2x (1-hour cache); a read costs 0.1x on most models | `Prompt cache (main)` line in `/usage` | Avoid the invalidators below; do not leave a huge session idle and then ask a one-line question |
-| Output and thinking | Output costs five times the input price on every current model; thinking is on by default | Output tokens per session | Lower `/effort`; ask for a diff or a summary, not a full file |
+| Context length | [The full history is resent on every call](https://code.claude.com/docs/en/costs) | `/context`; total tokens in `/usage` | `/clear` between unrelated tasks ("`/clear` costs nothing"); `/compact <focus>` |
+| Cache misses | [A cache write costs 1.25x the input price](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) (5-minute cache) or 2x (1-hour cache); a read costs 0.1x on most models | `Prompt cache (main)` line in `/usage` | Avoid the invalidators below; do not leave a huge session idle and then ask a one-line question |
+| Output and thinking | [Output costs five times the input price](https://platform.claude.com/docs/en/about-claude/pricing) on every current model; thinking is on by default | Output tokens per session | Lower `/effort`; ask for a diff or a summary, not a full file |
 | Subagent fan-out (one session launching many subagents) | Each subagent runs its own loop with its own context and cache | Attribution in `/usage` | Fewer, well-scoped subagents; a cheaper model for simple ones |
 | Verbose tool output | A 5,000-line test log is re-read on every later call | `/context` | Trim output before it enters context; delegate noisy work to a subagent |
 | Always-on boilerplate | Instruction files, the name and description of every enabled skill and agent, and text hooks inject are in context on every turn | `/context all`; attribution by plugin | Short `CLAUDE.md`; path-scoped rules; disable unused plugins and MCP servers |
 | Idle spend | `/loop` tasks, messages from other sessions and background agents keep making calls | Activity in `/usage` | Stop loops you no longer need |
 
-**Cache lifetime.** As of Nov 2026 the docs give the prompt cache about "an hour on a subscription and five minutes on an API key, cloud provider, or usage credits. Subagents get five minutes unless you change it." A break longer than that means the next call rewrites the whole context.
+**Cache lifetime.** As of Nov 2026 [the docs give the prompt cache](https://code.claude.com/docs/en/best-practices) about "an hour on a subscription and five minutes on an API key, cloud provider, or usage credits. Subagents get five minutes unless you change it." A break longer than that means the next call rewrites the whole context.
 
-**Cache invalidators.** The prompt-caching page lists actions that discard the cache mid-session: "Switching models", "Changing effort level", "Connecting or removing an MCP server", "Compacting the conversation" and "Upgrading Claude Code". Each is fine at the start of a task and expensive in the middle of a long one. `/compact` is itself "a large request".
+**Cache invalidators.** The [prompt-caching page](https://code.claude.com/docs/en/prompt-caching) lists actions that discard the cache mid-session: "Switching models", "Changing effort level", "Connecting or removing an MCP server", "Compacting the conversation" and "Upgrading Claude Code". Each is fine at the start of a task and expensive in the middle of a long one. `/compact` is itself ["a large request"](https://code.claude.com/docs/en/costs).
 
-**Fan-out multipliers.** Anthropic's figures: agents use "about 4× more tokens than chat interactions, and multi-agent systems use about 15× more tokens than chats"; agent teams (several full sessions working as teammates, see [Multi-agent orchestration](26-multi-agent-orchestration.md)) use "approximately 7x more tokens than standard sessions when teammates run in plan mode". The best-practices page is blunt about what you buy: "You get parallelism or a fresh pair of eyes out of it, but not a smarter answer."
+**Fan-out multipliers.** [Anthropic's figures](https://www.anthropic.com/research/multi-agent-research-system): agents use "about 4× more tokens than chat interactions, and multi-agent systems use about 15× more tokens than chats"; agent teams (several full sessions working as teammates, see [Multi-agent orchestration](26-multi-agent-orchestration.md)) use ["approximately 7x more tokens than standard sessions when teammates run in plan mode"](https://code.claude.com/docs/en/costs). [The best-practices page](https://code.claude.com/docs/en/best-practices) is blunt about what you buy: "You get parallelism or a fresh pair of eyes out of it, but not a smarter answer."
 
 ## Reduce it: the documented list
 
-These come from the Claude Code costs page. None needs a tool you do not already have.
+These come from [the Claude Code costs page](https://code.claude.com/docs/en/costs). None needs a tool you do not already have.
 
 1. **`/clear` between unrelated tasks.** A focused context is cheaper and gives better answers.
 2. **`/compact` with a focus**, for example `/compact Focus on code samples and API usage`, and add a `# Compact instructions` section to `CLAUDE.md` so automatic compaction keeps the right things.
-3. **Keep `CLAUDE.md` short.** "Aim to keep CLAUDE.md under 200 lines." Move procedures into skills, which load only when used, and path-specific rules into `.claude/rules/` with a `paths:` filter (that last tip is from the memory page; see [CLAUDE.md and memory](08-claude-md-and-memory.md)).
+3. **Keep `CLAUDE.md` short.** ["Aim to keep CLAUDE.md under 200 lines."](https://code.claude.com/docs/en/costs) Move procedures into skills, which load only when used, and path-specific rules into `.claude/rules/` with a `paths:` filter (that last tip is from the memory page; see [CLAUDE.md and memory](08-claude-md-and-memory.md)).
 4. **Prefer CLI tools** (`gh`, `aws`, `gcloud`) over MCP servers where both exist, and disable unused servers in `/mcp`.
 5. **Pre-filter noisy output** with a hook, so a failing test run contributes the failures and not the whole log.
 6. **Install code-intelligence plugins**, which report type errors after edits instead of leaving Claude to discover them by running things.
 7. **Delegate verbose work to subagents** so the noise stays out of the main context. This saves main-thread context, not total tokens.
 8. **Write specific prompts, plan first, interrupt early.** A wrong direction caught in the first minute costs one minute.
-9. **Lower `/effort`.** `MAX_THINKING_TOKENS=8000` helps only on older models with a fixed thinking budget; the current models reason adaptively, so effort is the control.
+9. **Lower `/effort`.** `MAX_THINKING_TOKENS=8000` [helps only on older models with a fixed thinking budget](https://code.claude.com/docs/en/costs); the current models reason adaptively, so effort is the control.
 
 A compact-instructions block for step 2. The heading is the documented hook; the wording is yours:
 
@@ -87,7 +87,7 @@ Drop tool output and file contents that can be re-read from disk.
 
 ## Choose a model and an effort level per task
 
-**Effort** is a setting (`low`, `medium`, `high`, `xhigh`, `max`) that steers how many tokens Claude spends on a response, thinking included; see [Thinking and effort](04-prompt-caching-compaction-and-cost.md). Prices below are per million tokens, as published on 2026-11-25. Check the pricing page before you budget.
+**Effort** is a setting (`low`, `medium`, `high`, `xhigh`, `max`) that [steers how many tokens Claude spends](https://platform.claude.com/docs/en/build-with-claude/effort) on a response, thinking included; see [Thinking and effort](04-prompt-caching-compaction-and-cost.md). Prices below are per million tokens, as published on 2026-11-25. [Check the pricing page](https://platform.claude.com/docs/en/about-claude/pricing) before you budget.
 
 | Model | Input | Output | 5-min cache write | 1-hour cache write | Cache read | API default effort |
 |---|--:|--:|--:|--:|--:|---|
@@ -97,25 +97,25 @@ Drop tool output and file contents that can be re-read from disk.
 | Claude Haiku 5.5, prompt up to 100,000 tokens | $0.10 | $0.50 | $0.125 | $0.20 | $0.01 | `medium` |
 | Claude Haiku 5.5, prompt over 100,000 tokens | $0.50 | $2.50 | $0.625 | $1 | $0.05 | |
 
-Three things in that table are easy to miss. Cache reads are discounted by a different factor per model (0.025x on Fable 5.2, 0.05x on Opus 5.5 and Sonnet 5.5, 0.1x on Haiku 5.5). Haiku 5.5 costs five times more once a request's prompt passes 100,000 tokens, and cache reads count toward that length. And the effort column is the API's default: Opus 5.5 runs at `medium` there, one level lower than earlier Opus models, while Claude Code itself starts all four current models at `medium` (as of Nov 2026).
+Three things in that table are easy to miss. [Cache reads are discounted by a different factor per model](https://platform.claude.com/docs/en/about-claude/pricing) (0.025x on Fable 5.2, 0.05x on Opus 5.5 and Sonnet 5.5, 0.1x on Haiku 5.5). Haiku 5.5 costs five times more once a request's prompt passes 100,000 tokens, and cache reads count toward that length. And [the effort column is the API's default](https://platform.claude.com/docs/en/models/overview): Opus 5.5 runs at `medium` there, one level lower than earlier Opus models, while Claude Code itself starts all four current models at `medium` (as of Nov 2026).
 
 **Tiering** means matching the model and effort to the task instead of using one setting for everything.
 
 | Task | Reasonable setting | Why |
 |---|---|---|
-| Lookups, log summaries, simple search subagents | Haiku 5.5 with a small context, or `low` effort | The docs' use for `low`: "Simpler tasks that need the best speed and lowest costs, such as subagents" |
+| Lookups, log summaries, simple search subagents | Haiku 5.5 with a small context, or `low` effort | The docs' use for `low`: ["Simpler tasks that need the best speed and lowest costs, such as subagents"](https://platform.claude.com/docs/en/build-with-claude/effort) |
 | Everyday implementation, tests, refactors | Sonnet 5.5, or Opus 5.5 at its default | See the note below |
-| Architecture, hard debugging, security review | Opus 5.5 at `high`, or Fable 5.2 at `high` | Fable guidance: "Start with `high`. Most of the gain in capability is already present at `high`" |
-| Unattended multi-hour objectives | `xhigh` | Described as for long-running agentic tasks "with token budgets in the millions" |
+| Architecture, hard debugging, security review | Opus 5.5 at `high`, or Fable 5.2 at `high` | [Fable guidance](https://platform.claude.com/docs/en/build-with-claude/effort): "Start with `high`. Most of the gain in capability is already present at `high`" |
+| Unattended multi-hour objectives | `xhigh` | Described as for long-running agentic tasks ["with token budgets in the millions"](https://platform.claude.com/docs/en/build-with-claude/effort) |
 
-> **Note:** The official pages disagree on the default. The Claude Code costs page recommends Sonnet for most work and `model: haiku` for simple subagents. The API models page says "start with Claude Opus 5.5 for most workloads". The API's model-selection guide adds a method that fits either default: "Tuning effort is often a better lever than switching models."
+> **Note:** The official pages disagree on the default. [The Claude Code costs page](https://code.claude.com/docs/en/costs) recommends Sonnet for most work and `model: haiku` for simple subagents. The API models page says ["start with Claude Opus 5.5 for most workloads"](https://platform.claude.com/docs/en/models/overview). The API's model-selection guide adds a method that fits either default: ["Tuning effort is often a better lever than switching models."](https://platform.claude.com/docs/en/about-claude/models/choosing-a-model)
 
 How to set it:
 
-- In a session: `/model` and `/effort high` (or `low`, `xhigh`). "Save `max` for a hard problem you want Claude to work through without you."
+- In a session: `/model` and `/effort high` (or `low`, `xhigh`). "Save `max` for [a hard problem you want Claude to work through without you](https://code.claude.com/docs/en/best-practices)."
 - As defaults: the `model`, `effortLevel` and `modelSettings` keys in `settings.json`. These are read only at session start.
-- For subagents: a `model` field in the agent definition, or the `CLAUDE_CODE_SUBAGENT_MODEL` environment variable as the fallback.
-- Choose at the start of a task. Switching model or effort mid-session discards the prompt cache.
+- For subagents: a `model` field in the agent definition, or the `CLAUDE_CODE_SUBAGENT_MODEL` environment [variable](https://code.claude.com/docs/en/env-vars) as the fallback.
+- Choose at the start of a task. Switching model or effort mid-session [discards the prompt cache](https://code.claude.com/docs/en/prompt-caching).
 
 A subagent pinned to the cheap tier, saved as `.claude/agents/log-summariser.md`:
 
@@ -135,16 +135,16 @@ Work can stop for four different reasons. Know which one you hit before you chan
 
 | What you see | What it is | What to do |
 |---|---|---|
-| A usage-limit message on a subscription | Seat allowances reset on "a rolling five-hour window and a weekly window". "The session and weekly limits are shared across all models" | Wait for the reset, or reduce fan-out. Switching model does not open a second allowance |
-| `429` on an API key | The rate limit configured for your API key or cloud project | The costs page gives per-user guidance by team size, from 200k-300k tokens per minute for 1-5 users down to 10k-15k for 500+ |
-| `529 Overloaded` | Server load. "A 529 is not your usage limit" | Retry later |
-| Limits far lower than your plan | A stray `ANTHROPIC_API_KEY` in the environment. When set, it "is used instead of your Claude Pro, Max, Ultra, Team, or Enterprise subscription even if you are logged in" | Unset it, or use it on purpose |
+| A usage-limit message on a subscription | Seat allowances reset on ["a rolling five-hour window and a weekly window"](https://code.claude.com/docs/en/costs). ["The session and weekly limits are shared across all models"](https://code.claude.com/docs/en/errors) | Wait for the reset, or reduce fan-out. Switching model does not open a second allowance |
+| `429` on an API key | The rate limit configured for your API key or cloud project | The costs page gives [per-user guidance](https://code.claude.com/docs/en/costs) by team size, from 200k-300k tokens per minute for 1-5 users down to 10k-15k for 500+ |
+| `529 Overloaded` | Server load. ["A 529 is not your usage limit"](https://code.claude.com/docs/en/errors) | Retry later |
+| Limits far lower than your plan | A stray `ANTHROPIC_API_KEY` in the environment. When set, it ["is used instead of your Claude Pro, Max, Ultra, Team, or Enterprise subscription even if you are logged in"](https://code.claude.com/docs/en/env-vars) | Unset it, or use it on purpose |
 
 Caps you set yourself:
 
-- **Unattended runs:** `--max-turns` and `--max-budget-usd` in print mode (`claude -p`, see [chapter 27](27-headless-ci-and-the-agent-sdk.md)). The docs warn: "Spend can pass the cap, so leave headroom".
-- **Organisations on the API:** workspace spend limits and per-member limits.
-- **Plans:** weekly caps were introduced on Pro and Max plans in August 2025 for heavy background use; they are a reason to schedule large fan-outs, not to run them on a whim.
+- **Unattended runs:** `--max-turns` and `--max-budget-usd` in print mode (`claude -p`, see [chapter 27](27-headless-ci-and-the-agent-sdk.md)). [The docs warn](https://code.claude.com/docs/en/cli-reference): "Spend can pass the cap, so leave headroom".
+- **Organisations on the API:** [workspace spend limits and per-member limits](https://code.claude.com/docs/en/costs).
+- **Plans:** [weekly caps were introduced on Pro and Max plans in August 2025](https://techcrunch.com/2025/07/28/anthropic-unveils-new-rate-limits-to-curb-claude-code-power-users/) for heavy background use; they are a reason to schedule large fan-outs, not to run them on a whim.
 
 ```bash
 claude -p "Fix the failing tests in tests/api" --max-turns 30 --max-budget-usd 5 --output-format json
@@ -154,7 +154,7 @@ claude -p "Fix the failing tests in tests/api" --max-turns 30 --max-budget-usd 5
 
 ## OpenTelemetry export
 
-Claude Code can export metrics and events over OpenTelemetry (OTel), the open standard for telemetry; OTLP is its wire protocol, and a collector is the service that receives it. Use it when you need history, more than one person, or alerts.
+Claude Code can [export metrics and events](https://code.claude.com/docs/en/monitoring-usage) over OpenTelemetry (OTel), the open standard for telemetry; OTLP is its wire protocol, and a collector is the service that receives it. Use it when you need history, more than one person, or alerts.
 
 ```mermaid
 flowchart LR
@@ -165,7 +165,7 @@ flowchart LR
     T["Local transcripts"] --> RP["Your own report"]
 ```
 
-**A first look with no collector.** The docs list `console` as an exporter option. Try it on a one-off run:
+**A first look with no collector.** [The docs list](https://code.claude.com/docs/en/monitoring-usage) `console` as an exporter option. Try it on a one-off run:
 
 ```bash
 export CLAUDE_CODE_ENABLE_TELEMETRY=1
@@ -175,7 +175,7 @@ export OTEL_METRIC_EXPORT_INTERVAL=10000   # default 60000 ms
 claude -p "say hi"
 ```
 
-**The documented quick start** for a real collector:
+**[The documented quick start](https://code.claude.com/docs/en/monitoring-usage)** for a real collector:
 
 ```bash
 export CLAUDE_CODE_ENABLE_TELEMETRY=1
@@ -194,14 +194,14 @@ export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer your-token"
 
 Things to know before you roll it out:
 
-- **Content is off by default.** Prompts, responses and tool details are exported only if you opt in with `OTEL_LOG_USER_PROMPTS`, `OTEL_LOG_ASSISTANT_RESPONSES`, `OTEL_LOG_TOOL_DETAILS`, `OTEL_LOG_TOOL_CONTENT` or `OTEL_LOG_RAW_API_BODIES`. Leave them off unless you have a reason and consent.
-- **A repository cannot turn it on.** Exporter variables in a project's `.claude/settings.json` are ignored. Set them in managed settings, the shell, or `~/.claude/settings.json`.
+- **Content is off by default.** Prompts, responses and tool details are [exported only if you opt in](https://code.claude.com/docs/en/monitoring-usage) with `OTEL_LOG_USER_PROMPTS`, `OTEL_LOG_ASSISTANT_RESPONSES`, `OTEL_LOG_TOOL_DETAILS`, `OTEL_LOG_TOOL_CONTENT` or `OTEL_LOG_RAW_API_BODIES`. Leave them off unless you have a reason and consent.
+- **A repository cannot turn it on.** [Exporter variables](https://code.claude.com/docs/en/monitoring-usage) in a project's `.claude/settings.json` are ignored. Set them in managed settings, the shell, or `~/.claude/settings.json`.
 - **Identity attributes** such as `user.email` and `session.id` are standard. `OTEL_METRICS_INCLUDE_SESSION_ID`, `OTEL_METRICS_INCLUDE_VERSION` and `OTEL_METRICS_INCLUDE_ACCOUNT_UUID` control how much detail the metrics carry.
 - **Do not sum metrics and events.** The author's telemetry repo found that the token and cost metrics describe the same requests as the `api_request` events. Pick one signal as your source of totals.
 
 ## Build your own report from transcripts
 
-Claude Code keeps transcripts as JSONL files (one JSON object per line) under `~/.claude/projects/`, with subagent transcripts in a `subagents/` folder beside each session. They hold the token usage of every response, so a short script gives you a per-model report with no telemetry at all. This one counts each response once per `message.id`, as the field analysis below does, and prints totals only.
+Claude Code [keeps transcripts as JSONL files](https://code.claude.com/docs/en/data-usage) (one JSON object per line) under `~/.claude/projects/`, with subagent transcripts in a `subagents/` folder beside each session. They hold the token usage of every response, so a short script gives you a per-model report with no telemetry at all. This one counts each response once per `message.id`, as the field analysis below does, and prints totals only.
 
 ```python
 #!/usr/bin/env python3
@@ -244,10 +244,10 @@ for model, t in sorted(totals.items(), key=lambda kv: -sum(kv[1].values())):
 Three traps the field analysis hit, all handled above or worth knowing:
 
 - **One response, several lines.** A single API response is written as one line per content block, each repeating the same `usage`. Count once per `message.id` or you will multiply your totals.
-- **It is a rolling window.** Transcripts are deleted after 30 days by default (`cleanupPeriodDays`). A report is "the last month", never "lifetime".
+- **It is a rolling window.** Transcripts are [deleted after 30 days by default](https://code.claude.com/docs/en/data-usage) (`cleanupPeriodDays`). A report is "the last month", never "lifetime".
 - **The format is not a published interface.** Field names are as observed in Nov 2026. Re-check after an upgrade, and treat anything the harness does not write to a transcript as missing.
 
-Multiply the four token columns by the price table and you have a list-price estimate per model. Cache writes have two prices; the split is in each response's `usage.cache_creation` object (`ephemeral_5m_input_tokens` and `ephemeral_1h_input_tokens`).
+Multiply the four token columns by the price table and you have a list-price estimate per model. [Cache writes have two prices](https://platform.claude.com/docs/en/build-with-claude/prompt-caching); the split is in each response's `usage.cache_creation` object (`ephemeral_5m_input_tokens` and `ephemeral_1h_input_tokens`).
 
 ## A monthly review routine
 
@@ -290,7 +290,7 @@ The numbers below come from one developer's transcripts over a rolling window of
 | Symptom | Cause | Fix |
 |---|---|---|
 | A one-line question costs a lot late in the day | The whole conversation is resent, and the cache expired or was invalidated | `/clear` between tasks; avoid mid-session model and effort switches; read the cache line in `/usage` |
-| Usage limit hit much earlier than expected | Subagent or team fan-out, idle loops, a very long context. Once, a client bug that caused cache misses | Smaller fan-out, cheaper subagents, stop loops, update Claude Code |
+| Usage limit hit much earlier than expected | Subagent or team fan-out, idle loops, a very long context. Once, [a client bug that caused cache misses](https://www.anthropic.com/research/april-23-postmortem) | Smaller fan-out, cheaper subagents, stop loops, update Claude Code |
 | An unattended run overspends | No ceiling on turns or dollars | `--max-turns`, `--max-budget-usd` with headroom, workspace spend limits |
 | Compaction happens again and again | Boilerplate or one giant tool result refills the window | `/context all`, prune injected content, read big files in chunks |
 | Dashboard totals are double the invoice | Metrics and events were summed for the same requests | Use one signal for totals |

@@ -6,7 +6,7 @@ After this chapter you can write a hook that blocks a dangerous command, one tha
 
 `CLAUDE.md`, skills and subagent prompts are text that the model reads. The model usually follows that text, but nothing guarantees it. A **hook** is code that the harness (the Claude Code program, not the model) runs when a named **lifecycle event** fires: before a tool call, when you submit a prompt, when a turn ends. The model cannot skip a hook, forget it, or decide that it does not apply this time.
 
-The official best-practices page draws the line like this: "If something has to happen every time, make it a hook, a deny rule, or a managed setting. `CLAUDE.md` is for guidelines, and Claude is allowed to decide a guideline doesn't apply."
+The [official best-practices page](https://code.claude.com/docs/en/best-practices) draws the line like this: "If something has to happen every time, make it a hook, a deny rule, or a managed setting. `CLAUDE.md` is for guidelines, and Claude is allowed to decide a guideline doesn't apply."
 
 Every hook works in the same three steps. An event fires and the harness finds the hooks registered for it. Each matching hook receives one JSON object on standard input (stdin) that describes the event. The hook answers with an exit code and, optionally, JSON on standard output (stdout), and the harness acts on that answer.
 
@@ -55,8 +55,8 @@ Hooks are defined in JSON settings files (see [chapter 9](09-settings-and-permis
 ```
 
 - **Event** (`PreToolUse`, `Stop`, ...): when to run. The next section lists the events.
-- **Matcher** (`"Bash"`): a single string, never an array. For tool events it names tools: `Bash`, `Edit|Write`, or `*` for every tool, MCP tools included. Names are case-sensitive, and a misspelled name matches nothing without any error. Some events match on something other than a tool, and a group can leave `matcher` out, as three of the four do here.
-- **Handler**: `type` plus its settings. `timeout` is in seconds. `statusMessage` is the text shown while the hook runs. `onFailure: "block"` (v2.1.295+) makes a crash, a timeout or an exit 1 block the action instead of letting it through; it has no effect on `Stop`, `SubagentStop`, `TaskCompleted` and `TeammateIdle` hooks or on async hooks. `"async": true` suits side effects such as notifications, with the documented limit that "Async hooks can't block or control Claude's behavior".
+- **Matcher** (`"Bash"`): a single string, never an array. For tool events it names tools: `Bash`, `Edit|Write`, or `*` for every tool, MCP tools included. [Names are case-sensitive](https://code.claude.com/docs/en/hooks-guide), and a misspelled name matches nothing without any error. Some events match on something other than a tool, and a group can leave `matcher` out, as three of the four do here.
+- **Handler**: `type` plus its settings. `timeout` is in seconds. `statusMessage` is the text shown while the hook runs. `onFailure: "block"` (v2.1.295+) makes a crash, a timeout or an exit 1 block the action instead of letting it through; it has no effect on `Stop`, `SubagentStop`, `TaskCompleted` and `TeammateIdle` hooks or on async hooks. `"async": true` suits side effects such as notifications, with the documented limit that "[Async hooks can't block or control Claude's behavior](https://code.claude.com/docs/en/hooks)".
 
 ### The five handler types
 
@@ -66,9 +66,9 @@ Hooks are defined in JSON settings files (see [chapter 9](09-settings-and-permis
 | `http` | An HTTP endpoint that receives the event | A policy service shared by a team |
 | `mcp_tool` | A tool on an MCP server | Reusing a server you already run (`onFailure` from v2.1.328+) |
 | `prompt` | A prompt that a model evaluates | A judgement call that a regular expression cannot make |
-| `agent` | A subagent | Checks that need tools. Marked experimental |
+| `agent` | A subagent | Checks that need tools. [Marked experimental](https://code.claude.com/docs/en/hooks) |
 
-For enforcement the docs recommend the first three: "use a `command`, `http`, or `mcp_tool` hook, and add `onFailure: "block"`". A `prompt` or `agent` hook is a model call, so it gives you judgement, not determinism. Field names for each type are in the hooks reference; this chapter stays with `command`.
+For enforcement [the docs recommend](https://code.claude.com/docs/en/best-practices) the first three: "use a `command`, `http`, or `mcp_tool` hook, and add `onFailure: "block"`". A `prompt` or `agent` hook is a model call, so it gives you judgement, not determinism. Field names for each type are in the [hooks reference](https://code.claude.com/docs/en/hooks); this chapter stays with `command`.
 
 ### The seven places a hook can live
 
@@ -82,11 +82,11 @@ For enforcement the docs recommend the first three: "use a `command`, `http`, or
 | Skill frontmatter | Defined with the skill | With the skill ([chapter 15](15-skills.md)) |
 | Subagent frontmatter | Defined with the subagent | With the subagent. Plugin subagents ignore `hooks` |
 
-Type `/hooks` in a session to view the hooks registered under each event. Hooks placed in `~/.claude.json` are ignored: that file is not a settings file. Two settings govern hooks as a whole: `disableAllHooks` turns them off (together with a custom status line), and the managed-only `allowManagedHooksOnly` restricts a machine to the organisation's hooks.
+Type `/hooks` in a session to view the hooks registered under each event. Hooks placed in `~/.claude.json` are ignored: [that file is not a settings file](https://code.claude.com/docs/en/debug-your-config). Two settings govern hooks as a whole: `disableAllHooks` [turns them off](https://code.claude.com/docs/en/settings-reference) (together with a custom status line), and the managed-only `allowManagedHooksOnly` [restricts a machine to the organisation's hooks](https://code.claude.com/docs/en/managed-settings).
 
 ## The event catalogue
 
-The hooks reference lists 34 events as of Nov 2026, and the list keeps growing. You will use five or six of them. The table groups all 34 and says what `exit 2` does on each, taken from the reference's "Exit code 2 behavior per event" table. Check that table again in your version before you rely on a block.
+The [hooks reference lists 34 events](https://code.claude.com/docs/en/hooks) as of Nov 2026, and the list keeps growing. You will use five or six of them. The table groups all 34 and says what `exit 2` does on each, taken from the reference's "Exit code 2 behavior per event" table. Check that table again in your version before you rely on a block.
 
 | Group | Events | Blocking behaviour |
 |---|---|---|
@@ -135,18 +135,18 @@ The fields depend on the event. These are the ones that real hook scripts in the
 | `2` | Blocking error | On an event that can block, the action stops. The hook's stderr (or a JSON decision's reason) becomes the block message |
 | Anything else, including `1` | Non-blocking error | The action goes ahead |
 
-The docs say it plainly: "Exit code 1 without valid JSON output is a non-blocking error ... even though 1 is the conventional Unix failure code. If your hook is meant to enforce a policy, use `exit 2`." That simple rule has four documented exceptions:
+[The docs say it plainly](https://code.claude.com/docs/en/hooks): "Exit code 1 without valid JSON output is a non-blocking error ... even though 1 is the conventional Unix failure code. If your hook is meant to enforce a policy, use `exit 2`." That simple rule has four documented exceptions:
 
 1. **Valid JSON overrides the exit code.** If the hook prints valid JSON that passes the schema and exits with a code other than 0 or 2, the run counts as a success and the JSON fields decide the outcome. Exit 1 plus a JSON deny can still block. (With `onFailure: "block"` set, such an exit code counts as a failure instead, so exit 0 when you print JSON.)
 2. **`onFailure: "block"` changes the default.** With it, exit 1, crashes and timeouts all block (v2.1.295+, and v2.1.328+ for `mcp_tool` hooks).
 3. **Some events have their own rules.** Any non-zero `WorktreeCreate` exit fails the creation. `PostToolUse` exit 2 only shows stderr to Claude. `SessionStart`, `SubagentStart` and `PostModelSwitch` exit 2 only renders a notice. On `Stop`, `SubagentStop`, `TaskCompleted` and a plugin's `UserPromptSubmit` hook, an exit 2 with nothing on stdout whose stderr says a file is missing (such as `No such file or directory`) counts as a non-blocking error.
 4. **Broken JSON is not applied.** On exit 0, output that does not parse or fails the schema becomes a non-blocking error.
 
-> **Warning:** A hook that times out does not block either. The docs state that a timed-out `PreToolUse` hook "doesn't block the tool call ... so don't count on a stalled hook to act as a gate". Add `onFailure: "block"` to any guard that must fail closed (block when it is broken) rather than fail open (allow when it is broken).
+> **Warning:** A hook that times out does not block either. [The docs state](https://code.claude.com/docs/en/hooks) that a timed-out `PreToolUse` hook "doesn't block the tool call ... so don't count on a stalled hook to act as a gate". Add `onFailure: "block"` to any guard that must fail closed (block when it is broken) rather than fail open (allow when it is broken).
 
 ### Output: JSON on stdout, and who reads it
 
-There are two ways to block: `exit 2` with the reason on stderr, or exit 0 with a JSON decision. The docs say "Choose one approach per hook". Beyond blocking, the field you print decides **who sees your message**. Pick the channel by its reader.
+There are two ways to block: `exit 2` with the reason on stderr, or exit 0 with a JSON decision. The docs say "[Choose one approach per hook](https://code.claude.com/docs/en/hooks-guide)". Beyond blocking, the field you print decides **who sees your message**. Pick the channel by its reader.
 
 | You want to | Print | Who gets it |
 |---|---|---|
@@ -156,7 +156,7 @@ There are two ways to block: `exit 2` with the reason on stderr, or exit 0 with 
 | Keep Claude working at a stop | `{"decision": "block", "reason": "..."}` or exit 2 with stderr | Claude, as the reason to continue |
 | Leave a trace for debugging | stderr with exit 0 | Not Claude. Treat it as diagnostics only |
 
-Two rules keep JSON output from being ignored without notice. `permissionDecision` must sit inside `hookSpecificOutput`, with `hookEventName` set to the event. And stdout must start with `{`: if your shell profile prints a banner, that text arrives ahead of the JSON.
+Two rules keep JSON output from being ignored without notice. `permissionDecision` must sit inside `hookSpecificOutput`, with `hookEventName` set to the event. And [stdout must start with](https://code.claude.com/docs/en/hooks-guide) `{`: if your shell profile prints a banner, that text arrives ahead of the JSON.
 
 ## Four hooks to copy
 
@@ -277,7 +277,7 @@ fi
 exit 0
 ```
 
-With the guard, this hook buys one more attempt and then lets the turn end. Without it, the only brake is the harness, which overrides a `Stop` hook after eight blocks in a row (`CLAUDE_CODE_STOP_HOOK_BLOCK_CAP`). Treat that cap as a backstop, not a design. One trap follows from the third exit-code exception: if the test output you relay on stderr contains `No such file or directory`, the exit 2 can be read as a non-blocking error and the turn ends. If your check prints such messages, exit 0 and print `{"decision": "block", "reason": "..."}` on stdout instead; that rule covers only an exit 2 with empty stdout. [Chapter 23](23-testing-and-verification-loops.md) shows where a `Stop` hook sits among the other ways to make Claude verify its work.
+With the guard, this hook buys one more attempt and then lets the turn end. Without it, the only brake is the harness, which overrides a `Stop` hook [after eight blocks in a row](https://code.claude.com/docs/en/hooks) (`CLAUDE_CODE_STOP_HOOK_BLOCK_CAP`). Treat that cap as a backstop, not a design. One trap follows from the third exit-code exception: if the test output you relay on stderr contains `No such file or directory`, the exit 2 can be read as a non-blocking error and the turn ends. If your check prints such messages, exit 0 and print `{"decision": "block", "reason": "..."}` on stdout instead; that rule covers only an exit 2 with empty stdout. [Chapter 23](23-testing-and-verification-loops.md) shows where a `Stop` hook sits among the other ways to make Claude verify its work.
 
 ## Pair every hard rule with an enforcing hook
 
@@ -307,7 +307,7 @@ In the field data (one developer, a rolling window of about four weeks) the tran
 
 - **Use a narrow matcher.** `Bash` instead of `*` when the rule is about shell commands.
 - **Exit early.** Check `tool_name` and the cheap conditions first. Never run a test suite in `PreToolUse`.
-- **Set a `timeout`.** Defaults are 600 seconds for `command`, `http` and `mcp_tool` (lowered to 30 on `UserPromptSubmit`, `PreModelSwitch` and `PostModelSwitch`), 30 for `prompt` and 60 for `agent`. Matching hooks run in parallel, so the slowest one sets the delay.
+- **Set a `timeout`.** [Defaults are 600 seconds](https://code.claude.com/docs/en/hooks) for `command`, `http` and `mcp_tool` (lowered to 30 on `UserPromptSubmit`, `PreModelSwitch` and `PostModelSwitch`), 30 for `prompt` and 60 for `agent`. Matching hooks run in parallel, so the slowest one sets the delay.
 - **Make side effects async.** A notification or a log line does not need to hold up the tool call.
 - **Count the tokens.** Every `additionalContext` stays in the context window. In the author's plugin an ablation attributed about 9% of the plugin's token overhead to all its hooks together, against about 82% for skill descriptions.
 
@@ -331,14 +331,14 @@ Write one payload for each branch, and keep them as a test file next to the scri
 
 | Payload | Expected |
 |---|---|
-| `git push origin +HEAD:main` | The JSON deny, exit 0 (a `+` before a refspec forces it, like `--force`) |
+| `git push origin +HEAD:main` | The JSON deny, exit 0 (a `+` [before a refspec forces it](https://git-scm.com/docs/git-push), like `--force`) |
 | `git push origin feature && rm -f tmp.txt` | No output, exit 0 (the `-f` belongs to `rm`) |
 | `git push --force-with-lease origin feature` | No output, exit 0 |
 | `git push --force-with-lease --force-if-includes origin feature` | No output, exit 0 |
 | `ALLOW_FORCE_PUSH=1 git push --force origin main` | No output, exit 0 (override) |
 | `{"hook_event_name":"Stop","stop_hook_active":true}` into the `Stop` hook | Exit 0 at once |
 
-Then check the wiring in a real session: `/hooks` confirms the registration, and `claude --debug` writes a log file that you can read for hook errors. One of the author's guards ships with unit tests and a dated comment for each false-positive fix. A guard matches text, not intent, so its patterns need maintenance like any other code.
+Then [check the wiring in a real session](https://code.claude.com/docs/en/debug-your-config): `/hooks` confirms the registration, and `claude --debug` writes a log file that you can read for hook errors. One of the author's guards ships with unit tests and a dated comment for each false-positive fix. A guard matches text, not intent, so its patterns need maintenance like any other code.
 
 ## From the field
 

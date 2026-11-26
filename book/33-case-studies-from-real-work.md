@@ -30,8 +30,8 @@ The layers, from weakest to strongest:
 |---|---|---|---|
 | None | A one-off with no pattern behind it | It really was a one-off | You are rationalising |
 | Memory note | "In this repo the browser loads the main checkout" | Same project, soon after | Another project, or after compaction |
-| Rule in the instruction file | "State the side effect and confirm before mutating live infrastructure" | The model reads it and agrees it applies | Reflexes, pressure, very long sessions |
-| Hook, deny rule or test | A `PreToolUse` guard; a negative-control test | Every time, if it can see the action | It matches text, not intent, and it costs something on every call |
+| Rule in the instruction file | "State the side effect and confirm before mutating live infrastructure" | [The model reads it and agrees it applies](https://code.claude.com/docs/en/best-practices) | Reflexes, pressure, very long sessions |
+| Hook, deny rule or test | A `PreToolUse` guard; a negative-control test | [Every time, if it can see the action](https://code.claude.com/docs/en/hooks-guide) | It matches text, not intent, and it costs something on every call |
 | Workflow or skill default | "Workers return after opening the PR" | The work goes through the workflow | The work happens outside it |
 
 Two things in that loop are easy to miss. "No change" is a legitimate outcome. And the loop has a way back down: a guard that costs more than it saves gets narrowed or removed (Case 3).
@@ -98,7 +98,7 @@ The hook is one of three copies of the same rule. The instruction file carries t
 - **Context.** The author's plugin enforced safety with hooks while sessions ran in `bypassPermissions`. A new feature added configurable permission levels on top: four levels, a resolver and more hooks.
 - **What happened.** Building the feature took a run of about 14 hours: objectives executed one after another, six review rounds on one parser, around ten status checks from the owner. Under pressure from a goal stop hook that kept re-firing, the agent cleared five Git stashes, four of them not its own, and said they held nothing of value before checking. Within days of release the new guard was the owner's top complaint: "then why are you asking for permission every minute".
 - **How it was noticed.** The owner's complaints. A retro then checked the stashes: four of the five held files that were not on the default branch. They were recoverable only because they had been archived first.
-- **Root cause.** The guard answered `ask`, and Claude Code honours a hook's `ask` in every permission mode, bypass included, so a quiet setup became a stream of prompts. Session worktrees also lived under the config folder, a protected path that kept prompting in these sessions whatever the mode (the docs say bypass covers protected paths, so check your version). The stash loss had a separate cause: the agent treated a stop hook's pressure as an instruction from the user.
+- **Root cause.** The guard answered `ask`, and Claude Code honours a hook's `ask` [in every permission mode, bypass included](https://code.claude.com/docs/en/hooks-guide), so a quiet setup became a stream of prompts. Session worktrees also lived under the config folder, a protected path that kept prompting in these sessions whatever the mode ([the docs say bypass covers protected paths](https://code.claude.com/docs/en/permission-modes), so check your version). The stash loss had a separate cause: the agent treated a stop hook's pressure as an instruction from the user.
 - **Durable fix.** The feature was removed in the next major version, with a decision record whose rule is "a hook denies or stays out of the way". Worktrees moved out of the config folder. New rules: a stop hook is not the user, so diff and ask before touching work that is not yours; cap external review at two rounds.
 - **What to copy.** Every guard has a carrying cost. Measure it the way you would measure a flaky test: blocks, prompts and tokens per week. Find out which calls actually prompted before you redesign anything. Removing a feature you built last week is a valid retro outcome.
 
@@ -165,7 +165,7 @@ echo "ok: 'make check' failed on sabotaged code, as it should"
 - **Context.** The author's plugin shipped 25 skills at the time, and a hook was meant to nudge the agent towards a relevant skill.
 - **What happened.** A usage count found that 15 of the 25 skills had never been invoked across 953 sessions. The nudge had been running the whole time.
 - **How it was noticed.** By counting invocations. No error ever appeared.
-- **Root cause.** Three faults in one hook. It printed `systemMessage`, which is shown to the user and never reaches the model. It fired on `Stop`, after the work was done. And it cached its state globally. A sibling fault went the other way: an advisory note sent as `additionalContext` on `SubagentStop` re-woke the subagent that had just stopped, 15 to 23 times, at about 200k tokens per read-only helper.
+- **Root cause.** Three faults in one hook. It printed `systemMessage`, [which is shown to the user](https://code.claude.com/docs/en/hooks) and never reaches the model. It fired on `Stop`, after the work was done. And it cached its state globally. A sibling fault went the other way: an advisory note sent as `additionalContext` on `SubagentStop` re-woke the subagent that had just stopped, 15 to 23 times, at about 200k tokens per read-only helper.
 - **Durable fix.** The nudge moved to `additionalContext` on `UserPromptSubmit`, once per skill per session per repository. The looping hook now honours `stop_hook_active`, skips read-only roles and speaks once per agent.
 - **What to copy.** Choose the channel by who must act. Then test a hook by whether behaviour changed, not by whether the script ran.
 
@@ -182,7 +182,7 @@ echo "ok: 'make check' failed on sabotaged code, as it should"
 |---|---|
 | `hookSpecificOutput.additionalContext` | The model |
 | `systemMessage` | The user |
-| stderr with `exit 2` | The model, as the reason for a block |
+| stderr with `exit 2` | [The model, as the reason for a block](https://code.claude.com/docs/en/hooks) |
 | stderr with exit 0 | Nobody in the conversation; diagnostics only |
 
 ### Case 8 — A very large session and what filled it (August)
@@ -192,7 +192,7 @@ echo "ok: 'make check' failed on sabotaged code, as it should"
 - **How it was noticed.** By its slowness. The cause was found only when the transcript itself was measured.
 - **Root cause.** Measured on that session, as recorded in the project's decision log: 46% of the bytes were re-injected attachments, against about 9% for all tool results. A task list carrying 100 completed tasks had been re-injected 1,263 times. Hooks had fired 33,295 times, among them a hook plugin registered on four events with zero rules configured.
 - **Durable fix.** Delete completed tasks. Remove plugins that do nothing. Add a pre-compaction hook that writes the branch and uncommitted state to disk. Hand a near-limit agent's remaining work to a fresh agent.
-- **What to copy.** "Measure before diagnosing." Run `/context` and `/usage` before you blame tool output. A plugin that does nothing can still cost something on every turn.
+- **What to copy.** "Measure before diagnosing." Run `/context` and `/usage` [before you blame tool output](https://code.claude.com/docs/en/context-window). A plugin that does nothing can still cost something on every turn.
 
 > **Field note:** For scale, in the later four-week transcript window no session compacted more than 11 times, and 20 sessions compacted at all (84 compactions in total). The two measurements are not a controlled comparison.
 
@@ -221,7 +221,7 @@ Rows before October rest on memory files and file dates only. The shape is the l
 
 ## Patterns that recur across the cases
 
-1. **Prose did not hold; mechanism did.** In Case 9, two written notes changed nothing. The shell-dialect errors in [Chapter 32](32-troubleshooting-common-problems.md) went the same way: notes in three projects, then a global rule, then a hook that finally held. Case 1 went straight to a hook, because one more miss would have been permanent. The official guidance agrees: if something has to happen every time, make it a hook, a deny rule or a managed setting.
+1. **Prose did not hold; mechanism did.** In Case 9, two written notes changed nothing. The shell-dialect errors in [Chapter 32](32-troubleshooting-common-problems.md) went the same way: notes in three projects, then a global rule, then a hook that finally held. Case 1 went straight to a hook, because one more miss would have been permanent. [The official guidance agrees](https://code.claude.com/docs/en/best-practices): if something has to happen every time, make it a hook, a deny rule or a managed setting.
 2. **A proxy was checked instead of the thing.** A green gate (6), a green PR (4), a guess about context (8), a script that ran (7). Ask what the check would look like if the thing were broken.
 3. **Benign names and shared triggers.** "Restore" (1), "test" (2) and "Change visibility" (5) each named something safe and did something else. Name the side effect before the command.
 4. **Authority without ownership.** The agent could merge someone else's PR (4) and clear someone else's stashes (3). Being able to reach something is not the same as owning it.
@@ -247,7 +247,7 @@ Rows before October rest on memory files and file dates only. The shape is the l
 | Symptom | Cause | Fix |
 |---|---|---|
 | The same mistake returns in the next session or project | The lesson lives in one project's memory | Promote it: global instruction file, then a hook |
-| The rule exists and the incident repeats | Advisory text does not stop a reflex | A `PreToolUse` hook that exits 2, or a deny rule |
+| The rule exists and the incident repeats | Advisory text does not stop a reflex | A `PreToolUse` hook that exits 2, [or a deny rule](https://code.claude.com/docs/en/permissions) |
 | A guard fires constantly and gets ignored | It matches text, not intent, or it answers `ask` | Count its blocks; narrow the pattern; deny or stay silent |
 | The gate is green and the feature is broken | The gate asks a proxy question | Negative control; one test across each seam |
 | A "test" changed production | A shared trigger, or a default context that is live | A notify-only target; state the side effect and confirm |

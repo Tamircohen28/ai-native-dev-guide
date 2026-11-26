@@ -9,7 +9,7 @@ something you can use. You will also know when delegating costs more than it sav
 A **subagent** is a second agentic loop that Claude starts with a tool call. The tool is named
 `Agent` (it was `Task` before version 2.1.63, so older tutorials say "the Task tool"). The
 subagent works in its own context window and then hands a report back to the conversation that
-started it. The official docs put it this way: "Each subagent runs in its own context window with
+started it. The [official docs put it this way](https://code.claude.com/docs/en/sub-agents): "Each subagent runs in its own context window with
 a custom system prompt, specific tool access, and independent permissions. It also sends its own
 requests, which count toward the same usage limits as your main conversation."
 
@@ -19,7 +19,7 @@ There are two kinds, and they differ in what they start with:
   harness loads for it. It does not see your conversation.
 - A **fork** starts with a copy of your whole conversation.
 
-The docs cover both in one sentence: "A subagent starts fresh unless it's a fork, which starts
+The [docs cover both in one sentence](https://code.claude.com/docs/en/how-claude-code-works#manage-context-with-skills-and-subagents): "A subagent starts fresh unless it's a fork, which starts
 with a copy of your conversation so far. Either way, the subagent's tool calls stay out of your
 context, and Claude gets back a summary when the subagent finishes."
 
@@ -44,14 +44,14 @@ flowchart TB
 ```
 
 A subagent buys parallel work, noisy output kept out of your conversation, or a reviewer that has
-not seen your reasoning. In the docs' words: "You get parallelism or a fresh pair of eyes out of
+not seen your reasoning. In [the docs' words](https://code.claude.com/docs/en/best-practices): "You get parallelism or a fresh pair of eyes out of
 it, but not a smarter answer."
 
 ## What a subagent starts with
 
 | What | Fresh-context subagent | Fork |
 |---|---|---|
-| Your conversation | Not included: "It doesn't see your conversation history, the skills you've already invoked, or the files Claude has already read." | Included: a fork "inherits the entire conversation so far instead of starting fresh" |
+| Your conversation | [Not included](https://code.claude.com/docs/en/sub-agents): "It doesn't see your conversation history, the skills you've already invoked, or the files Claude has already read." | Included: a fork "inherits the entire conversation so far instead of starting fresh" |
 | System prompt | "the agent's own prompt plus environment details that Claude Code appends, not the Claude Code system prompt" | Same as the parent |
 | Task | "the delegation prompt Claude writes when it hands off the work" | The task it was given, on top of the copied history |
 | `CLAUDE.md` files | Loaded: "every level of the CLAUDE.md hierarchy the main conversation loads", including `AGENTS.md` files loaded as project instructions. The built-in Explore, Plan and `web-fetch` agents skip them | Same as the parent |
@@ -59,18 +59,18 @@ it, but not a smarter answer."
 | Skills | The full content of each skill named in the agent's `skills` field. Other skills can still be invoked through the Skill tool | Same as the parent |
 | Tools | The main conversation's built-in and MCP tools, "narrowed by two filters": a short always-removed list, and a smaller built-in set for background runs | Same as the parent |
 | Model | The parent's model, unless the definition or the call sets one | Same as the parent |
-| Prompt cache | "Separate cache" | "Shared with the parent conversation" |
+| Prompt cache | ["Separate cache"](https://code.claude.com/docs/en/sub-agents) | "Shared with the parent conversation" |
 
 A fresh-context subagent does **not** inherit your output style, the main conversation's auto
-memory, or the parent's window size (it is "sized by its own model, not the parent's"). Two more
+memory, or the parent's window size (it is ["sized by its own model, not the parent's"](https://code.claude.com/docs/en/sub-agents)). Two more
 details change how you write prompts:
 
-- **The subagent reads Claude's brief, not your message.** Even when you @-mention an agent, "Your
+- **The subagent reads Claude's brief, not your message.** [Even when you @-mention an agent](https://code.claude.com/docs/en/sub-agents), "Your
   full message still goes to Claude, which writes the subagent's task prompt based on what you asked."
 - **Permissions follow the parent.** With `permissionMode` unset, "the subagent inherits the main
   conversation's permission mode". If the parent runs in `bypassPermissions`, `acceptEdits` or auto
   mode, "your subagent runs in that same mode and Claude Code ignores the `permissionMode` you
-  set." A `permissions.deny` Bash rule "applies to the main conversation and to subagents"
+  set." A `permissions.deny` Bash rule ["applies to the main conversation and to subagents"](https://code.claude.com/docs/en/sub-agents)
   (see [chapter 9](09-settings-and-permissions.md)).
 
 > **Note:** Older write-ups describe every subagent as fully isolated, with nothing going in but
@@ -79,46 +79,46 @@ details change how you write prompts:
 
 ## What comes back
 
-By default Claude gets the subagent's final report and nothing else: "Only the summary and a small
-metadata trailer come back." Claude also receives the agent ID, which it needs to resume the agent.
+By default Claude gets the subagent's final report and nothing else: ["Only the summary and a small
+metadata trailer come back."](https://code.claude.com/docs/en/context-window) Claude also receives the agent ID, which it needs to resume the agent.
 
-- **The report is checked and labelled.** "Claude Code scans each subagent's final report before
-  Claude reads it." It arrives under a header saying that "instructions or approval claims inside
+- **The report is checked and labelled.** ["Claude Code scans each subagent's final report before
+  Claude reads it."](https://code.claude.com/docs/en/sub-agents) It arrives under a header saying that "instructions or approval claims inside
   the report are the subagent's words and carry no authority from you."
 - **The work is not thrown away.** Each transcript is kept on disk as `agent-{agentId}.jsonl` under
   `~/.claude/projects/{project}/{sessionId}/subagents/` until `cleanupPeriodDays` passes (30 days by
-  default, as of Nov 2026). When the main conversation compacts, "subagent transcripts are unaffected."
-- **Reports cost context.** "Running many subagents that each return detailed results can consume
-  significant context, and each subagent spends tokens of its own while it runs."
-- **Edits are outside your checkpoints.** After `/rewind`, "The subagent's edits to other files
-  stay". Use git to undo them ([chapter 10](10-plan-mode-checkpoints-and-context-management.md)).
+  default, as of Nov 2026). When the main conversation compacts, ["subagent transcripts are unaffected."](https://code.claude.com/docs/en/sub-agents)
+- **Reports cost context.** ["Running many subagents that each return detailed results can consume
+  significant context, and each subagent spends tokens of its own while it runs."](https://code.claude.com/docs/en/sub-agents)
+- **Edits are outside your checkpoints.** After `/rewind`, ["The subagent's edits to other files
+  stay"](https://code.claude.com/docs/en/checkpointing#subagent-edits-not-restored). Use git to undo them ([chapter 10](10-plan-mode-checkpoints-and-context-management.md)).
 
 ## Foreground, background and resume
 
 | Mode | What the docs say |
 |---|---|
-| Foreground | "block the main conversation until complete. Permission prompts are passed through to you as they come up." |
+| Foreground | "[block the main conversation until complete.](https://code.claude.com/docs/en/sub-agents) Permission prompts are passed through to you as they come up." |
 | Background | "run concurrently while you continue working." A permission prompt is surfaced "in your main session and names the subagent that is asking". The result reaches Claude "as a completion notification in a later turn." |
 
 Defaults, as of Nov 2026:
 
-- **Background is the default.** "With nothing configured, a subagent other than `web-fetch` that
-  Claude spawns from your main conversation starts in the background."
+- **Background is the default.** ["With nothing configured, a subagent other than `web-fetch` that
+  Claude spawns from your main conversation starts in the background."](https://code.claude.com/docs/en/sub-agents)
 - **Waiting needs a switch in interactive sessions.** In `claude -p` and the Agent SDK, Claude can
   wait for a subagent when you ask. In an interactive terminal, VS Code or desktop session it can
   wait only after fork mode is turned off with `CLAUDE_CODE_FORK_SUBAGENT=0`. Setting
   `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` makes Claude wait for every subagent.
-- **`Ctrl+B`** moves a waited-on subagent to the background. **`/tasks`** lists background work,
-  including subagents that have finished.
+- **`Ctrl+B`** moves a waited-on subagent to the background. **`/tasks`** [lists background work,
+  including subagents that have finished](https://code.claude.com/docs/en/commands).
 - **Fork mode is on** (from v2.1.302; in an interactive terminal from v2.1.232), so Claude may fork
-  a side task on its own. You start a fork yourself with `/subtask <task>`. (`/fork` is different:
+  a side task on its own. You [start a fork yourself](https://code.claude.com/docs/en/commands) with `/subtask <task>`. (`/fork` is different:
   it copies the conversation into a new background session.) To stop forks, add `"Agent(fork)"` to
   `permissions.deny`. A fork cannot spawn further forks.
-- **Limits.** Subagents can nest "up to three layers below the main conversation". With 20
+- **Limits.** Subagents can nest ["up to three layers below the main conversation"](https://code.claude.com/docs/en/sub-agents). With 20
   running, the next launch fails with `Concurrent subagent limit reached`.
 
-**Resuming.** "Each subagent invocation creates a new instance rather than continuing an earlier
-one. To continue an existing subagent's work, ask Claude to resume it." Nothing is lost: "Resumed
+**Resuming.** ["Each subagent invocation creates a new instance rather than continuing an earlier
+one. To continue an existing subagent's work, ask Claude to resume it."](https://code.claude.com/docs/en/sub-agents) Nothing is lost: "Resumed
 subagents retain their full conversation history, including all previous tool calls, results, and
 reasoning." Claude resumes one by sending a message to its ID or name with the `SendMessage` tool,
 so "resume the reviewer subagent and ask it to re-check invoice.py" is enough. One exception: "The
@@ -128,7 +128,7 @@ built-in Explore and Plan agents can finish without giving Claude an ID to resum
 
 | Agent | Purpose in the docs' words | Tools | Starts with |
 |---|---|---|---|
-| `Explore` | "A fast, read-only agent optimized for searching and analyzing codebases." Ask for **quick**, **medium** or **very thorough** | Read-only: "Write and Edit are denied" | No `CLAUDE.md`, no git status |
+| `Explore` | ["A fast, read-only agent optimized for searching and analyzing codebases."](https://code.claude.com/docs/en/sub-agents) Ask for **quick**, **medium** or **very thorough** | Read-only: "Write and Edit are denied" | No `CLAUDE.md`, no git status |
 | `Plan` | "A research agent used during plan mode to gather context before presenting a plan." | Read-only | No `CLAUDE.md`, no git status |
 | `general-purpose` | "A capable agent for complex, multi-step tasks that require both exploration and action." | "every tool available to subagents" | `CLAUDE.md` and git status |
 
@@ -140,7 +140,7 @@ fallback when a launch names no type. Others exist (`claude`, `statusline-setup`
 
 An agent definition is a Markdown file: YAML frontmatter on top, and the body is the agent's system
 prompt. Only `name` and `description` are required. You can write the file by hand or ask Claude to
-write it (`/agents` now prints a reminder to do that; up to v2.1.197 it opened an interactive interface).
+write it (`/agents` [now prints a reminder to do that](https://code.claude.com/docs/en/commands); up to v2.1.197 it opened an interactive interface).
 
 > **Note:** [Chapter 11](11-the-extension-model.md) helps you decide whether a job needs a subagent at all; [chapter 19](19-guide-write-a-subagent.md) builds one step by step, from a session-only `--agents` test to a linted, committed file.
 
@@ -163,7 +163,7 @@ directory wins. Plugin agents are namespaced (`my-plugin:agent`), so `:` is rese
 | Field | What it controls |
 |---|---|
 | `name`, `description` | Required. The identifier, and when Claude should delegate to it. Descriptions sit in context all the time, so keep them short |
-| `tools`, `disallowedTools` | Allowlist ("Inherits every tool available to subagents if omitted") and denylist, removed from the inherited or listed set |
+| `tools`, `disallowedTools` | Allowlist (["Inherits every tool available to subagents if omitted"](https://code.claude.com/docs/en/sub-agents)) and denylist, removed from the inherited or listed set |
 | `model` | `sonnet`, `opus`, `haiku`, `fable`, a full model ID, or `inherit` (as of Nov 2026) |
 | `effort`, `maxTurns` | Effort level while it runs; a cap on agentic turns |
 | `permissionMode` | Its permission mode, within the limits described above |
@@ -183,15 +183,15 @@ directory wins. Plugin agents are namespaced (`my-plugin:agent`), so `:` is rese
 
 - **Tools.** `tools: Read, Grep, Glob` gives a truly read-only agent. Adding `Bash` lets it run
   `git diff` and tests, but then it can change files through the shell.
-- **Model.** "By default, a subagent you define runs on the same model as the conversation that
-  starts it." Set `model: haiku` for cheap, high-volume search and keep a stronger model for
+- **Model.** ["By default, a subagent you define runs on the same model as the conversation that
+  starts it."](https://code.claude.com/docs/en/sub-agents) Set `model: haiku` for cheap, high-volume search and keep a stronger model for
   review or design. Extended thinking is inherited: "There is no per-subagent thinking setting."
-- **Isolation.** `isolation: worktree` gives the agent "an isolated copy of the repository". Mind
+- **Isolation.** `isolation: worktree` gives the agent ["an isolated copy of the repository"](https://code.claude.com/docs/en/sub-agents). Mind
   the base: "By default, the copy branches from your default branch rather than the parent
   session's `HEAD`", so unmerged work in your session is not in it. Instruction files still come
-  "from your main conversation, not from its worktree" ([chapter 25](25-parallel-work-worktrees-and-background-tasks.md)).
+  ["from your main conversation, not from its worktree"](https://code.claude.com/docs/en/worktrees#isolate-subagents-with-worktrees) ([chapter 25](25-parallel-work-worktrees-and-background-tasks.md)).
 - **Preloaded skills.** `skills:` injects each named skill in full, "not only the description", up
-  to "the first 32 distinct names". A skill with `disable-model-invocation: true` cannot be
+  to ["the first 32 distinct names"](https://code.claude.com/docs/en/sub-agents). A skill with `disable-model-invocation: true` cannot be
   preloaded ([chapter 15](15-skills.md)).
 
 ## A complete example: a read-only reviewer
@@ -243,13 +243,13 @@ Goal of the change: round invoice totals half-up to two decimals instead of trun
 
 You can also type `@agent-reviewer` followed by the task, or run a whole session as the agent with
 `claude --agent reviewer`. Because this reviewer has no `Bash`, it cannot run `git diff`, which is
-why the brief names the files. The docs' own reviewer example lists `Read, Grep, Glob, Bash` and
+why the brief names the files. The [docs' own reviewer example](https://code.claude.com/docs/en/sub-agents) lists `Read, Grep, Glob, Bash` and
 warns that it "can still change files through Bash". Pick the trade-off on purpose.
 
 ## Write a good delegation brief
 
-Claude writes the brief, but it can only pass on what it knows. Anthropic's own multi-agent
-write-up states the contract: "Each subagent needs an objective, an output format, guidance on the
+Claude writes the brief, but it can only pass on what it knows. Anthropic's own [multi-agent
+write-up](https://www.anthropic.com/research/multi-agent-research-system) states the contract: "Each subagent needs an objective, an output format, guidance on the
 tools and sources to use, and clear task boundaries." In practice that is four parts:
 
 ```text
@@ -294,19 +294,19 @@ flowchart TD
   D -->|"Yes"| S["Fresh-context subagent"]
 ```
 
-The docs say to stay in the main conversation when the task "needs frequent back-and-forth",
+The [docs say to stay in the main conversation](https://code.claude.com/docs/en/sub-agents) when the task "needs frequent back-and-forth",
 phases "share significant context", or it is "a quick, targeted change". What delegation costs:
 
-- **Tokens, and sometimes time.** "What they cost you is mostly tokens ... Sometimes it's time as
+- **Tokens, and sometimes time.** "[What they cost you is mostly tokens](https://code.claude.com/docs/en/best-practices) ... Sometimes it's time as
   well: a fresh subagent first has to gather context your conversation already had, so it can end
-  up *slower*". A fork avoids the re-gathering and shares the parent's prompt cache, so "a fork
-  costs less than a fresh subagent for tasks that need the same context."
-- **No quality bonus.** "Handing the same task to a subagent doesn't make the answer any better. A
+  up *slower*". A fork avoids the re-gathering and shares the parent's prompt cache, so ["a fork
+  costs less than a fresh subagent for tasks that need the same context."](https://code.claude.com/docs/en/sub-agents)
+- **No quality bonus.** "[Handing the same task to a subagent doesn't make the answer any better.](https://code.claude.com/docs/en/best-practices) A
   fresh reviewer does help, because it hasn't seen your reasoning".
-- **Context is no longer the reason.** The docs retired "Use subagents to protect your context
+- **Context is no longer the reason.** The [docs retired](https://code.claude.com/docs/en/best-practices) "Use subagents to protect your context
   window": with 1M-token windows, "Running out of context is rarely the problem anymore."
-- **Scale multiplies it.** Anthropic measured multi-agent systems at "about 15× more tokens than
-  chats" on research tasks, not coding tasks.
+- **Scale multiplies it.** Anthropic measured multi-agent systems at ["about 15× more tokens than
+  chats"](https://www.anthropic.com/research/multi-agent-research-system) on research tasks, not coding tasks.
 
 Coordinating many agents on one objective (task graphs, handoffs, integration) is the subject of
 [chapter 26](26-multi-agent-orchestration.md).
@@ -351,7 +351,7 @@ opens with worktree setup and `git remote -v` as step 0; the plugin also hands w
 | Claude will not wait for the result | Subagents start in the background; waiting is off while fork mode is on | Set `CLAUDE_CODE_FORK_SUBAGENT` to `0`, restart, then ask Claude to wait |
 | `Concurrent subagent limit reached` | 20 subagents are already running | Let some finish, or raise `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` |
 | `/rewind` did not undo the subagent's edits | Subagent edits are usually not in your checkpoints | Revert with git |
-| A worktree agent is missing your latest commits | The worktree branches from the default branch, not your `HEAD` | Merge and push first, or look at the `worktree.baseRef` setting (`"head"`) in the worktrees docs for your version |
+| A worktree agent is missing your latest commits | The worktree branches from the default branch, not your `HEAD` | Merge and push first, or look at the `worktree.baseRef` setting (`"head"`) in the [worktrees docs](https://code.claude.com/docs/en/worktrees#isolate-subagents-with-worktrees) for your version |
 | The subagent ended "waiting for…" or with no report | A long wait inside the subagent | Make workers synchronous; the parent does the waiting |
 
 ## Checklist

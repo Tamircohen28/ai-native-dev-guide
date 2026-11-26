@@ -37,11 +37,11 @@ flowchart LR
 ```
 
 This is the difference from `CLAUDE.md` ([chapter 8](08-claude-md-and-memory.md)), which loads in
-full every session. The docs: "Unlike CLAUDE.md content, a skill's body loads only when it's used,
+full every session. The docs: "Unlike CLAUDE.md content, [a skill's body loads only when it's used](https://code.claude.com/docs/en/skills),
 so long reference material costs almost nothing until you need it." Stage 1 is not free, though:
 "Every skill in the skill listing adds to your context on every turn."
 
-The docs say when to make one: "Create a skill when you keep pasting the same instructions,
+The docs say when to make one: "Create a skill when you [keep pasting the same instructions](https://code.claude.com/docs/en/skills),
 checklist, or multi-step procedure into chat, or when a section of CLAUDE.md has grown into a
 procedure rather than a fact." A short fact needed in most tasks stays in `CLAUDE.md`. A rule with
 zero exceptions belongs in a hook ([chapter 16](16-hooks.md)): a skill is text the model reads, so
@@ -59,15 +59,15 @@ nothing guarantees it is followed.
 | Plugin | `<plugin>/skills/<name>/SKILL.md` | Wherever the plugin is enabled, as `/plugin-name:skill-name` |
 | claude.ai account | Skills enabled for your account | Sessions signed in with that account |
 
-When two skills share a name: enterprise beats personal, and personal beats project. Plugin skills
+When two skills share a name: [enterprise beats personal](https://code.claude.com/docs/en/skills), and personal beats project. Plugin skills
 never collide because they are namespaced. A root skill and a nested skill with the same name both
 load. Claude Code watches the skill directories, so an edit to `SKILL.md` takes effect in the
-running session. If a new skill does not appear, run `/reload-skills`. `/skills` lists what is loaded.
+running session. If a new skill does not appear, run `/reload-skills`. `/skills` [lists what is loaded](https://code.claude.com/docs/en/commands).
 
 ## Custom slash commands are now skills
 
 Older tutorials treat "custom slash commands" and "skills" as two features. They are one. The docs:
-"Custom commands have been merged into skills. Your existing `.claude/commands/` files keep working."
+"Custom commands have been [merged into skills](https://code.claude.com/docs/en/skills). Your existing `.claude/commands/` files keep working."
 
 | You have | You type | Notes |
 |---|---|---|
@@ -77,13 +77,13 @@ Older tutorials treat "custom slash commands" and "skills" as two features. They
 
 - Claude can now invoke a command file on its own. Add `disable-model-invocation: true` to stop that.
 - Many built-in commands are skills too. As of Nov 2026, 25 entries in the commands reference are
-  marked "a bundled skill. It works like skills you write yourself: a prompt handed to Claude",
+  marked "[a bundled skill](https://code.claude.com/docs/en/commands). It works like skills you write yourself: a prompt handed to Claude",
   among them `/code-review`, `/simplify`, `/doctor`, `/batch`, `/loop` and `/verify`.
-- "A command is only recognized at the start of your message". Up to six skills can be chained there.
+- "A command is only [recognized at the start of your message](https://code.claude.com/docs/en/commands)". Up to six skills can be chained there.
 
 ## Frontmatter fields
 
-In Claude Code every field is optional and only `description` is recommended. Names are lowercase
+In Claude Code [every field is optional](https://code.claude.com/docs/en/skills) and only `description` is recommended. Names are lowercase
 with hyphens, except `when_to_use`. An unknown field is ignored without an error.
 
 | Field | What it controls |
@@ -108,13 +108,13 @@ with hyphens, except `when_to_use`. An unknown field is ignored without an error
 | `disable-model-invocation: true` | Yes | Not on its own | No |
 | `user-invocable: false` | No | Yes | Yes |
 
-Use the first switch for anything with side effects: "You don't want Claude deciding to deploy
+Use the first switch for anything with side effects: "You don't want [Claude deciding to deploy](https://code.claude.com/docs/en/skills)
 because your code looks ready." It also stops the skill from being preloaded into a subagent. Use
 the second switch for background knowledge that makes no sense as a command.
 
 ### Tool allowances and arguments
 
-`allowed-tools` "grants permission for the listed tools during the turn that invokes the skill".
+`allowed-tools` "[grants permission for the listed tools](https://code.claude.com/docs/en/skills) during the turn that invokes the skill".
 It uses permission-rule syntax, for example `Bash(git add *)`. Two limits matter. The grant "clears
 when you send your next message", and it is not a sandbox: "It does not restrict which tools are
 available". To take tools away while a skill runs, use `disallowed-tools`.
@@ -130,12 +130,12 @@ pick single arguments, and names listed in `arguments` become `$name`. If the bo
 
 `context: fork` starts a new subagent of the type named in `agent` (default `general-purpose`) and
 gives it the skill content as its prompt. The name misleads: the docs warn that such a skill
-"doesn't run in a fork of the current conversation". The subagent does not see your conversation,
+"doesn't run in [a fork of the current conversation](https://code.claude.com/docs/en/skills)". The subagent does not see your conversation,
 "so the skill's instructions have to stand on their own." It runs in the background unless you set
 `background: false`. With `agent: Explore` it also starts without your `CLAUDE.md` files. A
 read-only debugging skill in the author's plugin combines `context: fork`, `agent: Explore`,
 `model: sonnet` and `allowed-tools: [Read, Grep, Glob]`. The inverse also exists: an agent
-definition can preload skills with its `skills` field, and then the full body is injected at
+definition [can preload skills](https://code.claude.com/docs/en/sub-agents#preload-skills-into-subagents) with its `skills` field, and then the full body is injected at
 startup ([chapter 14](14-subagents.md)).
 
 ## Write a description that triggers reliably and cheaply
@@ -152,28 +152,28 @@ description: "Use when the user asks for release notes, a changelog entry or 'wh
 ```
 
 1. **Say what it does and when to use it.** Lead with the main use case: the combined
-   `description` and `when_to_use` text is cut off at 1,536 characters in the listing.
+   `description` and `when_to_use` text is [cut off at 1,536 characters](https://code.claude.com/docs/en/skills) in the listing.
 2. **Use the words people type.** The author's plugin gives every skill the same shape: `Use when
    <situation>`, quoted trigger phrases, then a `Not for …` boundary that names the sibling skill.
-3. **Keep it short.** When the listing overflows its budget, descriptions are dropped, least-used skills first.
+3. **Keep it short.** When the listing overflows its budget, [descriptions are dropped, least-used skills first](https://code.claude.com/docs/en/skills).
 4. **Test near-misses.** The plugin's guide asks for 20 trigger queries before tuning a description:
    8 to 10 that should trigger and 8 to 10 that should not, and they must be "genuine near-misses".
 
-To see the cost, `/skills` lists every skill (`t` sorts by token count) and `/skill-doctor` reports
-per-skill context cost and usage. To cut it without editing a file, set the skill to `"name-only"`
+To see the cost, `/skills` lists every skill (`t` sorts by token count) and `/skill-doctor` [reports
+per-skill context cost and usage](https://code.claude.com/docs/en/commands). To cut it without editing a file, set the skill to `"name-only"`
 or `"off"` under `skillOverrides` in your settings. Plugin skills are managed through `/plugin`.
 
 ## Structure the body, references and scripts
 
-- **Keep `SKILL.md` under 500 lines.** Once loaded, the body "stays in context across turns, so
+- **Keep `SKILL.md` under 500 lines.** Once loaded, the body "[stays in context across turns](https://code.claude.com/docs/en/skills), so
   every line is a recurring token cost."
 - **Put the most important rules first.** After compaction, invoked skill bodies are re-attached
-  "capped at 5,000 tokens per skill and 25,000 tokens total; oldest dropped first".
-- **Write standing instructions.** Claude Code "does not re-read the skill file on later turns".
+  "[capped at 5,000 tokens per skill](https://code.claude.com/docs/en/context-window#what-survives-compaction) and 25,000 tokens total; oldest dropped first".
+- **Write standing instructions.** Claude Code "[does not re-read the skill file](https://code.claude.com/docs/en/skills) on later turns".
   "Run the tests after every edit" keeps working; "Run the tests" is done once.
 - **Move depth into files.** Long material goes in `references/`, deterministic steps in
   `scripts/`. Link each file from the body with one line saying what it holds and when to read it.
-- **Use `${CLAUDE_SKILL_DIR}` for paths.** It expands to the skill's own directory in the body and
+- **Use `${CLAUDE_SKILL_DIR}` for paths.** It [expands to the skill's own directory](https://code.claude.com/docs/en/skills) in the body and
   in `allowed-tools`, so a bundled script runs from any working directory without a prompt.
 
 A body order that works in the author's plugin: why the skill exists, a numbered workflow, hard
@@ -253,29 +253,29 @@ Run it with `/release-notes`, with `/release-notes v1.2.0 HEAD`, or by asking th
 
 ## Test and evaluate a skill
 
-The docs separate two questions: "Seeing a skill trigger tells you Claude found it, not that it did
+The docs separate two questions: "[Seeing a skill trigger](https://code.claude.com/docs/en/skills) tells you Claude found it, not that it did
 what you intended." Check triggering and output quality separately, and compare against a baseline.
 
 1. Confirm the skill is loaded with `/skills`.
-2. Open a **fresh** session and ask in natural words. A fresh session matters "because leftover
-   context from authoring the skill will mask gaps in the written instructions."
+2. Open a **fresh** session and ask in natural words. A fresh session matters "because [leftover
+   context from authoring](https://code.claude.com/docs/en/skills) the skill will mask gaps in the written instructions."
 3. Run it directly with `/name` and arguments.
 4. Try the near-misses. The skill should stay quiet.
 5. Turn the skill off and repeat the same prompts. For a personal or project skill, set
    `"skillOverrides": { "release-notes": "off" }` in `.claude/settings.local.json`.
 
-Write the test prompts first. Anthropic's skill-authoring guide says "Create evaluations BEFORE
-writing extensive documentation" and suggests three scenarios that show the gap without the skill.
-Its evals guide adds that "20-50 simple tasks drawn from real failures is a great start."
+Write the test prompts first. Anthropic's skill-authoring guide says "[Create evaluations BEFORE
+writing extensive documentation](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)" and suggests three scenarios that show the gap without the skill.
+Its evals guide adds that "[20-50 simple tasks drawn from real failures](https://www.anthropic.com/research/demystifying-evals-for-ai-agents) is a great start."
 
 For a skill that ships in a plugin ([chapter 17](17-plugins-and-marketplaces.md)), `claude plugin
-eval` automates the comparison. What the docs confirm, as of Nov 2026:
+eval` [automates the comparison](https://code.claude.com/docs/en/plugin-evals). What the docs confirm, as of Nov 2026:
 
 | Point | Detail |
 |---|---|
 | Requires | Claude Code v2.1.269 or later |
 | Suite | An `evals/` directory inside the plugin. Each case is a prompt plus graders (regex, tool-use, LLM rubric, baseline and others) |
-| Runs | "each case runs three times by default" |
+| Runs | "[each case runs three times by default](https://code.claude.com/docs/en/plugin-evals)" |
 | Baseline | Each case is rerun without the plugin, because "Claude might do as well without it." The difference is the plugin's contribution |
 | Gate | `--threshold` (default 1.0), exit code 1 on failure, a self-contained `report.html` |
 
@@ -292,24 +292,24 @@ before it goes into CI. The `skill-creator` plugin compares a single skill with 
 
 ## The cross-tool Agent Skills standard
 
-`SKILL.md` is not only a Claude Code format. The Agent Skills specification says it "was originally
-developed by Anthropic, released as an open standard", and other agents read the same folders
+`SKILL.md` is not only a Claude Code format. The Agent Skills specification says it "[was originally
+developed by Anthropic](https://agentskills.io/), released as an open standard", and other agents read the same folders
 (as seen on 2026-11-25):
 
 | Tool | Skill directories it reads |
 |---|---|
 | Claude Code | `.claude/skills/`, `~/.claude/skills/`, plugins |
-| Cursor | `.cursor/skills/`, `.agents/skills/`, and also `.claude/skills/` and `.codex/skills/` |
-| Codex CLI | `.agents/skills` (working directory, parents, repo root), `~/.agents/skills` |
-| Gemini CLI | `.gemini/skills/` or `.agents/skills/` |
-| OpenCode | `.opencode/skills`, plus `.claude/skills` and `.agents/skills` |
-| GitHub Copilot | `.github/skills`, `.claude/skills`, `.agents/skills` |
+| [Cursor](https://cursor.com/docs/context/skills) | `.cursor/skills/`, `.agents/skills/`, and also `.claude/skills/` and `.codex/skills/` |
+| [Codex CLI](https://learn.chatgpt.com/docs/build-skills) | `.agents/skills` (working directory, parents, repo root), `~/.agents/skills` |
+| [Gemini CLI](https://geminicli.com/docs/cli/skills/) | `.gemini/skills/` or `.agents/skills/` |
+| [OpenCode](https://opencode.ai/docs/skills/) | `.opencode/skills`, plus `.claude/skills` and `.agents/skills` |
+| [GitHub Copilot](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills) | `.github/skills`, `.claude/skills`, `.agents/skills` |
 
 Three rules keep a skill portable:
 
-- **Always set `name` and `description`.** Claude Code treats them as optional; the standard requires both.
+- **Always set `name` and `description`.** Claude Code treats them as optional; [the standard requires both](https://agentskills.io/specification).
 - **Stay inside the standard's fields when you upload.** They are `name`, `description`, `license`,
-  `compatibility`, `metadata` and `allowed-tools`. A claude.ai upload with a Claude Code field such
+  `compatibility`, `metadata` and `allowed-tools`. [A claude.ai upload](https://code.claude.com/docs/en/skills) with a Claude Code field such
   as `argument-hint` fails with `Unexpected key(s) in SKILL.md frontmatter`.
 - **Do not count on automatic triggering elsewhere.** The author's capability registry measures it as
   native on Claude Code, partial on Cursor and unknown on the rest. Expect to type the name there.

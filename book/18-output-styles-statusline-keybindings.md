@@ -22,7 +22,7 @@ flowchart LR
   YOU["You"] -->|"keys and voice"| UI
 ```
 
-Only the output style reaches the model. The status line and the keybindings are local: the status line script "does not consume API tokens", and a keybinding never appears in the conversation.
+Only the output style reaches the model. The status line and the keybindings are local: the status line script ["does not consume API tokens"](https://code.claude.com/docs/en/statusline), and a keybinding never appears in the conversation.
 
 ## Output styles
 
@@ -30,18 +30,18 @@ Only the output style reaches the model. The status line and the keybindings are
 
 An **output style** is a named set of instructions about how Claude should respond: tone, format, how much it explains. Four documented properties decide when a style is the right tool:
 
-- It applies for the whole session and still applies after a compaction ([chapter 10](10-plan-mode-checkpoints-and-context-management.md)).
-- A custom style drops Claude Code's built-in software-engineering instructions unless you set `keep-coding-instructions: true`.
-- It reaches the main conversation and forks only. The docs: other subagents "run their own system prompt, so styles don't change how they respond".
-- It is guidance, not enforcement: "It doesn't guarantee that something always happens". For a guarantee, use a hook ([chapter 16](16-hooks.md)).
+- It applies for the whole session and [still applies after a compaction](https://code.claude.com/docs/en/context-window) ([chapter 10](10-plan-mode-checkpoints-and-context-management.md)).
+- A custom style drops [Claude Code's built-in software-engineering instructions](https://code.claude.com/docs/en/output-styles) unless you set `keep-coding-instructions: true`.
+- It reaches the main conversation and forks only. The docs: other subagents ["run their own system prompt, so styles don't change how they respond"](https://code.claude.com/docs/en/output-styles).
+- It is guidance, not enforcement: ["It doesn't guarantee that something always happens"](https://code.claude.com/docs/en/output-styles). For a guarantee, use a hook ([chapter 16](16-hooks.md)).
 
 ### Built-in styles
 
 | Style | What the docs say (as of Nov 2026) |
 |---|---|
 | `default` | The standard behaviour |
-| `Proactive` | Starts work right away and makes reasonable assumptions instead of asking about routine decisions. It does not change your permission mode |
-| `Concise` | Leads with the result and leaves out preamble, narration and recaps (v2.1.237 or later) |
+| `Proactive` | [Starts work right away](https://code.claude.com/docs/en/output-styles) and makes reasonable assumptions instead of asking about routine decisions. It does not change your permission mode |
+| `Concise` | Leads with the result and leaves out preamble, narration and recaps ([v2.1.237 or later](https://code.claude.com/docs/en/output-styles)) |
 | `Explanatory` | Adds `★ Insight` blocks to its replies |
 | `Learning` | Leaves `TODO(human)` markers for you to fill in |
 
@@ -52,13 +52,13 @@ An **output style** is a named set of instructions about how Claude should respo
 /output-style Explanatory    switch to one
 ```
 
-The command needs v2.1.269 or later; `/config` offers the same choice. The selection is saved as `outputStyle` in `.claude/settings.local.json`:
+The command [needs v2.1.269 or later](https://code.claude.com/docs/en/output-styles); `/config` offers the same choice. The selection is saved as `outputStyle` in `.claude/settings.local.json`:
 
 ```json
 { "outputStyle": "Explanatory" }
 ```
 
-> **Warning:** The setting value is case-sensitive (the `/output-style` command is not), and a name that does not match silently gives you Default. If a style seems to do nothing, check the spelling before anything else.
+> **Warning:** The setting value [is case-sensitive](https://code.claude.com/docs/en/output-styles) (the `/output-style` command is not), and a name that does not match silently gives you Default. If a style seems to do nothing, check the spelling before anything else.
 
 ### Write a custom style
 
@@ -84,7 +84,7 @@ Lead with the result, then the evidence, then the next step. No preamble.
 
 Save it as `~/.claude/output-styles/receipts.md`, start a new session (the terminal reads style files only when Claude Code starts), then run `/output-style Receipts`.
 
-The frontmatter keys are all optional: `name`, `description`, `keep-coding-instructions` (default `false`) and `force-for-plugin` (plugin styles only: `true` applies the style whenever the plugin is enabled and overrides the user's `outputStyle`). A plugin ships its styles in an `output-styles/` folder ([chapter 17](17-plugins-and-marketplaces.md)).
+The [frontmatter keys are all optional](https://code.claude.com/docs/en/output-styles): `name`, `description`, `keep-coding-instructions` (default `false`) and `force-for-plugin` (plugin styles only: `true` applies the style whenever the plugin is enabled and overrides the user's `outputStyle`). A plugin [ships its styles](https://code.claude.com/docs/en/plugins/manifest-reference) in an `output-styles/` folder ([chapter 17](17-plugins-and-marketplaces.md)).
 
 > **Warning:** Without `keep-coding-instructions: true`, your style replaces the built-in coding instructions. That suits a style for writing or research work. For a coding style it is almost never what you want.
 
@@ -95,7 +95,7 @@ The frontmatter keys are all optional: `name`, `description`, `keep-coding-instr
 | A different voice or format in every reply | Output style | Applies all session and survives compaction |
 | Project facts and conventions | CLAUDE.md | Loaded for every task in that project ([chapter 08](08-claude-md-and-memory.md)) |
 | A procedure that is needed only sometimes | Skill | Its body loads only when it is used ([chapter 15](15-skills.md)) |
-| Something that must happen every time | Hook | A style "doesn't guarantee that something always happens" |
+| Something that must happen every time | Hook | A style ["doesn't guarantee that something always happens"](https://code.claude.com/docs/en/output-styles) |
 | The same behaviour inside subagents | The subagent's own definition | Styles do not reach non-fork subagents ([chapter 14](14-subagents.md)) |
 
 ## Status line
@@ -104,7 +104,7 @@ The **status line** is the text under the prompt. Claude Code produces it by run
 
 ### Configure it
 
-The quick way is to describe what you want: `/statusline` "accepts natural language instructions" and generates a script file in `~/.claude/`. The manual way is a `statusLine` object in a settings file:
+The quick way is to describe what you want: `/statusline` ["accepts natural language instructions"](https://code.claude.com/docs/en/statusline) and generates a script file in `~/.claude/`. The manual way is a `statusLine` object in a settings file:
 
 ```json
 {
@@ -116,16 +116,16 @@ The quick way is to describe what you want: `/statusline` "accepts natural langu
 }
 ```
 
-`statusLine` takes the object form shown above. Its optional keys are `padding` (default `0`), `refreshInterval` (seconds, minimum `1`) and `hideVimModeIndicator`. How the command runs:
+`statusLine` takes the object form shown above. Its [optional keys](https://code.claude.com/docs/en/statusline) are `padding` (default `0`), `refreshInterval` (seconds, minimum `1`) and `hideVimModeIndicator`. How the command runs:
 
-- It gets one JSON object on stdin and prints text on stdout. Several lines, ANSI colours and OSC 8 links are supported. The terminal size is in `COLUMNS` and `LINES`.
-- It runs locally and "does not consume API tokens".
-- Updates are debounced at 300ms, and a run that is still in flight is cancelled by a newer one. Keep the script fast.
-- It runs outside the sandbox. Sandboxing covers Bash, PowerShell and Monitor commands, and the docs list the status line command among the things it does not cover. Treat a status line script from someone else like any other script that runs with your rights ([chapter 29](29-security-and-guardrails.md)).
+- It gets one JSON object on stdin and prints text on stdout. Several lines, ANSI colours and [OSC 8 links are supported](https://code.claude.com/docs/en/statusline). The terminal size is in `COLUMNS` and `LINES`.
+- It runs locally and ["does not consume API tokens"](https://code.claude.com/docs/en/statusline).
+- Updates are [debounced at 300ms](https://code.claude.com/docs/en/statusline), and a run that is still in flight is cancelled by a newer one. Keep the script fast.
+- It runs outside the sandbox. Sandboxing covers Bash, PowerShell and Monitor commands, and [the docs list the status line command](https://code.claude.com/docs/en/sandboxing) among the things it does not cover. Treat a status line script from someone else like any other script that runs with your rights ([chapter 29](29-security-and-guardrails.md)).
 
 ### What the script receives
 
-A trimmed example. The field names are from the docs; the values are illustrative.
+A trimmed example. The [field names are from the docs](https://code.claude.com/docs/en/statusline); the values are illustrative.
 
 ```json
 {
@@ -197,7 +197,7 @@ Three rules keep a status line healthy. Keep it fast, because it runs again and 
 
 ## Keybindings
 
-`/keybindings` opens `~/.claude/keybindings.json`, creating it if needed. Changes apply without a restart.
+`/keybindings` opens `~/.claude/keybindings.json`, creating it if needed. [Changes apply without a restart](https://code.claude.com/docs/en/keybindings).
 
 ```json
 {
@@ -212,24 +212,24 @@ Three rules keep a status line healthy. Keep it fast, because it runs again and 
 
 | Entry | Effect |
 |---|---|
-| `"ctrl+e": "chat:externalEditor"` | Opens the prompt in your editor. This is the docs' own example; the default keys are `Ctrl+G` and `Ctrl+X Ctrl+E`. |
-| `"ctrl+s": null` | `null` unbinds a key. By default `Ctrl+S` stashes the prompt text. |
-| `"ctrl+k ctrl+n": "chat:newline"` | A chord: two key presses separated by a space, pressed within 3 seconds. Handy where `Shift+Enter` is not available. A chord reserves its first key, and `Ctrl+K` alone deletes to the end of the line by default, so pick another prefix if you use that. |
+| `"ctrl+e": "chat:externalEditor"` | Opens the prompt in your editor. This is [the docs' own example](https://code.claude.com/docs/en/keybindings); the default keys are `Ctrl+G` and `Ctrl+X Ctrl+E`. |
+| `"ctrl+s": null` | `null` unbinds a key. By default `Ctrl+S` [stashes the prompt text](https://code.claude.com/docs/en/interactive-mode). |
+| `"ctrl+k ctrl+n": "chat:newline"` | A chord: two key presses separated by a space, [pressed within 3 seconds](https://code.claude.com/docs/en/keybindings). Handy where `Shift+Enter` is not available. A chord reserves its first key, and `Ctrl+K` alone deletes to the end of the line by default, so pick another prefix if you use that. |
 | `"ctrl+k ctrl+t": "app:toggleTranscript"` | A chord for the transcript viewer, which is `Ctrl+O` by default. |
 
-> **Note:** This book checked four action names against the keybindings page (as of Nov 2026): `chat:externalEditor`, `chat:newline` and `chat:submit` belong to the `Chat` context, and `app:toggleTranscript` to `Global`. The page lists every other action with its context; look an action up there before you bind it. Validation problems are written to the debug log, so start with `claude --debug` when a binding does nothing.
+> **Note:** This book checked four action names against [the keybindings page](https://code.claude.com/docs/en/keybindings) (as of Nov 2026): `chat:externalEditor`, `chat:newline` and `chat:submit` belong to the `Chat` context, and `app:toggleTranscript` to `Global`. The page lists every other action with its context; look an action up there before you bind it. Validation problems are written to the debug log, so start with `claude --debug` when a binding does nothing.
 
 Rules to know before you edit:
 
-- **Contexts** scope a binding to one part of the UI. They include `Global`, `Chat`, `Autocomplete`, `Settings`, `Confirmation`, `Transcript`, `HistorySearch`, `Task`, `Select`, `Plugin`, `Agents` and `Scroll`.
-- **Reserved keys** cannot be rebound: `Ctrl+C`, `Ctrl+D`, `Ctrl+M`, `Ctrl+[`, `Ctrl+I`, `Ctrl+H` and Caps Lock.
-- **Not remappable here:** vim keys, and the word-editing shortcuts such as `Ctrl+W`, for which the file "has no actions".
+- **Contexts** [scope a binding to one part of the UI](https://code.claude.com/docs/en/keybindings). They include `Global`, `Chat`, `Autocomplete`, `Settings`, `Confirmation`, `Transcript`, `HistorySearch`, `Task`, `Select`, `Plugin`, `Agents` and `Scroll`.
+- **Reserved keys** [cannot be rebound](https://code.claude.com/docs/en/keybindings): `Ctrl+C`, `Ctrl+D`, `Ctrl+M`, `Ctrl+[`, `Ctrl+I`, `Ctrl+H` and Caps Lock.
+- **Not remappable here:** vim keys, and the word-editing shortcuts such as `Ctrl+W`, for which the file ["has no actions"](https://code.claude.com/docs/en/interactive-mode).
 
-Know the defaults before you change them: press `?` on an empty prompt to toggle the shortcut help panel. The ones you will meet most are `Ctrl+R` (search command history), `Ctrl+B` (move running commands and agents to the background; tmux users press it twice), `Shift+Tab` (cycle permission modes) and `Esc` twice on an empty prompt (the rewind menu). [Chapter 07](07-cli-slash-commands-and-shortcuts.md) has the full list.
+Know the defaults before you change them: press `?` on an empty prompt to [toggle the shortcut help panel](https://code.claude.com/docs/en/interactive-mode). The ones you will meet most are `Ctrl+R` (search command history), `Ctrl+B` (move running commands and agents to the background; tmux users press it twice), `Shift+Tab` (cycle permission modes) and `Esc` twice on an empty prompt (the rewind menu). [Chapter 07](07-cli-slash-commands-and-shortcuts.md) has the full list.
 
 ## Terminal setup, vim mode and voice
 
-**Multiline prompts.** `Ctrl+J`, or `\` followed by `Enter`, works in every terminal. `Shift+Enter` works natively in Ghostty, Kitty, iTerm2, WezTerm, Warp and Windows Terminal 1.25 or later. Run `/terminal-setup` once in VS Code, Cursor, Devin Desktop, Alacritty before 0.16 and Zed. Inside tmux, add these lines to `~/.tmux.conf`:
+**Multiline prompts.** `Ctrl+J`, or `\` followed by `Enter`, [works in every terminal](https://code.claude.com/docs/en/terminal-config). `Shift+Enter` works natively in Ghostty, Kitty, iTerm2, WezTerm, Warp and Windows Terminal 1.25 or later. Run `/terminal-setup` once in VS Code, Cursor, Devin Desktop, Alacritty before 0.16 and Zed. Inside tmux, add these lines to `~/.tmux.conf`:
 
 ```text
 set -g allow-passthrough on
@@ -238,21 +238,21 @@ set -s extended-keys on
 set -as terminal-features 'xterm*:extkeys'
 ```
 
-The last two lines enable `Shift+Enter`; passthrough lets notifications out of tmux. For an audible signal when Claude needs you, set `{"preferredNotifChannel": "terminal_bell"}` in settings.
+The last two lines enable `Shift+Enter`; passthrough lets notifications out of tmux. For [an audible signal when Claude needs you](https://code.claude.com/docs/en/terminal-config), set `{"preferredNotifChannel": "terminal_bell"}` in settings.
 
-**Vim mode.** Turn it on in `/config` under Editor mode, or in `~/.claude/settings.json`:
+**Vim mode.** [Turn it on](https://code.claude.com/docs/en/interactive-mode) in `/config` under Editor mode, or in `~/.claude/settings.json`:
 
 ```json
 { "editorMode": "vim", "vimInsertModeRemaps": { "jj": "<Esc>" } }
 ```
 
-- It supports "a subset of NORMAL- and VISUAL-mode motions and operators". "Block-wise visual mode with `Ctrl+V` is not supported".
+- It supports ["a subset of NORMAL- and VISUAL-mode motions and operators"](https://code.claude.com/docs/en/interactive-mode). "Block-wise visual mode with `Ctrl+V` is not supported".
 - `Enter` still submits in INSERT mode. For a newline use `o` or `O` in NORMAL mode, or `Ctrl+J`.
-- The `/vim` command was removed in v2.1.92. Vim keys are not remappable through the keybindings file. `vimInsertModeRemaps` is read only from user settings, `--settings` and managed settings.
+- The `/vim` command was [removed in v2.1.92](https://code.claude.com/docs/en/commands). Vim keys are not remappable through the keybindings file. `vimInsertModeRemaps` is read only from user settings, `--settings` and managed settings.
 
-**Voice.** `/voice hold`, `/voice tap` and `/voice off` control dictation; hold `Space` to record. The setting is `{"voice": {"enabled": true, "mode": "tap"}}`. Voice requires a Claude.ai account (not an API key, Bedrock, Agent Platform or Foundry) and does not work in SSH or cloud sessions. Dictation "does not consume Claude messages or tokens".
+**Voice.** `/voice hold`, `/voice tap` and `/voice off` control dictation; hold `Space` to record. The setting is `{"voice": {"enabled": true, "mode": "tap"}}`. Voice requires a Claude.ai account (not an API key, Bedrock, Agent Platform or Foundry) and does not work in SSH or cloud sessions. Dictation ["does not consume Claude messages or tokens"](https://code.claude.com/docs/en/voice-dictation).
 
-> **Note:** Voice audio is streamed to Anthropic for transcription. Check your employer's policy before you dictate at work.
+> **Note:** Voice audio is [streamed to Anthropic for transcription](https://code.claude.com/docs/en/voice-dictation). Check your employer's policy before you dictate at work.
 
 ## From the field
 
@@ -280,7 +280,7 @@ These examples describe one developer's machine, surveyed on 2026-11-25. They sh
 |---|---|---|
 | `outputStyle` is set but replies look like the default | The value is case-sensitive; a non-matching name silently gives Default | Copy the exact name from `/output-style` |
 | A custom style made Claude worse at coding | Custom styles drop the built-in software-engineering instructions | Add `keep-coding-instructions: true` |
-| A style rule is followed most of the time, not always | A style "doesn't guarantee that something always happens" | Move must-happen rules to a hook |
+| A style rule is followed most of the time, not always | A style ["doesn't guarantee that something always happens"](https://code.claude.com/docs/en/output-styles) | Move must-happen rules to a hook |
 | A subagent ignores the style | Styles do not affect subagents, except forks | Put the instruction in the subagent's definition |
 | The status line is blank or shows `null` | The script failed, or a field is absent or `null` at that moment | Run the script by hand with sample JSON; add `jq` fallbacks; check `chmod +x` |
 | The status line lags behind the session | The script is slow, and a newer update cancels a run still in flight | Remove slow commands such as network calls; cache anything expensive in a file |

@@ -4,11 +4,11 @@ After this chapter you can read a Model Context Protocol exchange on the wire an
 
 ## Mental model
 
-**The problem.** A coding agent is only as useful as the systems it can reach: the issue tracker, the database, the browser, your internal API. Without a shared protocol, every AI application needs its own adapter for every system, and each adapter is written again for the next application. The **Model Context Protocol (MCP)** replaces that with one contract. You wrap a system once as an *MCP server*, and every application that speaks MCP can use it. MCP has three roles:
+**The problem.** A coding agent is only as useful as the systems it can reach: the issue tracker, the database, the browser, your internal API. Without a shared protocol, every AI application needs its own adapter for every system, and each adapter is written again for the next application. The **Model Context Protocol (MCP)** replaces that with one contract. You wrap a system once as an *MCP server*, and every application that speaks MCP can use it. [MCP has three roles](https://modelcontextprotocol.io/docs/learn/architecture):
 
 | Role | What it is | Example |
 |---|---|---|
-| **Host** | The AI application (the figure labels it *Application*). It coordinates and manages one or more MCP clients | Claude Code, Claude Desktop, an IDE |
+| **Host** | The AI application (the figure labels it *Application*). It [coordinates and manages one or more MCP clients](https://modelcontextprotocol.io/docs/learn/architecture) | Claude Code, Claude Desktop, an IDE |
 | **Client** | A component inside the host that holds the connection to one server. The host creates one client per server | Created by the host; you never write it |
 | **Server** | A program that provides context to clients. It runs on your machine or remotely | A browser-automation server, an issue-tracker server, your own |
 
@@ -29,8 +29,8 @@ flowchart LR
 Three ideas carry the rest of the chapter:
 
 1. **The model never talks to a server.** The model asks for a tool call, the host decides whether to allow it, the client sends the message, and the result returns to the model as text in its context window (see [chapter 3](03-the-agentic-loop-and-tool-use.md)).
-2. **Messages and transport are separate layers.** The *data layer* defines the messages: discovery, tools, resources, prompts, notifications. The *transport layer* defines how the bytes move. The spec says "Protocol semantics are identical on every transport".
-3. **Each request stands alone.** Since revision 2026-07-28 there is no handshake and no session. Every request carries what the server needs to process it.
+2. **Messages and transport are separate layers.** The *data layer* defines the messages: discovery, tools, resources, prompts, notifications. The *transport layer* defines how the bytes move. The spec says ["Protocol semantics are identical on every transport"](https://modelcontextprotocol.io/specification/latest/basic/transports).
+3. **Each request stands alone.** Since revision 2026-07-28 [there is no handshake and no session](https://modelcontextprotocol.io/specification/2026-07-28/changelog). Every request carries what the server needs to process it.
 
 ## Three primitives, three owners
 
@@ -38,15 +38,15 @@ A server can offer three kinds of thing, called *primitives*. They differ in who
 
 | Primitive | Who decides | What it is | Methods | In Claude Code ([chapter 13](13-mcp-in-practice.md)) |
 |---|---|---|---|---|
-| **Tools** | The model ("model-controlled") | Functions the model calls to act or fetch data | `tools/list`, `tools/call` | `mcp__<server>__<tool>` |
-| **Resources** | The application ("application-driven") | Data with a URI that the client attaches as context | `resources/list`, `resources/read`, `resources/templates/list` | `@server:protocol://resource/path` |
+| **Tools** | The model (["model-controlled"](https://modelcontextprotocol.io/specification/latest/server/tools)) | Functions the model calls to act or fetch data | `tools/list`, `tools/call` | `mcp__<server>__<tool>` |
+| **Resources** | The application (["application-driven"](https://modelcontextprotocol.io/specification/2026-07-28/server/resources)) | Data with a URI that the client attaches as context | `resources/list`, `resources/read`, `resources/templates/list` | `@server:protocol://resource/path` |
 | **Prompts** | The user ("user-controlled") | Templates the user picks explicitly, typically as slash commands | `prompts/list`, `prompts/get` | `/servername:promptname` |
 
-The control column is design intent: the spec adds that the protocol "does not mandate any specific user interaction model", so each host decides how to surface each primitive. Clients offer one feature back to servers: **elicitation**, where a server asks the user for more input. Two older client features, *roots* and *sampling*, are deprecated as of 2026-07-28. They still work during the deprecation window, but do not build new servers on them.
+The control column is design intent: [the spec adds](https://modelcontextprotocol.io/specification/latest/server/tools) that the protocol "does not mandate any specific user interaction model", so each host decides how to surface each primitive. Clients offer one feature back to servers: **elicitation**, [where a server asks the user for more input](https://modelcontextprotocol.io/docs/learn/architecture). Two older client features, *roots* and *sampling*, [are deprecated as of 2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28/changelog). They still work during the deprecation window, but do not build new servers on them.
 
 ## Messages are JSON-RPC
 
-Every MCP message is a JSON-RPC 2.0 object encoded as UTF-8. JSON-RPC is a small standard for calling a named method on another program with JSON messages. There are three shapes:
+Every MCP message is a JSON-RPC 2.0 object [encoded as UTF-8](https://modelcontextprotocol.io/specification/latest/basic/transports). JSON-RPC is a small standard for calling a named method on another program with JSON messages. There are three shapes:
 
 | Shape | `id` | `method` | Who sends it |
 |---|---|---|---|
@@ -54,7 +54,7 @@ Every MCP message is a JSON-RPC 2.0 object encoded as UTF-8. JSON-RPC is a small
 | Response (`result` or `error`) | same as the request | no | The server only |
 | Notification | no | yes | Either side; no reply is expected |
 
-The one-way rule is new in 2026-07-28: "servers do not initiate JSON-RPC requests and clients do not send JSON-RPC responses". A complete request looks like this (from the spec):
+The one-way rule is new in 2026-07-28: ["servers do not initiate JSON-RPC requests and clients do not send JSON-RPC responses"](https://modelcontextprotocol.io/specification/latest/basic/transports). A complete request looks like this (from the spec):
 
 ```json
 {
@@ -72,14 +72,14 @@ The one-way rule is new in 2026-07-28: "servers do not initiate JSON-RPC request
 }
 ```
 
-The `_meta` block is what makes the request stand alone. Protocol version and client capabilities are required on every request; client identity is recommended. The spec's own examples leave `_meta` out for brevity, and so do the shorter examples below. Real requests always include it.
+The `_meta` block is what makes the request stand alone. [Protocol version and client capabilities are required on every request](https://modelcontextprotocol.io/specification/2026-07-28/changelog); client identity is recommended. The spec's own examples leave `_meta` out for brevity, and so do the shorter examples below. Real requests always include it.
 
 ## Two transports: stdio and Streamable HTTP
 
 | | stdio | Streamable HTTP |
 |---|---|---|
 | Who starts the server | The client launches it as a subprocess | It already runs on its own and serves many clients |
-| Framing | One JSON-RPC message per line on `stdin`/`stdout`, no embedded newlines | Each client message is its own HTTP POST to a single MCP endpoint |
+| Framing | One JSON-RPC message per line on `stdin`/`stdout`, no embedded newlines | Each client message is [its own HTTP POST to a single MCP endpoint](https://modelcontextprotocol.io/specification/latest/basic/transports) |
 | Reply | A line on `stdout` | `application/json` (one object) or `text/event-stream` (a stream scoped to that request: progress notifications, then the response) |
 | Request metadata | In the body only | In the body, mirrored into headers `MCP-Protocol-Version`, `Mcp-Method`, `Mcp-Name` |
 | Cancelling | The client sends `notifications/cancelled` | The client closes the response stream |
@@ -99,25 +99,25 @@ Mcp-Name: get_weather
 ```
 
 - **stdio:** "The server MUST NOT write anything to its `stdout` that is not a valid MCP message." Logs go to `stderr`. One stray `print` corrupts the stream.
-- **HTTP:** the body is the source of truth. If a header disagrees with it, the server rejects the request with `400` and JSON-RPC error `-32020` (`HeaderMismatch`). Servers MUST validate the `Origin` header and SHOULD bind to localhost when they run locally, to block DNS-rebinding attacks.
-- **"SSE" means two things.** The old *HTTP+SSE transport* (two endpoints, from 2024-11-05) is deprecated. Server-Sent Events as a *response format* inside Streamable HTTP is current.
+- **HTTP:** the body is the source of truth. If a header disagrees with it, the server rejects the request with `400` and JSON-RPC error `-32020` (`HeaderMismatch`). [Servers MUST validate the](https://modelcontextprotocol.io/specification/latest/basic/transports) `Origin` header and SHOULD bind to localhost when they run locally, to block DNS-rebinding attacks.
+- **"SSE" means two things.** The old *HTTP+SSE transport* (two endpoints, from 2024-11-05) [is deprecated](https://modelcontextprotocol.io/specification/2026-07-28/changelog). Server-Sent Events as a *response format* inside Streamable HTTP is current.
 
 ## What revision 2026-07-28 changed
 
-MCP versions are dates. `2026-07-28` is current as of Nov 2026 and is a breaking change from `2025-11-25`: the protocol became stateless. The spec calls the two generations *modern* and *legacy*.
+[MCP versions are dates](https://modelcontextprotocol.io/specification/2026-07-28/basic/versioning). `2026-07-28` is current as of Nov 2026 and is a breaking change from `2025-11-25`: [the protocol became stateless](https://modelcontextprotocol.io/specification/2026-07-28/changelog). The spec calls the two generations *modern* and *legacy*.
 
 | Topic | Legacy (2025-11-25 and earlier) | Modern (2026-07-28) |
 |---|---|---|
 | Opening | `initialize` request, then `notifications/initialized` | No handshake. Version and capabilities ride in `_meta` on every request |
 | Sessions | `Mcp-Session-Id` header on HTTP | None. Cross-call state is an explicit handle the server returns and the model passes back as a tool argument |
-| What a server supports | In the `initialize` response | `server/discover`: servers MUST implement it, clients MAY call it |
-| Server needs something from the client | The server sends its own request (`elicitation/create`, `sampling/createMessage`, `roots/list`) | Multi Round-Trip Requests: the server replies `input_required` and the client retries |
-| Results | No type marker | Every result has `resultType`: `complete` or `input_required` |
+| What a server supports | In the `initialize` response | `server/discover`: servers MUST implement it, [clients MAY call it](https://modelcontextprotocol.io/specification/2026-07-28/server/discover) |
+| Server needs something from the client | The server sends its own request (`elicitation/create`, `sampling/createMessage`, `roots/list`) | [Multi Round-Trip Requests](https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/mrtr): the server replies `input_required` and the client retries |
+| Results | No type marker | [Every result has](https://modelcontextprotocol.io/specification/2026-07-28/changelog) `resultType`: `complete` or `input_required` |
 | Change notifications | A GET stream, `resources/subscribe` | One opt-in `subscriptions/listen` stream |
 | Broken stream | Resume with `Last-Event-ID` | No resume. The client re-issues the request with a new `id` |
 | Deprecated | | Roots, Sampling, protocol Logging, the HTTP+SSE transport, Dynamic Client Registration |
 
-`server/discover` replaces the handshake as the way to ask a server what it speaks (response from the spec):
+`server/discover` [replaces the handshake](https://modelcontextprotocol.io/specification/2026-07-28/server/discover) as the way to ask a server what it speaks (response from the spec):
 
 ```json
 {
@@ -133,17 +133,17 @@ MCP versions are dates. `2026-07-28` is current as of Nov 2026 and is a breaking
 }
 ```
 
-**What this means for older servers.** An implementation is *modern*, *legacy* or *dual-era* (both).
+**What this means for older servers.** [An implementation is](https://modelcontextprotocol.io/specification/2026-07-28/basic/versioning) *modern*, *legacy* or *dual-era* (both).
 
 | Client | Server | Outcome |
 |---|---|---|
 | Modern only | Legacy only | Fails |
 | Legacy only | Modern only | Fails. A legacy client has no way to fall forward |
-| Dual-era | Legacy or modern | Works. On stdio the client probes with `server/discover` and falls back to `initialize` on an unrecognised error or a timeout. On HTTP it tries a modern request and inspects the `400` body before falling back |
+| Dual-era | Legacy or modern | Works. [On stdio the client probes with](https://modelcontextprotocol.io/specification/2026-07-28/basic/versioning) `server/discover` and falls back to `initialize` on an unrecognised error or a timeout. On HTTP it tries a modern request and inspects the `400` body before falling back |
 | Any | Dual-era | Works. The server picks its behaviour from how the client opens |
 
-- A server built on a 2025 SDK keeps working with dual-era clients. Upgrade its SDK to reach modern-only clients. Clients MUST treat a result with no `resultType` (from an older server) as `complete`.
-- Claude Code before v2.1.302 showed `tools fetch failed` in `/mcp` for a server on revision 2026-07-28. Update the client. How Claude Code probes older servers is not described in the docs read for this book, so check behaviour in your version.
+- A server built on a 2025 SDK keeps working with dual-era clients. Upgrade its SDK to reach modern-only clients. [Clients MUST treat a result with no](https://modelcontextprotocol.io/specification/2026-07-28/changelog) `resultType` (from an older server) as `complete`.
+- [Claude Code before v2.1.302 showed](https://code.claude.com/docs/en/mcp-quickstart) `tools fetch failed` in `/mcp` for a server on revision 2026-07-28. Update the client. How Claude Code probes older servers is not described in the docs read for this book, so check behaviour in your version.
 - Most tutorials and videos from before mid-2026 describe the legacy model.
 
 ## Discovery and invocation
@@ -172,11 +172,11 @@ The client learns a server's tools with `tools/list`. The response (from the spe
 }
 ```
 
-`name`, `description` and `inputSchema` (a JSON Schema) are what the model sees when it chooses a tool. List rules worth knowing:
+`name`, `description` and `inputSchema` (a JSON Schema) are [what the model sees when it chooses a tool](https://modelcontextprotocol.io/specification/latest/server/tools). List rules worth knowing:
 
-- **Pagination.** If `nextCursor` is present, send it back as `params.cursor` for the next page. The cursor is opaque: do not parse it, and do not assume a page size. A missing `nextCursor` means the end.
+- **Pagination.** If `nextCursor` is present, send it back as `params.cursor` for the next page. [The cursor is opaque](https://modelcontextprotocol.io/specification/2026-07-28/server/utilities/pagination): do not parse it, and do not assume a page size. A missing `nextCursor` means the end.
 - **Caching.** `ttlMs` says how long the list stays fresh and `cacheScope` says who may reuse it.
-- **Stability.** The list MUST NOT vary per connection, but it MAY vary by the authorization on the request. Servers SHOULD return tools in the same order every time, which also helps prompt-cache hit rates ([chapter 4](04-prompt-caching-compaction-and-cost.md)).
+- **Stability.** [The list MUST NOT vary per connection](https://modelcontextprotocol.io/specification/latest/server/tools), but it MAY vary by the authorization on the request. Servers SHOULD return tools in the same order every time, which also helps prompt-cache hit rates ([chapter 4](04-prompt-caching-compaction-and-cost.md)).
 
 To run a tool the client sends `tools/call` with the tool's `name` and an `arguments` object (the request shown earlier). The response:
 
@@ -191,7 +191,7 @@ To run a tool the client sends `tools/call` with the tool's `name` and an `argum
 }
 ```
 
-`content` is a list of blocks: `text`, `image`, `audio`, `resource_link` or an embedded `resource`. A tool can also return `structuredContent`, a JSON value that matches its `outputSchema`. End to end:
+`content` is a list of blocks: `text`, `image`, `audio`, `resource_link` or an embedded `resource`. [A tool can also return](https://modelcontextprotocol.io/specification/latest/server/tools) `structuredContent`, a JSON value that matches its `outputSchema`. End to end:
 
 ```mermaid
 sequenceDiagram
@@ -220,7 +220,7 @@ A failed call comes back in one of two forms, and the difference decides whether
 |---|---|---|
 | Wire form | JSON-RPC `error` object | Normal `result` with `isError: true` |
 | Used for | Unknown tool, malformed request, server fault | API failure, invalid input value, business-rule failure |
-| Reaches the model? | Clients MAY pass it on; recovery is unlikely | Clients SHOULD pass it on so the model can correct itself |
+| Reaches the model? | Clients MAY pass it on; recovery is unlikely | [Clients SHOULD pass it on so the model can correct itself](https://modelcontextprotocol.io/specification/latest/server/tools) |
 
 ```json
 { "jsonrpc": "2.0", "id": 3, "error": { "code": -32602, "message": "Unknown tool: invalid_tool_name" } }
@@ -237,11 +237,11 @@ A failed call comes back in one of two forms, and the difference decides whether
 }
 ```
 
-The second form is a message *to the model*. It says what was wrong and what a valid value looks like, so the next call can succeed. Input validation moved from protocol errors to `isError` results in revision 2025-11-25 for that reason. If you write a server, return validation failures as `isError`.
+The second form is a message *to the model*. It says what was wrong and what a valid value looks like, so the next call can succeed. Input validation moved from protocol errors to `isError` results in revision 2025-11-25 for that reason. If you write a server, [return validation failures as](https://modelcontextprotocol.io/specification/latest/server/tools) `isError`.
 
 ## Multi Round-Trip Requests
 
-Sometimes a server cannot finish without asking something, such as a confirmation or a missing value. A modern server may not send its own request, so it answers the call with an *interim result* and the client tries again. This is **Multi Round-Trip Requests (MRTR)**. It is allowed on `tools/call`, `prompts/get` and `resources/read` only.
+Sometimes a server cannot finish without asking something, such as a confirmation or a missing value. A modern server may not send its own request, so it answers the call with an *interim result* and the client tries again. This is **Multi Round-Trip Requests (MRTR)**. [It is allowed on](https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/mrtr) `tools/call`, `prompts/get` and `resources/read` only.
 
 ```mermaid
 sequenceDiagram
@@ -291,18 +291,18 @@ The interim result, then the `params` of the retry (both from the spec):
 ```
 
 - The retry is a new request with a new `id`. The server keeps no memory of the first one.
-- `requestState` is opaque to the client, which MUST echo it back unchanged. The server MUST treat it as attacker-controlled input and protect its integrity (for example with an HMAC) if it affects authorization or business logic.
+- `requestState` is opaque to the client, which MUST echo it back unchanged. The server MUST treat it as attacker-controlled input and [protect its integrity (for example with an HMAC)](https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/mrtr) if it affects authorization or business logic.
 - A server MUST NOT send an input request for a capability the client did not declare in `_meta`.
 
 ## Authorization for remote servers
 
-Authorization is optional and defined for HTTP transports only. A stdio server SHOULD NOT use it and takes credentials from its environment instead. For a protected remote server the roles map onto OAuth 2.1: the MCP server is the *resource server*, the MCP client is the *OAuth client*, and a separate *authorization server* signs the user in and issues tokens.
+[Authorization is optional and defined for HTTP transports only](https://modelcontextprotocol.io/specification/latest/basic/authorization). A stdio server SHOULD NOT use it and takes credentials from its environment instead. For a protected remote server the roles map onto OAuth 2.1: the MCP server is the *resource server*, the MCP client is the *OAuth client*, and a separate *authorization server* signs the user in and issues tokens.
 
 1. The client sends a request with no token. The server answers `401` with a `WWW-Authenticate` header that points at its metadata document (shown below).
-2. The client reads that document (OAuth Protected Resource Metadata, RFC 9728), finds the authorization server and reads its metadata.
-3. The client gets a client ID: a Client ID Metadata Document (preferred), pre-registration, or Dynamic Client Registration (deprecated, kept for older authorization servers).
+2. The client reads that document ([OAuth Protected Resource Metadata, RFC 9728](https://modelcontextprotocol.io/specification/latest/basic/authorization)), finds the authorization server and reads its metadata.
+3. The client gets a client ID: a Client ID Metadata Document (preferred), pre-registration, or [Dynamic Client Registration (deprecated](https://modelcontextprotocol.io/specification/2026-07-28/changelog), kept for older authorization servers).
 4. The client opens a browser with PKCE (a one-time proof that binds the authorization code to this client) and a `resource` parameter naming the MCP server (RFC 8707). The user approves, and the client exchanges the code for an access token.
-5. The client retries with `Authorization: Bearer <access-token>`, on every request and never in the query string.
+5. The client retries with `Authorization: Bearer <access-token>`, on every request and [never in the query string](https://modelcontextprotocol.io/specification/latest/basic/authorization).
 
 ```http
 HTTP/1.1 401 Unauthorized
@@ -310,13 +310,13 @@ WWW-Authenticate: Bearer resource_metadata="https://mcp.example.com/.well-known/
                          scope="files:read"
 ```
 
-Two rules prevent token misuse. The server MUST check that a token was issued for it and MUST NOT accept or forward any other token. The client MUST NOT send the server a token from a different authorization server. If a token lacks a scope mid-session, the server answers `403` with `error="insufficient_scope"` and the client re-authorizes with a larger scope set.
+Two rules prevent token misuse. [The server MUST check that a token was issued for it](https://modelcontextprotocol.io/specification/latest/basic/authorization) and MUST NOT accept or forward any other token. The client MUST NOT send the server a token from a different authorization server. If a token lacks a scope mid-session, the server answers `403` with `error="insufficient_scope"` and the client re-authorizes with a larger scope set.
 
 ## The human in the loop
 
-Tools are model-controlled, so the spec puts the brake in the host: "there SHOULD always be a human in the loop with the ability to deny tool invocations". Applications SHOULD show which tools are exposed, show when a tool runs, and ask for confirmation. The protocol requires no particular UI; Claude Code implements this with its permission system ([chapter 9](09-settings-and-permissions.md)). Each side has duties. Servers MUST validate all tool inputs, enforce access controls, rate-limit calls and sanitize outputs. Clients SHOULD confirm sensitive operations, show tool inputs before sending them, set timeouts and log tool use. Clients MUST treat tool annotations (a server's hints about a tool's behaviour) as untrusted unless the server is trusted.
+Tools are model-controlled, so [the spec puts the brake in the host](https://modelcontextprotocol.io/specification/latest/server/tools): "there SHOULD always be a human in the loop with the ability to deny tool invocations". Applications SHOULD show which tools are exposed, show when a tool runs, and ask for confirmation. The protocol requires no particular UI; [Claude Code implements this with its permission system](https://code.claude.com/docs/en/mcp) ([chapter 9](09-settings-and-permissions.md)). Each side has duties. Servers MUST validate all tool inputs, enforce access controls, rate-limit calls and sanitize outputs. Clients SHOULD confirm sensitive operations, show tool inputs before sending them, set timeouts and log tool use. Clients MUST treat tool annotations (a server's hints about a tool's behaviour) as untrusted unless the server is trusted.
 
-> **Warning:** A tool description is text that the model reads and you usually do not. A malicious server can hide instructions in it (*tool poisoning*), change a description after you approved the server (*rug pull*), or use its descriptions to interfere with another server's tools (*cross-server shadowing*). Anthropic "does not security-audit or manage any MCP server". Treat servers like dependencies: trusted source, pinned version. Defences are in [chapter 29](29-security-and-guardrails.md).
+> **Warning:** A tool description is text that the model reads and you usually do not. A malicious server can [hide instructions in it](https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks) (*tool poisoning*), change a description after you approved the server (*rug pull*), or use its descriptions to interfere with another server's tools (*cross-server shadowing*). Anthropic ["does not security-audit or manage any MCP server"](https://code.claude.com/docs/en/security). Treat servers like dependencies: trusted source, pinned version. Defences are in [chapter 29](29-security-and-guardrails.md).
 
 ## From the field
 
@@ -330,7 +330,7 @@ Tools are model-controlled, so the spec puts the brake in the host: "there SHOUL
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| A server works in one client but shows no tools, or `tools fetch failed`, in another | Era mismatch between a modern-only and a legacy-only side | Update the client (Claude Code v2.1.302 or later for 2026-07-28 servers); build servers on a dual-era SDK |
+| A server works in one client but shows no tools, or `tools fetch failed`, in another | Era mismatch between a modern-only and a legacy-only side | Update the client ([Claude Code v2.1.302 or later](https://code.claude.com/docs/en/mcp-quickstart) for 2026-07-28 servers); build servers on a dual-era SDK |
 | A stdio server connects, then returns garbage or zero tools | Something other than MCP messages was written to `stdout` | Send all logs to `stderr` |
 | HTTP request rejected with `400` and code `-32020` | A header disagrees with the body, or a required header is missing | Let the SDK build the headers; check proxies that rewrite them |
 | The model gives up after one failed call | The server sent a protocol error for a fixable input problem | Return `isError: true` with text that says what to change |

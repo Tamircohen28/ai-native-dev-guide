@@ -13,12 +13,12 @@ mechanisms keep that affordable:
 
 - **Prompt caching makes the repeated part cheap.** The API stores the processed prefix of a request.
   If the next request starts with exactly the same content, those tokens are billed at a small
-  fraction of the input price. Caching changes price, not size: "Cached prompt prefixes still occupy
-  the context window: prompt caching changes what you pay for those tokens, not whether they count."
+  fraction of the input price. Caching changes price, not size: "[Cached prompt prefixes still occupy
+  the context window](https://platform.claude.com/docs/en/build-with-claude/context-windows): prompt caching changes what you pay for those tokens, not whether they count."
 - **Compaction makes the repeated part small.** Older turns are replaced by a summary. That frees the
   window and shrinks every later call, and it loses detail.
-- **Effort sets how much the model writes.** Output tokens, thinking included, cost five times the
-  input price on every current model (see the price table below).
+- **Effort sets how much the model writes.** Output tokens, thinking included, [cost five times the
+  input price](https://platform.claude.com/docs/en/about-claude/pricing) on every current model (see the price table below).
 
 ```mermaid
 flowchart LR
@@ -33,12 +33,12 @@ flowchart LR
 
 ## How prompt caching works
 
-A request is cached as a **prefix**. The order is fixed: "`tools`, `system`, and `messages` (in that
+A request is cached as a **prefix**. [The order is fixed](https://platform.claude.com/docs/en/build-with-claude/prompt-caching): "`tools`, `system`, and `messages` (in that
 order), up to and including the block designated with `cache_control`." That marker is a **cache
 breakpoint**, and there are two ways to place it:
 
-- **Automatic.** Put one `cache_control` field at the top level of the request: "The system
-  automatically applies the cache breakpoint to the last cacheable block and moves it forward as
+- **Automatic.** Put one `cache_control` field at the top level of the request: "[The system
+  automatically applies the cache breakpoint](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) to the last cacheable block and moves it forward as
   conversations grow." This is the natural choice for a tool loop.
 - **Explicit.** Put `cache_control` on individual content blocks, up to 4 breakpoints per request.
   Use it when an early part of the prompt is stable and a later part is not.
@@ -65,18 +65,18 @@ The rules behind almost every caching surprise (as of Nov 2026):
 
 | Rule | Detail |
 | :-- | :-- |
-| Exact match | "Cache hits require 100 percent identical prompt segments, including all text and images" up to the breakpoint |
-| Writes happen only at breakpoints | A marker "writes exactly one cache entry: a hash of the prefix ending at that block" |
-| Reads look backward | From the breakpoint the API walks back up to 20 blocks, "looking for prior writes, not for stable content" |
-| Lifetime (TTL) | "By default, the cache has a 5-minute lifetime. The cache is refreshed for no additional cost each time the cached content is used." A 1-hour option exists |
-| The clock starts early | Lifetime is measured "from the start of the request", so after a 4-minute response you have about 1 minute left |
-| Minimum size | 512 tokens on Fable 5.2, Opus 5.5, Sonnet 5.5 and Haiku 5.5; a shorter prefix is "processed without caching, and no error is returned" |
-| Concurrency | "a cache entry only becomes available after the first response starts", so send one request before you fan out |
-| Isolation | "Different organizations never share caches", and "There's no way to manually clear the cache" |
+| Exact match | "[Cache hits require 100 percent identical prompt segments](https://platform.claude.com/docs/en/build-with-claude/prompt-caching), including all text and images" up to the breakpoint |
+| Writes happen only at breakpoints | A marker "[writes exactly one cache entry](https://platform.claude.com/docs/en/build-with-claude/prompt-caching): a hash of the prefix ending at that block" |
+| Reads look backward | From the breakpoint the API walks back up to 20 blocks, "[looking for prior writes, not for stable content](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)" |
+| Lifetime (TTL) | "[By default, the cache has a 5-minute lifetime.](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) The cache is refreshed for no additional cost each time the cached content is used." A 1-hour option exists |
+| The clock starts early | Lifetime is measured "[from the start of the request](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)", so after a 4-minute response you have about 1 minute left |
+| Minimum size | 512 tokens on Fable 5.2, Opus 5.5, Sonnet 5.5 and Haiku 5.5; a shorter prefix is "[processed without caching, and no error is returned](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)" |
+| Concurrency | "[a cache entry only becomes available after the first response starts](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)", so send one request before you fan out |
+| Isolation | "[Different organizations never share caches](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)", and "There's no way to manually clear the cache" |
 
 ## What it costs, and how the API reports it
 
-Prices in USD per million tokens (MTok), as published on 2026-11-25:
+[Prices in USD per million tokens](https://platform.claude.com/docs/en/about-claude/pricing) (MTok), as published on 2026-11-25:
 
 | Model | Input | Output | 5-minute cache write | 1-hour cache write | Cache read |
 | :-- | --: | --: | --: | --: | --: |
@@ -87,7 +87,7 @@ Prices in USD per million tokens (MTok), as published on 2026-11-25:
 | Claude Haiku 5.5, prompt over 100,000 tokens | $0.50 | $2.50 | $0.625 | $1 | $0.05 (0.1x) |
 
 The pattern: a 5-minute write costs 1.25x the input price, a 1-hour write 2x, and a read 0.1x "on most
-models" and less on the newest ones. A 5-minute write pays for itself "after one cache read", a 1-hour
+models" and less on the newest ones. A 5-minute write pays for itself "[after one cache read](https://platform.claude.com/docs/en/about-claude/pricing)", a 1-hour
 write "after two cache reads".
 
 Every response reports the split in its `usage` object:
@@ -96,10 +96,10 @@ Every response reports the split in its `usage` object:
 | :-- | :-- | :-- |
 | `cache_read_input_tokens` | Prefix tokens found in the cache | Cache read price |
 | `cache_creation_input_tokens` | Tokens this request wrote to the cache | Cache write price |
-| `input_tokens` | "only the tokens that come **after the last cache breakpoint**" | Input price |
+| `input_tokens` | "[only the tokens that come](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) **after the last cache breakpoint**" | Input price |
 | `output_tokens` | Everything the model generated, thinking included | Output price |
 
-Total input is the sum of the first three, and all three count toward the context window. "if both
+Total input is the sum of the first three, and all three count toward the context window. "[if both](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)
 `cache_creation_input_tokens` and `cache_read_input_tokens` are 0, the prompt was not cached". In this
 book, **cache-hit ratio** means cache read ÷ (input + cache read + cache creation).
 
@@ -154,11 +154,11 @@ out because this session crosses its 100,000-token price step at call 41):
 3. **Output becomes a big line.** With input cached, 25,000 output tokens are 28% of the bill.
 
 > **Note:** These are API list prices. On a subscription you see plan usage bars instead of a bill;
-> the dollar figure Claude Code shows in `/usage` is computed locally "from token counts at list price".
+> the dollar figure Claude Code shows in `/usage` is computed locally "[from token counts at list price](https://code.claude.com/docs/en/costs)".
 
 ## What breaks the cache
 
-The prefix is ordered `tools`, then `system`, then `messages`, and a change at one level invalidates
+The prefix is ordered `tools`, then `system`, then `messages`, and [a change at one level invalidates](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)
 that level and everything after it:
 
 | What changed | What is lost |
@@ -167,47 +167,47 @@ that level and everything after it:
 | Web search toggle, citations toggle, `speed` setting | System prompt and messages |
 | `tool_choice`, `disable_parallel_tool_use`, images added or removed | Messages |
 | Thinking parameters, `output_config.effort` | Messages always; tools and system too on some models |
-| A timestamp or per-request value inside the cached prefix | Every request: "You pay for a fresh cache write on every request and never get a read." |
+| A timestamp or per-request value inside the cached prefix | Every request: "[You pay for a fresh cache write on every request and never get a read.](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)" |
 | More idle time than the TTL | Everything |
 
-In Claude Code the same rules surface as five documented invalidators: "Switching models", "Changing
+In Claude Code the same rules surface as [five documented invalidators](https://code.claude.com/docs/en/prompt-caching): "Switching models", "Changing
 effort level", "Connecting or removing an MCP server", "Compacting the conversation" and "Upgrading
-Claude Code". Its cache lifetime depends on how you pay: about "an hour on a subscription and five
-minutes on an API key, cloud provider, or usage credits. Subagents get five minutes unless you change
+Claude Code". Its cache lifetime depends on how you pay: about "[an hour on a subscription and five
+minutes](https://code.claude.com/docs/en/best-practices) on an API key, cloud provider, or usage credits. Subagents get five minutes unless you change
 it."
 
 Two ways to change behaviour mid-session and keep the prefix (as of Nov 2026):
 
-- Add an instruction by appending a `{"role": "system"}` message to `messages` "instead of editing the
+- Add an instruction by appending a `{"role": "system"}` message to `messages` "[instead of editing the](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)
   top-level `system` field" (Fable 5.2, Opus 5.5, Sonnet 5.5 and Haiku 5.5; not Sonnet 5).
-- Add tools through tool search: "Deferred tools are not included in the system-prompt prefix ... The
+- Add tools through tool search: "[Deferred tools are not included in the system-prompt prefix](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-use-with-prompt-caching) ... The
   prefix is untouched, so prompt caching is preserved."
 
 ## Compaction and context editing
 
-Caching does nothing about size. **Compaction** does: it "replaces the older turns of a conversation
-with a summary that Claude writes on the server". On the API it is in beta (as of Nov 2026) in two
-forms: on demand, and at a token threshold (default trigger: 150,000 input tokens).
+Caching does nothing about size. **Compaction** does: it "[replaces the older turns of a conversation
+with a summary](https://platform.claude.com/docs/en/build-with-claude/compaction) that Claude writes on the server". On the API it is in beta (as of Nov 2026) in two
+forms: on demand, and at a token threshold ([default trigger: 150,000 input tokens](https://platform.claude.com/docs/en/build-with-claude/compaction-threshold)).
 
-- Everything before the summary is dropped, thinking included: "the summary is all the model has of
-  that earlier work." Images, documents and fetched URLs in the summarised range "are gone".
+- Everything before the summary is dropped, thinking included: "[the summary is all the model has of
+  that earlier work.](https://platform.claude.com/docs/en/build-with-claude/compaction-threshold)" Images, documents and fetched URLs in the summarised range "[are gone](https://platform.claude.com/docs/en/build-with-claude/compaction-on-demand)".
 - It is not free: "Compaction requires an additional sampling step, which contributes to rate limits
   and billing", and the model named in your request writes the summary.
 
-**Context editing** is the finer tool: "the API automatically clears the oldest tool results in
+**Context editing** is the finer tool: "[the API automatically clears the oldest tool results](https://platform.claude.com/docs/en/build-with-claude/context-editing) in
 chronological order" and leaves a placeholder (defaults: trigger at 100,000 input tokens, keep the 3
 most recent tool uses). It also "Invalidates cached prompt prefixes when content is cleared". The docs
-call compaction "the primary strategy" and context editing the option for fine-grained control.
+call compaction "[the primary strategy](https://platform.claude.com/docs/en/build-with-claude/context-windows)" and context editing the option for fine-grained control.
 
 ### What Claude Code does
 
-"Claude Code compacts automatically as you approach the limit, so a full context window doesn't end
-your session." With a 1M window that happens "at about 967K tokens by default". You can lower the
+"[Claude Code compacts automatically as you approach the limit](https://code.claude.com/docs/en/context-window#what-survives-compaction), so a full context window doesn't end
+your session." With a 1M window that happens "[at about 967K tokens by default](https://code.claude.com/docs/en/model-config)". You can lower the
 threshold with `/autocompact` (for example `/autocompact 500k`, v2.1.221 or later), or compact when
 you choose with `/compact [instructions]`, for example `/compact focus on the auth bug fix`.
 
-"The summary keeps your requests and key code snippets, but detailed instructions from early in the
-conversation may be lost." Claude Code then rebuilds part of the context from disk:
+"[The summary keeps your requests and key code snippets](https://code.claude.com/docs/en/how-claude-code-works#when-context-fills-up), but detailed instructions from early in the
+conversation may be lost." Claude Code then [rebuilds part of the context from disk](https://code.claude.com/docs/en/context-window#what-survives-compaction):
 
 | Item | After compaction |
 | :-- | :-- |
@@ -228,54 +228,54 @@ Keep: the current plan, the list of changed files, failing test names with their
 Drop: directory listings, passing test output, abandoned approaches.
 ```
 
-> **Warning:** Compaction is itself a cost event. The docs call `/compact` "a large request" and list
+> **Warning:** Compaction is itself a cost event. The docs call `/compact` "[a large request](https://code.claude.com/docs/en/costs)" and list
 > "Compacting the conversation" among the cache invalidators, while "`/clear` costs nothing". If the
 > next task is unrelated, clear instead of compacting.
 
 ## Thinking and effort
 
-Thinking is output: "the tokens Claude spends reasoning are billed as output tokens, even when the
+Thinking is output: "[the tokens Claude spends reasoning are billed as output tokens](https://platform.claude.com/docs/en/build-with-claude/thinking), even when the
 thinking text isn't returned to you, and they count toward `max_tokens`".
 
-- Hiding thinking saves nothing: "Omitting reduces latency, not cost."
+- Hiding thinking saves nothing: "[Omitting reduces latency, not cost.](https://platform.claude.com/docs/en/build-with-claude/thinking)"
 - On current models earlier thinking stays in the conversation, so "budget your context window as if
   thinking were ordinary conversation history, because it is."
 - On the API, Fable 5.2 and Opus 5.5 reject `thinking: {type: "disabled"}`, and Claude Code cannot turn
   thinking off on any current model (as of Nov 2026). The control you have is **effort**.
 
 Effort is `output_config.effort` on the API, with levels `low`, `medium`, `high`, `xhigh` and `max`.
-It "affects **all tokens** in the response" (text, tool calls and thinking), and "Lower effort also
+It "[affects](https://platform.claude.com/docs/en/build-with-claude/effort) **all tokens** in the response" (text, tool calls and thinking), and "Lower effort also
 means fewer and terser tool calls." It is guidance, not a cap: "Effort is a behavioral signal, not a
 strict token budget." The hard ceiling is `max_tokens`.
 
 | Where | Default effort (as of Nov 2026) | How to change it |
 | :-- | :-- | :-- |
-| Claude API | `high` on Fable 5.2 and Sonnet 5.5; `medium` on Opus 5.5 and Haiku 5.5 | `output_config.effort` |
-| Claude Code | `medium` on Fable 5.2, Opus 5.5, Sonnet 5.5 and Haiku 5.5 | `/effort <level>`, `claude --effort <level>`, or the `effortLevel` and per-model `modelSettings` settings (a top-level `effortLevel` in user settings "doesn't count for Opus 5.5") |
+| [Claude API](https://platform.claude.com/docs/en/build-with-claude/effort) | `high` on Fable 5.2 and Sonnet 5.5; `medium` on Opus 5.5 and Haiku 5.5 | `output_config.effort` |
+| [Claude Code](https://code.claude.com/docs/en/model-config) | `medium` on Fable 5.2, Opus 5.5, Sonnet 5.5 and Haiku 5.5 | `/effort <level>`, `claude --effort <level>`, or the `effortLevel` and per-model `modelSettings` settings (a top-level `effortLevel` in user settings "doesn't count for Opus 5.5") |
 
 Two cost rules. First, "Tuning effort is often a better lever than switching models". Second, change
-effort at a task boundary, because "Changing the top-level effort value between requests can
+effort at a task boundary, because "[Changing the top-level effort value](https://platform.claude.com/docs/en/build-with-claude/effort) between requests can
 invalidate all or part of the prompt cache". For one hard question, Claude Code's `ultrathink` keyword
-requests "deeper reasoning on that turn without changing your session effort setting".
+requests "[deeper reasoning on that turn](https://code.claude.com/docs/en/model-config) without changing your session effort setting".
 
 ## What agents and multi-agent systems multiply
 
 Anthropic's write-up of its multi-agent research system (June 2025) gives the reference numbers:
-"agents typically use about 4× more tokens than chat interactions, and multi-agent systems use about
+"[agents typically use about 4× more tokens than chat interactions](https://www.anthropic.com/research/multi-agent-research-system), and multi-agent systems use about
 15× more tokens than chats." Claude Code's cost docs add one for agent teams (several sessions working
-as teammates; experimental and off by default): "approximately 7x more tokens than standard sessions
+as teammates; experimental and off by default): "[approximately 7x more tokens than standard sessions](https://code.claude.com/docs/en/costs)
 when teammates run in plan mode".
 
-The post also says why anyone pays that: "Multi-agent systems work mainly because they help spend
-enough tokens to solve the problem", and on one evaluation "token usage by itself explains 80% of the
+The post also says why anyone pays that: "[Multi-agent systems work mainly because they help spend
+enough tokens](https://www.anthropic.com/research/multi-agent-research-system) to solve the problem", and on one evaluation "token usage by itself explains 80% of the
 variance". It pays for "valuable tasks that involve heavy parallelization, information that exceeds
 single context windows, and interfacing with numerous complex tools", and less for code, because
 "most coding tasks involve fewer truly parallelizable tasks than research".
 
-Fan-out also meets the cache. A fresh subagent has a "Separate cache", so it starts cold and writes
+Fan-out also meets the cache. A fresh subagent has a "[Separate cache](https://code.claude.com/docs/en/prompt-caching)", so it starts cold and writes
 its own prefix, while a fork (a subagent that starts with a copy of your conversation) shares the
 parent's cache ([chapter 14](14-subagents.md)). For scale, the
-Claude Code docs put the average at "around $13 per developer per active day and $150-250 per
+Claude Code docs put the average at "[around $13 per developer per active day](https://code.claude.com/docs/en/costs) and $150-250 per
 developer per month, with costs remaining below $30 per active day for 90% of users".
 
 ## Habits that keep sessions cheap
@@ -284,8 +284,8 @@ developer per month, with costs remaining below $30 per active day for 90% of us
    changes last. Switch model, effort and MCP servers at task boundaries, not mid-task.
 2. **Respect the clock.** On API-key billing the cache lives five minutes. Ask the follow-up now, or
    accept a full re-write after the break.
-3. **Clear between unrelated tasks.** "`/clear` costs nothing", and "a focused context gets you better
-   answers and costs less".
+3. **Clear between unrelated tasks.** "`/clear` costs nothing", and "[a focused context gets you better
+   answers and costs less](https://code.claude.com/docs/en/best-practices)".
 4. **Compact at a boundary you choose**, with a focus, not at 967K tokens in the middle of a change.
 5. **Keep the standing load small.** CLAUDE.md under 200 lines, procedures moved into skills, unused
    MCP servers disabled, CLIs such as `gh` preferred where they do the same job.
@@ -293,8 +293,8 @@ developer per month, with costs remaining below $30 per active day for 90% of us
    (`model: haiku`) for simple ones.
 7. **Cap unattended runs.** In `claude -p`, set `--max-turns` and `--max-budget-usd` ("Spend can pass
    the cap, so leave headroom").
-8. **Measure.** `/usage` shows session cost and a `Prompt cache (main)` line with the likely cause of
-   a miss; `/context` shows what fills the window.
+8. **Measure.** `/usage` shows session cost and a `Prompt cache (main)` line with [the likely cause of
+   a miss](https://code.claude.com/docs/en/prompt-caching); `/context` shows what fills the window.
 
 ## From the field
 
@@ -337,13 +337,13 @@ tokens and a 90th percentile of 968k, and fell to a median of 33k afterwards.
 
 | Symptom | Cause | Fix |
 | :-- | :-- | :-- |
-| `cache_read_input_tokens` stays 0 while `cache_creation_input_tokens` is high on every call | The breakpoint sits on a block that changes per request, or something early in the prefix changes | "Place `cache_control` on the last block whose prefix is identical across the requests you want to share a cache" |
+| `cache_read_input_tokens` stays 0 while `cache_creation_input_tokens` is high on every call | The breakpoint sits on a block that changes per request, or something early in the prefix changes | "[Place](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) `cache_control` on the last block whose prefix is identical across the requests you want to share a cache" |
 | Both cache fields are 0 | No `cache_control`, or the prefix is under the minimum (512 tokens on current models) | Add the marker; accept that short prompts are not cached |
 | The first message after a break is slow and expensive | The TTL ran out: five minutes on API-key billing, about an hour on a subscription | Keep related questions together; `/clear` if the task changed |
 | The cache is lost after "one small change" | You switched model, changed effort, connected or removed an MCP server, or upgraded Claude Code | Make those changes at task boundaries; read the `Prompt cache (main)` line in `/usage` |
 | Parallel requests all pay the write price | "a cache entry only becomes available after the first response starts" | Send one request, wait for its response to start, then fan out |
 | A rule is followed early in the session and ignored later | It lived only in the conversation or in a path-scoped file, and compaction summarised it away | Put it in project-root CLAUDE.md; if it must never bend, make it a hook or deny rule |
-| `Autocompact is thrashing` error | One oversized file or tool result refills the window after each summary | Read in chunks, move the work to a subagent, `/compact` with a narrow focus, or `/clear` |
+| `Autocompact is thrashing` error | [One oversized file or tool result](https://code.claude.com/docs/en/troubleshooting) refills the window after each summary | Read in chunks, move the work to a subagent, `/compact` with a narrow focus, or `/clear` |
 | Usage limit drains fast when several agents run | Fan-out multiplies tokens and every fresh subagent starts with a cold cache | Fewer agents, `model: haiku` for simple ones, `--max-turns` and `--max-budget-usd` on unattended runs |
 
 ## Checklist

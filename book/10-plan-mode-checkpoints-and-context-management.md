@@ -32,17 +32,17 @@ flowchart TD
   R --> P
 ```
 
-Two facts shape the rest of the chapter. First, current models have a 1M-token window by default (as of Nov 2026) and Claude Code compacts on its own, so the official best-practices page now files "The context window is your main constraint, manage it aggressively" under old advice: "running out is rare". Second, a big window is not a clean one. Anthropic's API docs call the quality drop on long inputs *context rot*: "As token count grows, accuracy and recall degrade". You manage context for focus and cost, not to avoid a crash.
+Two facts shape the rest of the chapter. First, [current models have a 1M-token window](https://code.claude.com/docs/en/model-config) by default (as of Nov 2026) and Claude Code compacts on its own, so the [official best-practices page](https://code.claude.com/docs/en/best-practices) now files "The context window is your main constraint, manage it aggressively" under old advice: "running out is rare". Second, a big window is not a clean one. [Anthropic's API docs](https://platform.claude.com/docs/en/build-with-claude/context-windows) call the quality drop on long inputs *context rot*: "As token count grows, accuracy and recall degrade". You manage context for focus and cost, not to avoid a crash.
 
 ## Plan mode
 
-**Plan mode** is a permission mode ([chapter 09](09-settings-and-permissions.md)) in which "Claude reads files, runs shell commands to explore, and writes a plan, but does not edit your source."
+**Plan mode** is a permission mode ([chapter 09](09-settings-and-permissions.md)) in which ["Claude reads files, runs shell commands to explore, and writes a plan, but does not edit your source."](https://code.claude.com/docs/en/permission-modes)
 
 ### Enter and leave
 
 | How | Detail |
 |---|---|
-| `Shift+Tab` | Cycles modes. New interactive sessions start in `auto` (v2.1.283+); the first press goes to `default`, then `acceptEdits`, then `plan`. Stop when the status bar shows `plan mode on`. |
+| `Shift+Tab` | Cycles modes. [New interactive sessions start in](https://code.claude.com/docs/en/permission-modes) `auto` (v2.1.283+); the first press goes to `default`, then `acceptEdits`, then `plan`. Stop when the status bar shows `plan mode on`. |
 | `/plan` | Enters plan mode from the prompt. `/plan fix the auth bug` enters it and starts on that task. |
 | `claude --permission-mode plan` | Starts the session in plan mode. |
 | `defaultMode` | Set it to `plan` in `.claude/settings.json` to make planning the project default (see below). |
@@ -52,7 +52,7 @@ Two facts shape the rest of the chapter. First, current models have a 1M-token w
 { "permissions": { "defaultMode": "plan" } }
 ```
 
-To leave without approving anything: "With no approval prompt open, press `Shift+Tab` again to leave plan mode."
+[To leave without approving anything](https://code.claude.com/docs/en/permission-modes): "With no approval prompt open, press `Shift+Tab` again to leave plan mode."
 
 ### What is restricted
 
@@ -61,31 +61,31 @@ File edits stay blocked until you approve the plan (the warning below gives the 
 | Your session | Shell commands while planning |
 |---|---|
 | Interactive terminal started with bypass permissions available | Run with neither a classifier check nor a prompt |
-| Auto mode available (`useAutoModeDuringPlan` is on by default) | A classifier reviews shell commands instead of prompting you; approved ones run, rejected ones are blocked |
+| Auto mode available (`useAutoModeDuringPlan` is on by default) | [A classifier reviews shell commands](https://code.claude.com/docs/en/permission-modes) instead of prompting you; approved ones run, rejected ones are blocked |
 | Anything else | Commands outside the built-in read-only set prompt you for approval |
 
 Subagents ([chapter 14](14-subagents.md)) follow the main conversation: "When the main conversation is in `plan` mode, the subagent stays in plan mode whichever `permissionMode` you set". The built-in Plan subagent gathers context with read-only tools; Write and Edit are denied to it.
 
-> **Warning:** The docs say it plainly: "In interactive terminal sessions with bypass permissions available, don't rely on plan mode's blocks." If you launch with bypass permissions, plan mode is a working convention, not a guard.
+> **Warning:** [The docs say it plainly](https://code.claude.com/docs/en/permission-modes): "In interactive terminal sessions with bypass permissions available, don't rely on plan mode's blocks." If you launch with bypass permissions, plan mode is a working convention, not a guard.
 
 ### Approve the plan
 
-"When the plan is ready, Claude presents it and asks how to proceed."
+["When the plan is ready, Claude presents it and asks how to proceed."](https://code.claude.com/docs/en/permission-modes)
 
 | Option | Effect |
 |---|---|
 | **Yes, and use auto mode** | Approves and continues in auto mode. Reads **Yes, auto-accept edits** when auto mode is not available to your session. |
-| **Yes, manually approve edits** | Approves; you "approve and review each edit individually". |
+| **Yes, manually approve edits** | Approves; you ["approve and review each edit individually"](https://code.claude.com/docs/en/permission-modes). |
 | **No, keep planning** | "stay in plan mode and tell Claude what to change". |
 
-- `Ctrl+G` opens the proposed plan in your default text editor, so you can edit it before Claude proceeds.
+- `Ctrl+G` [opens the proposed plan in your default text editor](https://code.claude.com/docs/en/permission-modes), so you can edit it before Claude proceeds.
 - To back out of the prompt, press `Esc` first: "pressing `Shift+Tab` there approves the plan."
-- `showClearContextOnPlanAccept` (default `false`) adds an option that "approves the plan, clears the conversation context, and starts implementing from the plan alone". Use it when the exploration was long and noisy.
-- Plans are saved under `~/.claude/plans` unless you set `plansDirectory` to a path inside the project. The approved plan is re-injected from disk after a compaction, so it does not get summarised away.
+- `showClearContextOnPlanAccept` (default `false`) [adds an option](https://code.claude.com/docs/en/settings-reference) that "approves the plan, clears the conversation context, and starts implementing from the plan alone". Use it when the exploration was long and noisy.
+- Plans are saved under `~/.claude/plans` unless you set `plansDirectory` to a path inside the project. The approved plan is [re-injected from disk after a compaction](https://code.claude.com/docs/en/context-window), so it does not get summarised away.
 
 ### When planning pays off
 
-The costs page credits plan mode with "preventing expensive re-work when the initial direction is wrong". The best-practices page also says that "in most cases, your first plain prompt in a fresh session already does the right thing". Both are true, so choose per task. The table is this book's rule of thumb, not a quote from the docs.
+[The costs page](https://code.claude.com/docs/en/costs) credits plan mode with "preventing expensive re-work when the initial direction is wrong". [The best-practices page](https://code.claude.com/docs/en/best-practices) also says that "in most cases, your first plain prompt in a fresh session already does the right thing". Both are true, so choose per task. The table is this book's rule of thumb, not a quote from the docs.
 
 | Plan first | Skip the plan |
 |---|---|
@@ -94,7 +94,7 @@ The costs page credits plan mode with "preventing expensive re-work when the ini
 | A wrong start is expensive: migrations, public APIs, anything hard to undo | A wrong start costs one `/rewind` |
 | The work will run unattended or be split across agents | You are watching and can press `Esc` |
 
-For bigger work the docs go one step further than plan mode: "Ask Claude to interview you instead", save the answers as `SPEC.md`, then "start a fresh session to build from it". [Chapter 22](22-explore-plan-implement-verify.md) builds a full workflow on that idea.
+For bigger work [the docs go one step further](https://code.claude.com/docs/en/best-practices) than plan mode: "Ask Claude to interview you instead", save the answers as `SPEC.md`, then "start a fresh session to build from it". [Chapter 22](22-explore-plan-implement-verify.md) builds a full workflow on that idea.
 
 ## Model, effort and thinking
 
@@ -102,18 +102,18 @@ These controls decide how much reasoning each turn gets. All defaults below are 
 
 | Control | How to set it | What to know |
 |---|---|---|
-| Model | `/model`, `claude --model <alias>` | Aliases: `opus` (also `best`), `sonnet`, `haiku`, `fable`, `opusplan`, `default`. `/model` switches and saves your choice as the default for new sessions; in the picker, `s` switches for this session only. |
-| Effort | `/effort <level>`, `claude --effort <level>`, left/right arrows in the `/model` picker | Levels: `low`, `medium`, `high`, `xhigh`, `max`. Fable 5.2, Opus 5.5, Sonnet 5.5 and Haiku 5.5 default to `medium`. `max` applies to the current session only. `/effort status` prints the level; `/effort auto` clears a saved one. |
-| One deep turn | Put `ultrathink` anywhere in the prompt | Requests deeper reasoning on that turn without changing the session effort. "think", "think hard" and "think more" are ordinary prompt text, not keywords. |
-| Thinking display | `Ctrl+O` | Thinking is collapsed by default; `Ctrl+O` shows it. You cannot turn thinking off on Opus 5.5, Sonnet 5.5, Haiku 5.5 or the Fable models. |
-| Fast mode | `/fast` | "up to 2.5x faster at a higher cost per token" on supported models. Turned on mid-conversation, "you pay the full fast mode uncached input token price for the entire conversation context". |
+| Model | `/model`, `claude --model <alias>` | Aliases: `opus` (also `best`), `sonnet`, `haiku`, `fable`, `opusplan`, `default`. `/model` switches and [saves your choice as the default](https://code.claude.com/docs/en/model-config) for new sessions; in the picker, `s` switches for this session only. |
+| Effort | `/effort <level>`, `claude --effort <level>`, left/right arrows in the `/model` picker | Levels: `low`, `medium`, `high`, `xhigh`, `max`. Fable 5.2, Opus 5.5, Sonnet 5.5 and [Haiku 5.5 default to](https://code.claude.com/docs/en/model-config) `medium`. `max` applies to the current session only. `/effort status` prints the level; `/effort auto` clears a saved one. |
+| One deep turn | Put `ultrathink` anywhere in the prompt | [Requests deeper reasoning on that turn](https://code.claude.com/docs/en/model-config) without changing the session effort. "think", "think hard" and "think more" are ordinary prompt text, not keywords. |
+| Thinking display | `Ctrl+O` | [Thinking is collapsed by default](https://code.claude.com/docs/en/model-config); `Ctrl+O` shows it. You cannot turn thinking off on Opus 5.5, Sonnet 5.5, Haiku 5.5 or the Fable models. |
+| Fast mode | `/fast` | ["up to 2.5x faster at a higher cost per token"](https://code.claude.com/docs/en/fast-mode) on supported models. Turned on mid-conversation, "you pay the full fast mode uncached input token price for the entire conversation context". |
 
-- **Default model.** On Pro, Max, Ultra, Team, Enterprise and the Anthropic API, `default` resolves to Opus 5.5. "No Fable model is the account-type default on any plan or provider", so reach it with `/model fable`.
-- **Plan with one model, build with another.** `opusplan` "uses `opus` during plan mode, then switches to `sonnet` for execution".
-- **How to choose effort.** The docs: "Effort is the main control for how long Claude thinks" and "Save `max` for a hard problem you want Claude to work through without you". A workable habit: leave the default alone, raise to `high` or `xhigh` for hard debugging and design, drop to `low` for mechanical edits, and use `ultrathink` for a single hard question.
-- **If a setting will not stick.** Effort resolves in this order: `CLAUDE_CODE_EFFORT_LEVEL`, then a level picked in the session, then `--effort`, then settings, then the model default. An exported environment variable silently beats `/effort`.
+- **Default model.** On Pro, Max, Ultra, Team, Enterprise and the Anthropic API, `default` [resolves to Opus 5.5](https://code.claude.com/docs/en/model-config). "No Fable model is the account-type default on any plan or provider", so reach it with `/model fable`.
+- **Plan with one model, build with another.** `opusplan` "uses `opus` [during plan mode, then switches to](https://code.claude.com/docs/en/model-config) `sonnet` for execution".
+- **How to choose effort.** [The docs](https://code.claude.com/docs/en/best-practices): "Effort is the main control for how long Claude thinks" and "Save `max` for a hard problem you want Claude to work through without you". A workable habit: leave the default alone, raise to `high` or `xhigh` for hard debugging and design, drop to `low` for mechanical edits, and use `ultrathink` for a single hard question.
+- **If a setting will not stick.** [Effort resolves in this order](https://code.claude.com/docs/en/model-config): `CLAUDE_CODE_EFFORT_LEVEL`, then a level picked in the session, then `--effort`, then settings, then the model default. An exported environment variable silently beats `/effort`.
 
-> **Note:** You pay for reasoning you do not see: "You are charged for all thinking tokens generated, even when collapsed or redacted." The API docs also warn that changing effort between requests "can invalidate all or part of the prompt cache" ([chapter 04](04-prompt-caching-compaction-and-cost.md)). Pick a level for the task; do not flip it every turn.
+> **Note:** [You pay for reasoning you do not see](https://code.claude.com/docs/en/model-config): "You are charged for all thinking tokens generated, even when collapsed or redacted." [The API docs also warn](https://platform.claude.com/docs/en/build-with-claude/effort) that changing effort between requests "can invalidate all or part of the prompt cache" ([chapter 04](04-prompt-caching-compaction-and-cost.md)). Pick a level for the task; do not flip it every turn.
 
 ## Read `/context`
 
@@ -122,7 +122,7 @@ These controls decide how much reasoning each turn gets. All defaults below are 
 /context all    expand the per-item breakdown
 ```
 
-Per the docs it also "Shows optimization suggestions for context-heavy tools, memory bloat, and capacity warnings." Row names change between versions, so read the labels in your build and ask three questions:
+[Per the docs](https://code.claude.com/docs/en/commands) it also "Shows optimization suggestions for context-heavy tools, memory bloat, and capacity warnings." Row names change between versions, so read the labels in your build and ask three questions:
 
 1. **How much is used before I type anything?** The system prompt, tool definitions, memory files such as CLAUDE.md, and the skill listing are fixed overhead. You pay for them on every request.
 2. **What is the biggest item in the conversation?** It is often one tool result or one large file, not the chat itself.
@@ -134,36 +134,36 @@ To watch the number all the time, put `context_window.used_percentage` in your s
 
 | Tool | What it does | Cost |
 |---|---|---|
-| `/compact [instructions]` | "Free up context by summarizing the conversation so far." The optional instructions steer the summary: `/compact focus on the auth bug fix`. | It is itself a large request |
-| `/clear [name]` | "Start a new conversation with empty context." The old conversation is saved, not deleted; a name labels it in the `/resume` picker. Aliases: `/reset`, `/new`. | "`/clear` costs nothing" |
-| New session | Another `claude` process: "Each new session starts with a fresh context window, without the conversation history from previous sessions." | Normal startup overhead |
+| `/compact [instructions]` | ["Free up context by summarizing the conversation so far."](https://code.claude.com/docs/en/commands) The optional instructions steer the summary: `/compact focus on the auth bug fix`. | It is itself a large request |
+| `/clear [name]` | ["Start a new conversation with empty context."](https://code.claude.com/docs/en/commands) The old conversation is saved, not deleted; a name labels it in the `/resume` picker. Aliases: `/reset`, `/new`. | "`/clear` costs nothing" |
+| New session | Another `claude` process: "[Each new session starts with a fresh context window](https://code.claude.com/docs/en/how-claude-code-works), without the conversation history from previous sessions." | Normal startup overhead |
 
 Choose with this table:
 
 | Situation | Use | Why |
 |---|---|---|
 | Same task, long exploration behind you, direction settled | `/compact <what to keep>` | Keeps the thread and drops the noise, with a focus you chose |
-| Next task is unrelated | `/clear` | The docs still advise "`/clear` between unrelated tasks": "a focused context gets you better answers and costs less" |
-| Two corrections on the same problem both failed | `/clear`, then a better prompt | "after two failed corrections run `/clear` and write a better prompt instead of a third" |
-| A quick side question | `/btw <question>` | Answered from the current context "without adding to the conversation" |
-| You want to try an alternative and keep this thread | `/branch [name]` | Copies the conversation into a new session; the original stays reachable with `/resume` |
+| Next task is unrelated | `/clear` | [The docs still advise](https://code.claude.com/docs/en/best-practices) "`/clear` between unrelated tasks": "a focused context gets you better answers and costs less" |
+| Two corrections on the same problem both failed | `/clear`, then a better prompt | "after two failed corrections run `/clear` and [write a better prompt instead of a third](https://code.claude.com/docs/en/best-practices)" |
+| A quick side question | `/btw <question>` | Answered from the current context ["without adding to the conversation"](https://code.claude.com/docs/en/commands) |
+| You want to try an alternative and keep this thread | `/branch [name]` | [Copies the conversation into a new session](https://code.claude.com/docs/en/commands); the original stays reachable with `/resume` |
 | Only the last stretch went wrong | `/rewind` | Restore, or summarise from a chosen message (see below) |
 | Different directory or worktree, or work in parallel | New session | Separate window, separate transcript ([chapter 25](25-parallel-work-worktrees-and-background-tasks.md)) |
 | Stopping for the day, or handing over | Handoff note, then exit | A file on disk outlives the summary, the cache and the transcript |
 
-> **Note:** Coming back after a break is a natural decision point. The prompt cache "lasts about an hour on a subscription and five minutes on an API key, cloud provider, or usage credits", and the costs page lists cache misses after a break among the reasons a session keeps spending. If you no longer need the old context, `/clear` before your next prompt, not after it.
+> **Note:** Coming back after a break is a natural decision point. The prompt cache ["lasts about an hour](https://code.claude.com/docs/en/best-practices) on a subscription and five minutes on an API key, cloud provider, or usage credits", and [the costs page lists cache misses after a break](https://code.claude.com/docs/en/costs) among the reasons a session keeps spending. If you no longer need the old context, `/clear` before your next prompt, not after it.
 
 ## Auto-compaction and what survives
 
-"Claude Code compacts automatically as you approach the limit, so a full context window doesn't end your session." With no auto-compact window set, compaction happens at the model's context limit; models with a native 1M window "compact before the window fills, at about 967K tokens by default" (as of Nov 2026). To compact earlier, for focus or cost:
+"[Claude Code compacts automatically as you approach the limit](https://code.claude.com/docs/en/context-window), so a full context window doesn't end your session." With no auto-compact window set, compaction happens at the model's context limit; models with a native 1M window ["compact before the window fills, at about 967K tokens by default"](https://code.claude.com/docs/en/model-config) (as of Nov 2026). To compact earlier, for focus or cost:
 
 ```text
 /autocompact 500k
 ```
 
-That command needs v2.1.221 or later. The same control exists as the `autoCompactWindow` setting and the `CLAUDE_CODE_AUTO_COMPACT_WINDOW` environment variable. `DISABLE_AUTO_COMPACT=1` turns the automatic trigger off while manual `/compact` still works.
+[That command needs v2.1.221 or later](https://code.claude.com/docs/en/commands). The same control exists as the `autoCompactWindow` setting and the `CLAUDE_CODE_AUTO_COMPACT_WINDOW` environment variable. `DISABLE_AUTO_COMPACT=1` turns the automatic trigger off while manual `/compact` still works.
 
-A compaction is a lossy summary: "The summary keeps your requests and key code snippets, but detailed instructions from early in the conversation may be lost. Put persistent rules in CLAUDE.md." What comes back afterwards:
+[A compaction is a lossy summary](https://code.claude.com/docs/en/how-claude-code-works): "The summary keeps your requests and key code snippets, but detailed instructions from early in the conversation may be lost. Put persistent rules in CLAUDE.md." [What comes back afterwards](https://code.claude.com/docs/en/context-window):
 
 | Item | After compaction |
 |---|---|
@@ -192,14 +192,14 @@ When compacting, always keep:
 - any instruction from me that says "always" or "never"
 ```
 
-2. **Move must-survive rules to a place that is re-injected.** That means the project-root CLAUDE.md or an unscoped rule. For a path-scoped rule that must persist, the docs say to "drop the `paths:` frontmatter".
-3. **Re-inject with a hook.** Claude Code runs `SessionStart` hooks that match the `compact` source and adds their output to the compacted context ([chapter 16](16-hooks.md)).
+2. **Move must-survive rules to a place that is re-injected.** That means the project-root CLAUDE.md or an unscoped rule. For a path-scoped rule that must persist, [the docs say](https://code.claude.com/docs/en/context-window) to "drop the `paths:` frontmatter".
+3. **Re-inject with a hook.** Claude Code runs `SessionStart` hooks that match the `compact` source and [adds their output to the compacted context](https://code.claude.com/docs/en/context-window) ([chapter 16](16-hooks.md)).
 
-If one huge file or tool result refills the window right after every summary, "Claude Code stops auto-compacting after a few attempts and shows an error instead of looping." The documented recovery: read the big file in chunks, run `/compact keep only the plan and the diff`, move the work to a subagent, or `/clear`.
+If one huge file or tool result refills the window right after every summary, "[Claude Code stops auto-compacting after a few attempts](https://code.claude.com/docs/en/how-claude-code-works) and shows an error instead of looping." [The documented recovery](https://code.claude.com/docs/en/troubleshooting): read the big file in chunks, run `/compact keep only the plan and the diff`, move the work to a subagent, or `/clear`.
 
 ## Resume and session storage
 
-Transcripts are stored "as JSONL at `~/.claude/projects/<project>/<session-id>.jsonl`", where `<project>` is your working directory path with non-alphanumeric characters replaced by `-`. They are kept for 30 days by default (`cleanupPeriodDays`). The entry format is internal and "changes between versions", so do not build tools that depend on it staying stable.
+[Transcripts are stored](https://code.claude.com/docs/en/sessions) "as JSONL at `~/.claude/projects/<project>/<session-id>.jsonl`", where `<project>` is your working directory path with non-alphanumeric characters replaced by `-`. They are [kept for 30 days by default](https://code.claude.com/docs/en/settings-reference) (`cleanupPeriodDays`). The entry format is internal and "changes between versions", so do not build tools that depend on it staying stable.
 
 ```bash
 claude --continue                 # most recent session in this directory
@@ -208,19 +208,19 @@ claude --resume oauth-migration   # by name; set one with /rename oauth-migratio
 claude --from-pr 1234             # the session linked to that pull request
 ```
 
-Inside a session, `/resume` opens the same picker: `Ctrl+A` shows all projects, `Ctrl+B` the current branch, `Space` previews, `/` searches.
+Inside a session, `/resume` [opens the same picker](https://code.claude.com/docs/en/sessions): `Ctrl+A` shows all projects, `Ctrl+B` the current branch, `Space` previews, `/` searches.
 
 | Resume restores | Resume does not restore |
 |---|---|
 | The conversation; after a compaction, the summary plus later messages only | Background Bash and monitor tasks |
-| Model, permission mode (terminal resume), active goal | Launch flags such as `--mcp-config`, `--plugin-dir`, `--add-dir`, `--settings`, `--allowedTools`, `--disallowedTools`: pass them again |
+| Model, permission mode (terminal resume), active goal | [Launch flags such as](https://code.claude.com/docs/en/sessions) `--mcp-config`, `--plugin-dir`, `--add-dir`, `--settings`, `--allowedTools`, `--disallowedTools`: pass them again |
 | Checkpoints, which survive a resume | Interrupted tool calls: they are not rerun |
 
-Opening one session in two terminals makes "both write to one transcript". Add `--fork-session` to keep the two conversations separate.
+Opening one session in two terminals makes ["both write to one transcript"](https://code.claude.com/docs/en/sessions). Add `--fork-session` to keep the two conversations separate.
 
 ## Checkpoints and `/rewind`
 
-"Every prompt you send that starts a turn creates a new checkpoint". Claude Code keeps snapshots for the 100 most recent checkpoints in a session and sweeps them about 30 days after the session last saved one. Open the menu with `/rewind` (aliases `/checkpoint`, `/undo`) or press `Esc` twice on an empty prompt.
+["Every prompt you send that starts a turn creates a new checkpoint"](https://code.claude.com/docs/en/checkpointing). Claude Code keeps snapshots for the 100 most recent checkpoints in a session and sweeps them about 30 days after the session last saved one. Open the menu with `/rewind` (aliases `/checkpoint`, `/undo`) or press `Esc` twice [on an empty prompt](https://code.claude.com/docs/en/interactive-mode).
 
 | Menu action | Effect |
 |---|---|
@@ -231,7 +231,7 @@ Opening one session in two terminals makes "both write to one transcript". Add `
 | **Summarize up to here** | Compresses what came before that point and keeps the later messages intact |
 | **Never mind** | Returns to the message list without changing anything |
 
-Summarizing "doesn't change files on disk, and the original messages stay in the session transcript". The two code options appear only when that checkpoint has tracked file changes to revert.
+[Summarizing](https://code.claude.com/docs/en/checkpointing) "doesn't change files on disk, and the original messages stay in the session transcript". The two code options appear only when that checkpoint has tracked file changes to revert.
 
 ```mermaid
 flowchart LR
@@ -246,15 +246,15 @@ flowchart LR
 | Change made by | Does `/rewind` restore it? |
 |---|---|
 | Claude's file editing tools | Yes |
-| Bash, on a file Claude had already edited | Yes: it "undoes changes that Bash commands make to that file afterward" |
-| Bash only, for example `sed -i`, a formatter, a code generator, `mv` or `rm` | No: "A file that only Bash commands changed isn't tracked and stays as it is. To revert it, use version control, such as Git." |
-| A subagent | Usually no: "Claude Code usually doesn't capture those edits in your session's checkpoints." |
+| Bash, on a file Claude had already edited | Yes: it ["undoes changes that Bash commands make to that file afterward"](https://code.claude.com/docs/en/checkpointing) |
+| Bash only, for example `sed -i`, a formatter, a code generator, `mv` or `rm` | No: "[A file that only Bash commands changed isn't tracked](https://code.claude.com/docs/en/checkpointing) and stays as it is. To revert it, use version control, such as Git." |
+| A subagent | Usually no: ["Claude Code usually doesn't capture those edits in your session's checkpoints."](https://code.claude.com/docs/en/checkpointing) |
 | You, outside Claude Code | Normally not captured |
 | Symlinked or hard-linked files, including files pnpm hard-links into place | No |
-| Remote systems: databases, APIs, deployments | No: they "can't be checkpointed" |
+| Remote systems: databases, APIs, deployments | No: they ["can't be checkpointed"](https://code.claude.com/docs/en/how-claude-code-works) |
 | A message you typed while Claude was working | It has no checkpoint of its own; the menu marks it **No code restore** |
 
-The docs sum it up: "Checkpoints are designed for quick, session-level recovery." They sit beside git; they do not replace it.
+[The docs sum it up](https://code.claude.com/docs/en/checkpointing): "Checkpoints are designed for quick, session-level recovery." They sit beside git; they do not replace it.
 
 ### Safe undo: rewind plus git
 
@@ -344,7 +344,7 @@ The first two items come from a rolling window of about four weeks of one develo
 | Symptom | Cause | Fix |
 |---|---|---|
 | A rule was followed early and ignored later | It lived only in the conversation or in a path-scoped rule and was summarised away | Move it to the project-root CLAUDE.md; use a hook if it can never bend |
-| `Autocompact is thrashing: the context refilled to the limit...` | One oversized file or tool result refills the window after each summary | Read in chunks, `/compact keep only the plan and the diff`, use a subagent, or `/clear` |
+| `Autocompact is thrashing: the context refilled to the limit...` | [One oversized file or tool result](https://code.claude.com/docs/en/troubleshooting) refills the window after each summary | Read in chunks, `/compact keep only the plan and the diff`, use a subagent, or `/clear` |
 | `/rewind` left some files changed | Bash-only changes, subagent edits or linked files are not tracked | Follow the safe-undo steps: `git status --short`, then `git restore` |
 | Claude started editing when you meant to leave the plan prompt | `Shift+Tab` approves the plan at the approval prompt | Press `Esc` first, then `Shift+Tab` |
 | Edits happened during plan mode | The session was started with bypass permissions available | Do not rely on plan mode's blocks there; start without bypass |

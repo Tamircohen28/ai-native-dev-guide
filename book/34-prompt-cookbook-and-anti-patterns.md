@@ -4,7 +4,7 @@ After this chapter you can write a prompt that an agent can finish without you, 
 
 ## Mental model
 
-A prompt is a brief to a capable colleague who has read the repository but cannot read your mind. The official guidance starts from an encouraging place: "in most cases, your first plain prompt in a fresh session already does the right thing". What you add on top is whatever the agent cannot find for itself: the goal behind the task, the facts that are not in the repo, the limits, and the check that says it is finished.
+A prompt is a brief to a capable colleague who has read the repository but cannot read your mind. [The official guidance](https://code.claude.com/docs/en/best-practices) starts from an encouraging place: "in most cases, your first plain prompt in a fresh session already does the right thing". What you add on top is whatever the agent cannot find for itself: the goal behind the task, the facts that are not in the repo, the limits, and the check that says it is finished.
 
 A prompt is also the weakest layer of control. The model reads it and may decide a line does not apply. So a prompt is for direction, and a hook or deny rule is for anything that has to hold every time (see [Chapter 16](16-hooks.md) and [Chapter 29](29-security-and-guardrails.md)).
 
@@ -54,23 +54,23 @@ The constraint line does the most work. Without it, a retry wrapper is the short
 
 ## Wording: what the current guidance says
 
-Much prompt advice from 2024 and 2025 was a workaround for weaker models. The current best-practices page retires it explicitly (as of Nov 2026).
+Much prompt advice from 2024 and 2025 was a workaround for weaker models. [The current best-practices page](https://code.claude.com/docs/en/best-practices) retires it explicitly (as of Nov 2026).
 
 | Older habit | Current guidance |
 |---|---|
-| IMPORTANT, capitals or "YOU MUST" on a rule the model keeps missing | Write the line plainly. Piling on emphasis "mostly makes Claude over-apply the rule". If the rule cannot bend, make it a hook or a deny rule. |
+| IMPORTANT, capitals or "YOU MUST" on a rule the model keeps missing | Write the line plainly. Piling on emphasis ["mostly makes Claude over-apply the rule"](https://code.claude.com/docs/en/best-practices). If the rule cannot bend, make it a hook or a deny rule. |
 | "think hard", "think harder", "be thorough" | Effort is the control: `/effort high` or `/effort xhigh`. Those phrases are ordinary prompt text. `ultrathink` still works. |
 | "keep going", "don't be lazy", "loop until done" | More likely to cause over-work than to fix a stall. If a run stops short, say `continue`. For unattended runs use `/goal` or a `Stop` hook. |
 | Describing the architecture and file layout | Claude reads the repo. Write down only what is not in it. |
 | "Hand it to a subagent for a better answer" | Delegating does not improve the answer. A fresh reviewer helps because it has not seen your reasoning. |
 
-Three lines from the vendor's own prompting guide show the house style: a plain sentence, and where it matters, the reason.
+Three lines from [the vendor's own prompting guide](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices) show the house style: a plain sentence, and where it matters, the reason.
 
 - "Avoid over-engineering. Only make changes that are directly requested or clearly necessary."
 - "Never speculate about code you have not opened."
 - "It is unacceptable to remove or edit tests because this could lead to missing or buggy functionality."
 
-> **Note:** If you keep adding emphasis to a line and the agent still misses it, the docs say that is the sign the line belongs in a hook. Emphasis is not an enforcement mechanism.
+> **Note:** If you keep adding emphasis to a line and the agent still misses it, [the docs say](https://code.claude.com/docs/en/best-practices) that is the sign the line belongs in a hook. Emphasis is not an enforcement mechanism.
 
 ## Templates
 
@@ -78,7 +78,7 @@ Seventeen templates, grouped by job. Replace everything in `<angle brackets>` an
 
 ### Explore and explain
 
-**1. Overview and trace** (docs). Read-only, so it is safe as a first prompt in an unfamiliar repo.
+**1. [Overview and trace](https://code.claude.com/docs/en/common-workflows)** (docs). Read-only, so it is safe as a first prompt in an unfamiliar repo.
 
 ```text
 Give me an overview of this codebase: what it does, how it is laid out, how to build and test it.
@@ -119,7 +119,7 @@ and say whether it belongs in a test, a hook or a line in CLAUDE.md.
 
 ### Feature
 
-**5. Interview to a spec** (docs). The second line is the official wording. Then start a fresh session to build from the file.
+**5. Interview to a spec** (docs). The second line is [the official wording](https://code.claude.com/docs/en/best-practices). Then start a fresh session to build from the file.
 
 ```text
 I want to build <feature, in one sentence>.
@@ -151,7 +151,7 @@ If a step needs a behaviour change, stop and ask.
 
 ### Tests
 
-**8. Red, then green.** Seeing the test fail first proves that it exercises the new code.
+**8. Red, then green.** [Seeing the test fail first proves that it exercises the new code.](https://simonwillison.net/guides/agentic-engineering-patterns/red-green-tdd/)
 
 ```text
 Use red/green TDD for <behaviour>.
@@ -160,7 +160,7 @@ Use red/green TDD for <behaviour>.
 3. Run the full suite with <command> and show the output.
 ```
 
-**9. Close a coverage gap** (docs).
+**9. [Close a coverage gap](https://code.claude.com/docs/en/common-workflows)** (docs).
 
 ```text
 Find functions in <file or module> that are not covered by tests.
@@ -170,7 +170,7 @@ Run the new tests. If one fails because the code is wrong, report it; do not wea
 
 ### Review
 
-**10. Fresh-context review against the spec** (docs). Keep "skip style": a reviewer asked to find problems will always find something.
+**10. Fresh-context review against the spec** (docs). Keep "skip style": [a reviewer asked to find problems will always find something](https://code.claude.com/docs/en/best-practices).
 
 ```text
 Use a subagent to review the <feature> diff against SPEC.md.
@@ -188,7 +188,7 @@ Give me the top three bottlenecks with evidence. For each: the change you propos
 
 ### Delegation brief for a subagent
 
-**12. Worker brief.** A subagent that is not a fork starts without your conversation, so the brief must stand alone ([Chapter 14](14-subagents.md)). The four parts Anthropic's own multi-agent write-up asks for are an objective, an output format, guidance on tools, and clear boundaries.
+**12. Worker brief.** A subagent that is not a fork [starts without your conversation](https://code.claude.com/docs/en/sub-agents), so the brief must stand alone ([Chapter 14](14-subagents.md)). The four parts [Anthropic's own multi-agent write-up](https://www.anthropic.com/research/multi-agent-research-system) asks for are an objective, an output format, guidance on tools, and clear boundaries.
 
 ```text
 Objective: <one outcome, in one sentence>.

@@ -26,13 +26,13 @@ flowchart TB
     P2 --> R
 ```
 
-The units you can run in parallel, as documented in Nov 2026:
+The units you can run in parallel, [as documented in Nov 2026](https://code.claude.com/docs/en/agents):
 
 | Unit | Starts with | Own files? | Result comes back as |
 |---|---|---|---|
 | Background shell command | Ask Claude, or press `Ctrl+B` | No | A task ID at once; an output file Claude reads later |
 | Background subagent | The default for subagents Claude spawns | Only with `isolation: worktree` | A completion notification carrying the summary |
-| Background session | `claude --bg`, `/background`, `/fork` | Yes, it moves into a worktree before editing | `claude agents`, `claude logs <id>` |
+| Background session | `claude --bg`, `/background`, `/fork` | Yes, [it moves into a worktree before editing](https://code.claude.com/docs/en/agent-view) | `claude agents`, `claude logs <id>` |
 | Second interactive session | `claude --worktree <name>` | Yes | You read it; sessions can also message each other |
 | Cloud session | `claude --cloud "<task>"` | Yes, on a remote machine | The web UI, or `claude --teleport` |
 
@@ -47,14 +47,14 @@ A short timeline with two agents sharing one directory:
 | 3 | Runs the tests, sees the old behaviour, starts "fixing" again | Edits `src/auth.ts` for its own reason | Two half-changes mixed |
 | 4 | | Commits everything on `fix/b` | A's work now sits on B's branch, plus a stash nobody remembers |
 
-The agent-teams docs state the same thing in one line: "Two teammates editing the same file leads to overwrites." The author's own lesson file words it as "silent last-write-wins data loss," not a git conflict.
+The agent-teams docs state the same thing in one line: "[Two teammates editing the same file leads to overwrites.](https://code.claude.com/docs/en/agent-teams)" The author's own lesson file words it as "silent last-write-wins data loss," not a git conflict.
 
 A worktree fixes the file part of this. It does not split the repository:
 
 | Separate per worktree | Shared by every worktree |
 |---|---|
-| Working files, index, `HEAD` | Commits, branches, tags, remotes and **the stash list** |
-| Installed dependencies, build output, `.env` files | In Claude Code: project-scope plugins and "don't ask again" Bash approvals, which are saved to the main checkout's `.claude/settings.local.json` |
+| [Working files, index](https://git-scm.com/docs/git-worktree), `HEAD` | Commits, branches, tags, remotes and **the stash list** |
+| Installed dependencies, build output, `.env` files | In Claude Code: project-scope plugins and ["don't ask again" Bash approvals](https://code.claude.com/docs/en/worktrees), which are saved to the main checkout's `.claude/settings.local.json` |
 
 So a worktree prevents file overwrites, but an agent in worktree A can still drop a stash, delete a branch or merge a PR that belongs to the agent in worktree B. That part needs rules, covered later in this chapter.
 
@@ -75,13 +75,13 @@ git worktree prune                 # drops records of worktree folders deleted b
 
 Three rules cover most surprises:
 
-1. A branch can be checked out in only one worktree at a time. Git refuses the second checkout.
+1. A branch can be checked out in only one worktree at a time. [Git refuses the second checkout](https://git-scm.com/docs/git-worktree).
 2. All worktrees share one object store, so creating one is fast and cheap on disk. Dependencies and build output are not shared.
 3. Gitignored files (`.env`, `node_modules`, local databases) do not exist in a new worktree until you create or copy them.
 
 ## The `--worktree` flag
 
-Claude Code wraps those steps in one flag:
+Claude Code [wraps those steps in one flag](https://code.claude.com/docs/en/worktrees):
 
 ```bash
 claude --worktree feature-auth     # or: claude -w feature-auth
@@ -92,11 +92,11 @@ claude --worktree feature-auth --tmux   # open it in a tmux session; --tmux requ
 
 | Question | Answer (docs, Nov 2026) |
 |---|---|
-| Where does it live? | `.claude/worktrees/<name>/` at the repository root. Add `.claude/worktrees/` to `.gitignore`. A PR worktree lands in `.claude/worktrees/pr-<number>` |
+| Where does it live? | `.claude/worktrees/<name>/` [at the repository root](https://code.claude.com/docs/en/worktrees). Add `.claude/worktrees/` to `.gitignore`. A PR worktree lands in `.claude/worktrees/pr-<number>` |
 | Which branch? | A new branch named `worktree-<name>` |
 | Based on what? | Setting `worktree.baseRef`: `"fresh"` (default) is the default branch **on the remote**, so your unpushed commits are not in the worktree; `"head"` uses your current `HEAD`. A branch name is not accepted |
 | What about `.env`? | A `.worktreeinclude` file in the project root (gitignore syntax) lists gitignored files to copy into each new worktree |
-| What stops the session leaving? | In a worktree, Claude Code blocks `Edit`/`Write`/`NotebookEdit` on main-checkout paths, commands whose working directory resolves there, and git redirected there (`git -C`, `--git-dir`, `GIT_DIR`) |
+| What stops the session leaving? | In a worktree, [Claude Code blocks](https://code.claude.com/docs/en/worktrees) `Edit`/`Write`/`NotebookEdit` on main-checkout paths, commands whose working directory resolves there, and git redirected there (`git -C`, `--git-dir`, `GIT_DIR`) |
 | Requirements | The repository needs at least one commit. Other version-control systems use `WorktreeCreate` / `WorktreeRemove` hooks ([chapter 16](16-hooks.md)) |
 
 ```text
@@ -114,14 +114,14 @@ Cleanup depends on how the session ends:
 |---|---|
 | Interactive, unnamed session, no changes | The worktree is removed automatically |
 | Interactive, with changes or commits | Claude Code asks whether to keep or remove it |
-| `claude -p` (headless) run | Never cleaned up. Remove it yourself with `git worktree remove` (run `git worktree unlock` first if it is locked) |
+| `claude -p` (headless) run | [Never cleaned up](https://code.claude.com/docs/en/worktrees). Remove it yourself with `git worktree remove` (run `git worktree unlock` first if it is locked) |
 | Subagent or background-session worktree | Kept if it holds changes, untracked files or commits; a periodic sweep removes ones older than `cleanupPeriodDays` unless they hold work |
 
-> **Warning:** Worktree isolation is a guard rail, not a sandbox. The docs say it does not track which files a shell command writes, so `cp` or a redirect into the main checkout is not refused. Hooks also keep `${CLAUDE_PROJECT_DIR}` pointing at the original project root. For hard limits use permissions and the sandbox ([chapter 29](29-security-and-guardrails.md)).
+> **Warning:** Worktree isolation is a guard rail, not a sandbox. The docs say [it does not track which files a shell command writes](https://code.claude.com/docs/en/worktrees), so `cp` or a redirect into the main checkout is not refused. Hooks also keep `${CLAUDE_PROJECT_DIR}` pointing at the original project root. For hard limits use permissions and the sandbox ([chapter 29](29-security-and-guardrails.md)).
 
 ## Subagents in worktrees
 
-A subagent ([chapter 14](14-subagents.md)) starts in the main conversation's current working directory, so by default it writes into your checkout. Give a writing subagent its own copy in the agent file:
+A subagent ([chapter 14](14-subagents.md)) [starts in the main conversation's current working directory](https://code.claude.com/docs/en/sub-agents), so by default it writes into your checkout. Give a writing subagent its own copy in the agent file:
 
 ```markdown
 ---
@@ -136,11 +136,11 @@ and return the branch name, the commit hash and the test command output.
 
 You can also say it in the prompt: "use worktrees for your agents". Facts to keep in mind:
 
-- The copy branches from your **default branch**, not from the parent session's `HEAD`. Work you have not merged is not there; name the starting branch in the task if it matters.
-- The subagent's instruction files still come from your main conversation, not from its worktree.
-- Up to 20 subagents run at once by default (`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`).
-- `/batch <instruction>` packages the whole pattern: it splits a change into 5 to 30 independent units and runs one background subagent per unit in its own worktree, each opening a PR or reporting what happened.
-- Subagent edits are usually not captured by the parent's checkpoints, so `/rewind` will not undo them ([chapter 10](10-plan-mode-checkpoints-and-context-management.md)). A commit in the worktree is your undo.
+- The copy [branches from your **default branch**](https://code.claude.com/docs/en/worktrees), not from the parent session's `HEAD`. Work you have not merged is not there; name the starting branch in the task if it matters.
+- The subagent's [instruction files still come from your main conversation](https://code.claude.com/docs/en/worktrees), not from its worktree.
+- [Up to 20 subagents run at once](https://code.claude.com/docs/en/sub-agents) by default (`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`).
+- `/batch <instruction>` packages the whole pattern: it [splits a change into 5 to 30 independent units](https://code.claude.com/docs/en/commands) and runs one background subagent per unit in its own worktree, each opening a PR or reporting what happened.
+- Subagent edits are [usually not captured by the parent's checkpoints](https://code.claude.com/docs/en/checkpointing), so `/rewind` will not undo them ([chapter 10](10-plan-mode-checkpoints-and-context-management.md)). A commit in the worktree is your undo.
 
 > **Field note:** In a product workspace, two agents in one fan-out (a batch of subagents started together) hit the wrong directory because subagents inherited the spawning session's worktree binding; one "produced nothing after five attempts". The workspace's rule since then: every dispatch prompt (the task message sent to a subagent) opens with worktree setup and a remote check.
 
@@ -162,18 +162,18 @@ flowchart LR
     E --> F["Claude reads the output and reports"]
 ```
 
-**Shell commands.** Ask for it ("run the test suite in the background") or press `Ctrl+B` while a command runs (twice inside tmux). The command returns a background task ID immediately; its output is written to a file that Claude retrieves with the Read tool. `/tasks` (alias `/bashes`) lists and manages them.
+**Shell commands.** Ask for it ("run the test suite in the background") or press `Ctrl+B` while a command runs ([twice inside tmux](https://code.claude.com/docs/en/interactive-mode)). The command returns a background task ID immediately; [its output is written to a file](https://code.claude.com/docs/en/tools-reference) that Claude retrieves with the Read tool. `/tasks` (alias `/bashes`) lists and manages them.
 
 | Limit (Nov 2026) | Value |
 |---|---|
 | Lifetime | Cleaned up when Claude Code exits; no time limit in a local interactive session |
-| Unattended runs (`-p`, SDK, CI, cloud) | 30 minutes by default, 2 hours at most; 10 minutes for a plain-text `-p` prompt |
-| Output size | Terminated above 5GB |
-| Foreground timeout | The command is moved to the background instead of being killed, unless it starts with `sleep` |
+| Unattended runs (`-p`, SDK, CI, cloud) | [30 minutes by default, 2 hours at most](https://code.claude.com/docs/en/tools-reference); 10 minutes for a plain-text `-p` prompt |
+| Output size | [Terminated above 5GB](https://code.claude.com/docs/en/tools-reference) |
+| Foreground timeout | The command is [moved to the background instead of being killed](https://code.claude.com/docs/en/tools-reference), unless it starts with `sleep` |
 | Started by a foreground subagent | Ends when that subagent's run ends |
 | Switch it all off | `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` (you also lose `Ctrl+B`) |
 
-**Subagents.** A subagent that Claude spawns from your main conversation starts in the background (the `web-fetch` agent is the exception). Its result reaches Claude "as a completion notification in a later turn". If it needs a permission, the prompt appears in your main session and names the subagent that is asking. `Ctrl+X Ctrl+K`, pressed twice within 3 seconds, stops all running background subagents. To let Claude wait for a subagent in an interactive session, set `CLAUDE_CODE_FORK_SUBAGENT=0`.
+**Subagents.** A subagent that Claude spawns from your main conversation starts in the background (the `web-fetch` agent is the exception). Its result reaches Claude "[as a completion notification in a later turn](https://code.claude.com/docs/en/sub-agents)". If it needs a permission, the prompt appears in your main session and names the subagent that is asking. `Ctrl+X Ctrl+K`, pressed twice within 3 seconds, [stops all running background subagents](https://code.claude.com/docs/en/interactive-mode). To let Claude wait for a subagent in an interactive session, set `CLAUDE_CODE_FORK_SUBAGENT=0`.
 
 **Background sessions.** A whole session can run detached:
 
@@ -186,14 +186,14 @@ claude attach "$ID"          # take it over in this terminal
 claude stop "$ID"            # also: claude respawn "$ID", claude rm "$ID"
 ```
 
-Inside a session, `/background` (alias `/bg`) detaches the current one and `/fork` copies the conversation into a new background session. Before editing, a background session moves into a worktree under `.claude/worktrees/` (opt out with `{"worktree": {"bgIsolation": "none"}}`). These sessions are local: they survive sleep but stop if the machine shuts down, and an idle one is stopped after about an hour and resumes when you reply. State lives in `~/.claude/jobs/<id>/`.
+Inside a session, `/background` (alias `/bg`) detaches the current one and `/fork` [copies the conversation into a new background session](https://code.claude.com/docs/en/agents). Before editing, a background session moves into a worktree under `.claude/worktrees/` (opt out with `{"worktree": {"bgIsolation": "none"}}`). These sessions are local: they survive sleep but stop if the machine shuts down, and an idle one is [stopped after about an hour](https://code.claude.com/docs/en/agent-view) and resumes when you reply. State lives in `~/.claude/jobs/<id>/`.
 
 ## Waiting without polling
 
 A polling loop (`sleep 60`, check, repeat) burns a turn per check, and a waiting agent is silent, which looks the same as a stuck agent. Use something that blocks until the event and then wakes Claude:
 
 1. **One background watcher that exits on every terminal state.** For CI: `gh pr checks <number> --watch` as a background command. When it exits, the notification starts a new turn.
-2. **The Monitor tool.** Claude runs a watch script (or a WebSocket) in the background and receives each output line as it appears. The deadline is 5 minutes by default and 30 at most; it follows Bash permission rules.
+2. **The Monitor tool.** Claude runs a watch script (or a WebSocket) in the background and receives each output line as it appears. [The deadline is 5 minutes by default and 30 at most](https://code.claude.com/docs/en/tools-reference); it follows Bash permission rules.
 3. **End the turn.** After arming the watcher, Claude should stop. Nothing is lost: the notification brings it back.
 
 ```text
@@ -220,13 +220,13 @@ until curl -fsS http://localhost:3000/health >/dev/null; do sleep 5; done; echo 
 | | `/loop` | Desktop scheduled tasks | Cloud scheduled tasks |
 |---|---|---|---|
 | Needs | An open session | The machine on, no open session | Nothing local |
-| Minimum interval | 1 minute | See the scheduled-tasks page | 1 hour |
+| Minimum interval | 1 minute | [See the scheduled-tasks page](https://code.claude.com/docs/en/scheduled-tasks) | 1 hour |
 | Local files | Yes | Yes | No |
 | Set up with | `/loop` | The desktop app | `/schedule` (alias `/routines`) or the web UI |
 
-Details for `/loop` as of Nov 2026: the schedule is 5-field cron in **local** time; at most 50 tasks per session; recurring tasks expire after 30 days (7 before v2.1.330); runs are jittered and can fire up to 30 minutes late; missed fires are not caught up. `CLAUDE_CODE_DISABLE_CRON=1` turns it off. Cloud scheduled tasks (a research preview, formerly "routines") can trigger on a schedule, an API call or a GitHub event, use cron in **UTC**, and allow 100 scheduled runs per hour per account.
+Details for `/loop` as of Nov 2026: the schedule is 5-field cron in **local** time; [at most 50 tasks per session](https://code.claude.com/docs/en/scheduled-tasks); recurring tasks expire after 30 days (7 before v2.1.330); runs are jittered and can fire up to 30 minutes late; missed fires are not caught up. `CLAUDE_CODE_DISABLE_CRON=1` turns it off. Cloud scheduled tasks (a research preview, formerly "routines") can trigger on a schedule, an API call or a GitHub event, use cron in **UTC**, and allow [100 scheduled runs per hour per account](https://code.claude.com/docs/en/routines).
 
-A cloud session is the same idea without a schedule: `claude --cloud "Fix the authentication bug in src/auth/login.ts"` starts one, and `claude --teleport` pulls it into your terminal. The hand-off is one-way. Chapter [27](27-headless-ci-and-the-agent-sdk.md) covers unattended runs in depth.
+A cloud session is the same idea without a schedule: `claude --cloud "Fix the authentication bug in src/auth/login.ts"` starts one, and `claude --teleport` pulls it into your terminal. [The hand-off is one-way](https://code.claude.com/docs/en/claude-code-on-the-web). Chapter [27](27-headless-ci-and-the-agent-sdk.md) covers unattended runs in depth.
 
 ## Several interactive sessions at once
 
@@ -234,7 +234,7 @@ Three terminals, three worktrees, three branches is a normal day. The collisions
 
 1. **One session, one worktree, one named branch.** Start with `claude --worktree auth-refresh --name auth-refresh` so the session name, the folder and the branch (`worktree-auth-refresh`) match. `/rename` fixes a name later.
 2. **A session touches only what it created.** That covers branches, worktrees, stashes and PRs. The stash list is shared across worktrees, so prefer a WIP (work-in-progress) commit on your own branch; if you must stash, label it: `git stash push -m "auth-refresh: wip before rebase"`.
-3. **Find the owner before acting on a PR.** `claude --from-pr 1234` opens the session picker filtered to sessions linked to that PR. `/list-agents` (alias `/peers`) lists the sessions Claude can message, and typing `@` suggests your other live sessions on the machine (v2.1.232+).
+3. **Find the owner before acting on a PR.** `claude --from-pr 1234` [opens the session picker filtered to sessions linked to that PR](https://code.claude.com/docs/en/cli-reference). `/list-agents` (alias `/peers`) [lists the sessions Claude can message](https://code.claude.com/docs/en/commands), and typing `@` [suggests your other live sessions on the machine](https://code.claude.com/docs/en/interactive-mode) (v2.1.232+).
 4. **Keep a "who holds what" note** outside every worktree (a file in a shared folder, or a pinned issue). A held PR looks exactly like a mergeable PR unless someone wrote the hold down.
 5. **Re-orient after a resume or a compaction.** Read `git log origin/main -5` and the open-PR list before writing code. An empty PR list does not prove that an agent died.
 

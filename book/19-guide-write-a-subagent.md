@@ -92,7 +92,7 @@ You should see the tests pass (`OK`) and then `50.0`. Ten items at 5.0 should co
 
 ## Step 2 — Decide that a subagent is the right tool
 
-Run the idea through the decision guide in [chapter 11](11-the-extension-model.md) before writing a file. The official trigger for a subagent is "A side task floods your conversation with output you won't reference again", and the docs describe one as an "Isolated execution context that returns summarized results". A diff review fits for three reasons:
+Run the idea through the decision guide in [chapter 11](11-the-extension-model.md) before writing a file. [The official trigger for a subagent](https://code.claude.com/docs/en/features-overview) is "A side task floods your conversation with output you won't reference again", and the docs describe one as an "Isolated execution context that returns summarized results". A diff review fits for three reasons:
 
 | Need | Why a subagent gives it |
 |---|---|
@@ -106,7 +106,7 @@ A PR checklist alone would be a skill ([chapter 15](15-skills.md)); a must-hold 
 
 ## Step 3 — Try the idea as a session-only agent
 
-Before you save anything, test the prompt with the `--agents` flag. Agents defined this way "exist only for that session and aren't saved to disk, making them useful for quick testing".
+Before you save anything, test the prompt with the `--agents` flag. Agents defined this way ["exist only for that session and aren't saved to disk, making them useful for quick testing"](https://code.claude.com/docs/en/sub-agents).
 
 ```bash
 cd ~/scratch/pr-helper-demo
@@ -125,13 +125,13 @@ In that session, ask:
 Use the diff-reviewer agent on .pr-helper/diff.patch. Goal: orders of 10 or more items get 10% off.
 ```
 
-You should see a tool-call row naming the agent, in the form the docs show as `code-improver(Suggest code improvements)`, then its report. An interactive session accepts only inline JSON here; the file form (`--agents ./agents.json`) works with `-p` from v2.1.281.
+You should see a tool-call row naming the agent, in the form [the docs show](https://code.claude.com/docs/en/sub-agents) as `code-improver(Suggest code improvements)`, then its report. An interactive session accepts only inline JSON here; the file form (`--agents ./agents.json`) [works with](https://code.claude.com/docs/en/cli-reference) `-p` from v2.1.281.
 
 **Check:** the report mentions the `qty > 10` line; if not, fix the prompt now, before you share it. (This guide started no interactive session; the row format is quoted from the docs.)
 
 ## Step 4 — Write the agent file
 
-Save this as `.claude/agents/diff-reviewer.md`. The frontmatter is YAML, and the body is the agent's system prompt. Only `name` and `description` are required.
+Save this as `.claude/agents/diff-reviewer.md`. The frontmatter is YAML, and the body is the agent's system prompt. Only `name` and `description` [are required](https://code.claude.com/docs/en/sub-agents).
 
 ```markdown
 ---
@@ -166,9 +166,9 @@ Summarize what you found.
 
 What each field does here:
 
-- **`description`** is written for delegation: what it does, when to use it ("Use proactively before…"; the docs suggest phrases like "use proactively"), and what input it needs. It sits in context on every turn, so keep it to two or three sentences.
-- **`tools: Read, Grep, Glob`** makes it read-only. Without a `tools` line it "Inherits every tool available to subagents". The docs' own reviewer example adds `Bash` and warns that it "can still change files through Bash". You may want `Bash` so the agent can run `git diff` itself; then add `permissions.deny` rules for the commands you fear ([chapter 9](09-settings-and-permissions.md)). This guide keeps `Bash` out and hands the agent a saved diff instead.
-- **`model: sonnet`** runs the review on Sonnet whatever the main session uses. Other values are `opus`, `haiku`, `fable`, a full model ID or `inherit` (as of Nov 2026). Leave it out and the agent runs on the parent's model.
+- **`description`** is written for delegation: what it does, when to use it ("Use proactively before…"; [the docs suggest phrases](https://code.claude.com/docs/en/sub-agents) like "use proactively"), and what input it needs. It sits in context on every turn, so keep it to two or three sentences.
+- **`tools: Read, Grep, Glob`** makes it read-only. Without a `tools` line it ["Inherits every tool available to subagents"](https://code.claude.com/docs/en/sub-agents). The docs' own reviewer example adds `Bash` and warns that it "can still change files through Bash". You may want `Bash` so the agent can run `git diff` itself; then add `permissions.deny` rules for the commands you fear ([chapter 9](09-settings-and-permissions.md)). This guide keeps `Bash` out and hands the agent a saved diff instead.
+- **`model: sonnet`** runs the review on Sonnet whatever the main session uses. [Other values are](https://code.claude.com/docs/en/sub-agents) `opus`, `haiku`, `fable`, a full model ID or `inherit` (as of Nov 2026). Leave it out and the agent runs on the parent's model.
 
 > **Note:** With no `permissionMode`, a subagent inherits the main session's mode (new interactive sessions start in `auto`). The short `tools` list is what keeps this agent read-only.
 
@@ -176,7 +176,7 @@ What each field does here:
 
 ## Step 5 — Or have Claude draft it
 
-There is no creation wizard any more. On v2.1.197 and earlier, `/agents` opened an interactive interface; today it prints "a reminder to ask Claude to create or manage subagents, or to edit `.claude/agents/` or `~/.claude/agents/` directly". The docs' advice is: "ask Claude to write it for you, or write the file yourself". A prompt in the shape of the docs' example:
+There is no creation wizard any more. On v2.1.197 and earlier, `/agents` opened an interactive interface; today it prints ["a reminder to ask Claude to create or manage subagents](https://code.claude.com/docs/en/commands), or to edit `.claude/agents/` or `~/.claude/agents/` directly". The docs' advice is: ["ask Claude to write it for you, or write the file yourself"](https://code.claude.com/docs/en/sub-agents). A prompt in the shape of the docs' example:
 
 ```text
 Create a project subagent in .claude/agents/diff-reviewer.md that reviews a saved diff file
@@ -185,7 +185,7 @@ and a failing input, and never invents findings. Make it read-only (Read, Grep, 
 it use Sonnet.
 ```
 
-Read the draft, `tools` line first. `claude agents` ("Manage background agents") creates nothing. For a guided draft, the optional official `plugin-dev` plugin ships an `agent-creator` agent (`/plugin install plugin-dev@claude-plugins-official`).
+Read the draft, `tools` line first. `claude agents` ("Manage background agents") creates nothing. For a guided draft, [the optional official](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/plugin-dev) `plugin-dev` plugin ships an `agent-creator` agent (`/plugin install plugin-dev@claude-plugins-official`).
 
 **Check:** the drafted file has the four frontmatter lines from Step 4 and no `Bash`.
 
@@ -195,14 +195,14 @@ Read the draft, `tools` line first. `claude agents` ("Manage background agents")
 claude plugin validate .claude/agents
 ```
 
-On v2.1.332 this guide's run printed `Validating components in: …/.claude/agents` and `✔ Validation passed`. The validator lists only files with problems; a file without a `description` gets a warning, and `--strict` turns warnings into exit code 1. In this guide's runs it did **not** flag a misspelled field (`tool:` for `tools:`), a name with spaces, or YAML that a strict parser rejects. Add a parse check (needs PyYAML, `python3 -m pip install pyyaml`):
+On v2.1.332 this guide's run printed `Validating components in: …/.claude/agents` and `✔ Validation passed`. The validator lists only files with problems; a file without a `description` gets a warning, and `--strict` [turns warnings into exit code 1](https://code.claude.com/docs/en/plugins/cli-reference). In this guide's runs it did **not** flag a misspelled field (`tool:` for `tools:`), a name with spaces, or YAML that a strict parser rejects. Add a parse check (needs PyYAML, `python3 -m pip install pyyaml`):
 
 ```bash
 python3 -c "import sys,yaml; print(sorted(yaml.safe_load(open(sys.argv[1]).read().split('---')[1])))" \
   .claude/agents/diff-reviewer.md
 ```
 
-It printed `['description', 'model', 'name', 'tools']`. Claude Code watches `.claude/agents/`, so the next delegation uses the file with no restart.
+It printed `['description', 'model', 'name', 'tools']`. Claude Code watches `.claude/agents/`, so the next delegation uses the file [with no restart](https://code.claude.com/docs/en/sub-agents).
 
 **Check:** both commands succeed and the field list has no typos.
 
@@ -214,9 +214,9 @@ Start `claude` in the repo and try the three explicit forms:
 |---|---|
 | @-mention | `@agent-diff-reviewer GOAL: orders of 10 or more get 10% off. DIFF: .pr-helper/diff.patch` |
 | Name it in a prompt | `Use the diff-reviewer agent on .pr-helper/diff.patch …` |
-| Whole session | `claude --agent diff-reviewer` (the header shows `@diff-reviewer`) |
+| [Whole session](https://code.claude.com/docs/en/cli-reference) | `claude --agent diff-reviewer` (the header shows `@diff-reviewer`) |
 
-Even with an @-mention, "Your full message still goes to Claude, which writes the subagent's task prompt". So the implicit route depends on Claude knowing enough to brief it. Give it the four parts of a delegation brief from [chapter 14](14-subagents.md), without naming the agent:
+Even with an @-mention, ["Your full message still goes to Claude, which writes the subagent's task prompt"](https://code.claude.com/docs/en/sub-agents). So the implicit route depends on Claude knowing enough to brief it. Give it the four parts of a delegation brief from [chapter 14](14-subagents.md), without naming the agent:
 
 ```text
 Before I open a PR, get an independent review of this branch.
@@ -234,11 +234,11 @@ Claude should pick `diff-reviewer` from its description; if it reviews inline, s
 
 | Command | What it tells you |
 |---|---|
-| `/context` | Lists "custom subagents with the source each loaded from": `diff-reviewer` from `.claude/agents/` |
-| `/tasks` | Background work "including subagents that have finished"; it names the model on the subagent's row (v2.1.242+), and finished ones sit under "Earlier in this session" (v2.1.319+) |
-| `claude --debug` | Writes `~/.claude/debug/<session-id>.txt`; search it for `does not recognize or apply` to find a misspelled field (v2.1.296+) |
+| `/context` | Lists ["custom subagents with the source each loaded from"](https://code.claude.com/docs/en/debug-your-config): `diff-reviewer` from `.claude/agents/` |
+| `/tasks` | Background work ["including subagents that have finished"](https://code.claude.com/docs/en/commands); it names the model on the subagent's row (v2.1.242+), and finished ones sit under "Earlier in this session" (v2.1.319+) |
+| `claude --debug` | Writes `~/.claude/debug/<session-id>.txt`; search it for `does not recognize or apply` [to find a misspelled field](https://code.claude.com/docs/en/sub-agents) (v2.1.296+) |
 
-Cost has two parts: the subagent "spends tokens of its own while it runs", and its report lands in your main context. Step 9 shrinks the second ([chapter 30](30-cost-usage-and-observability.md) covers totals).
+Cost has two parts: the subagent ["spends tokens of its own while it runs"](https://code.claude.com/docs/en/sub-agents), and its report lands in your main context. Step 9 shrinks the second ([chapter 30](30-cost-usage-and-observability.md) covers totals).
 
 **Check:** `/tasks` shows the run with model Sonnet.
 
@@ -281,10 +281,10 @@ The reviewer should return `VERDICT: approve` and no blocking finding. Then undo
 
 Change one thing at a time and keep evidence: a list of prompts that should delegate ("review my branch before I open a PR") and near-misses that should not ("fix the bulk discount bug"), each run twice in a fresh session, with the result written down before and after each edit.
 
-- **It is not chosen automatically.** Put the trigger words people type ("review", "before a PR", "diff") early in `description`. The docs warn when all agent descriptions together pass 15,000 tokens, so add words, not paragraphs.
+- **It is not chosen automatically.** Put the trigger words people type ("review", "before a PR", "diff") early in `description`. [The docs warn](https://code.claude.com/docs/en/sub-agents) when all agent descriptions together pass 15,000 tokens, so add words, not paragraphs.
 - **It is chosen for the wrong tasks.** Add a boundary such as "Not for fixing code".
 - **Findings without evidence.** Keep the "No failing input, no finding" rule; run the clean diff from Step 9 again after every prompt change to catch invented findings.
-- **Measuring it properly.** Nothing built in measures delegation for a standalone `.claude/agents/` file. For an agent inside a plugin, `claude plugin eval` "runs each prompt with and without the plugin and scores the results" ([chapter 21](21-guide-build-and-ship-a-plugin.md)).
+- **Measuring it properly.** Nothing built in measures delegation for a standalone `.claude/agents/` file. For an agent inside a plugin, `claude plugin eval` ["runs each prompt with and without the plugin and scores the results"](https://code.claude.com/docs/en/sub-agents) ([chapter 21](21-guide-build-and-ship-a-plugin.md)).
 
 ## Ship it or share it
 
@@ -295,7 +295,7 @@ Change one thing at a time and keep evidence: a list of prompts that should dele
 | All your projects | `~/.claude/agents/diff-reviewer.md` | Only you |
 | A plugin | `<plugin>/agents/diff-reviewer.md` | Everyone with the plugin enabled; invoked as `@agent-<plugin>:diff-reviewer` |
 
-When names clash, "managed > CLI flag > project > user > plugin". A plugin agent ignores `hooks`, `mcpServers` and `permissionMode` "For security reasons". To share it with your team, commit it. In this demo, commit it on `main` and rebase the feature branch onto it, so the branch diff stays about pricing (chapter 20's script prints that diff):
+When names clash, ["managed > CLI flag > project > user > plugin"](https://code.claude.com/docs/en/features-overview). A plugin agent ignores `hooks`, `mcpServers` and `permissionMode` ["For security reasons"](https://code.claude.com/docs/en/sub-agents). To share it with your team, commit it. In this demo, commit it on `main` and rebase the feature branch onto it, so the branch diff stays about pricing (chapter 20's script prints that diff):
 
 ```bash
 git switch main
@@ -319,7 +319,7 @@ Both come from the author's plugin repository; the counts are that project's own
 | Symptom | Cause | Fix |
 |---|---|---|
 | The agent never appears in `/context` | `---` not on line 1, no `name`, `name` without `description`, or YAML that does not parse | Fix the frontmatter; run with `--debug` and read the log |
-| A setting seems ignored | Misspelled field; unknown fields are "ignored without reporting an error" | Search the debug log for `does not recognize or apply` |
+| A setting seems ignored | Misspelled field; unknown fields are ["ignored without reporting an error"](https://code.claude.com/docs/en/sub-agents) | Search the debug log for `does not recognize or apply` |
 | The "read-only" agent changed a file | `tools` includes `Bash`, or `tools` was left out | List tools explicitly; add `permissions.deny` rules if it needs `Bash` |
 | It says it cannot see the diff | It has no `Bash`, so it cannot run `git diff` | Save the diff to a file and name the path in the brief |
 | Claude reviews inline instead of delegating | Weak description, or the brief lacked a goal | Add trigger words; name the agent or use `@agent-diff-reviewer` |

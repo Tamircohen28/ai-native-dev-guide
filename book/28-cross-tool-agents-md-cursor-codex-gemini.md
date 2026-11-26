@@ -26,13 +26,13 @@ flowchart LR
 
 ## What `AGENTS.md` specifies
 
-`AGENTS.md` is "a simple, open format for guiding coding agents": plain Markdown with no schema and no required fields. The site says "Use any headings you like; the agent simply parses the text you provide."
+`AGENTS.md` is "[a simple, open format for guiding coding agents](https://agents.md/)": plain Markdown with no schema and no required fields. The site says "Use any headings you like; the agent simply parses the text you provide."
 
-- **Placement.** One file at the repository root; in a monorepo, another inside each package.
-- **Precedence, as the format states it.** "The closest AGENTS.md to the edited file wins; explicit user chat prompts override everything."
+- **Placement.** One file at the repository root; in a monorepo, [another inside each package](https://agents.md/).
+- **Precedence, as the format states it.** "[The closest AGENTS.md to the edited file wins; explicit user chat prompts override everything.](https://agents.md/)"
 - **Commands.** Agents run the test commands you list in the file.
-- **Governance.** It is "stewarded by the Agentic AI Foundation under the Linux Foundation". The site's own adoption figure is "over 60k open-source projects".
-- **Readers named on the site** include Codex, Cursor, Gemini CLI, opencode, the GitHub Copilot coding agent, Aider, Zed and Windsurf. Claude Code was not on that list when checked on 2026-11-25, but its own docs document native reading (next section).
+- **Governance.** It is "[stewarded by the Agentic AI Foundation under the Linux Foundation](https://agents.md/)". The site's own adoption figure is "over 60k open-source projects".
+- **Readers named on the site** [include Codex, Cursor, Gemini CLI](https://agents.md/), opencode, the GitHub Copilot coding agent, Aider, Zed and Windsurf. Claude Code was not on that list when checked on 2026-11-25, but its own docs document native reading (next section).
 
 A workable section set, taken from the template the author uses across 16 repositories:
 
@@ -52,16 +52,16 @@ Keep it lean, because every tool loads it into every session. [Chapter 8](08-cla
 
 ## How Claude Code reads `AGENTS.md`
 
-Most older tutorials say Claude Code ignores `AGENTS.md`. Since v2.1.277 it reads the file natively, with rules worth knowing:
+Most older tutorials say Claude Code ignores `AGENTS.md`. [Since v2.1.277 it reads the file natively](https://code.claude.com/docs/en/memory), with rules worth knowing:
 
-- **The default is either/or.** "By default, Claude reads `AGENTS.md` only when you have no `CLAUDE.md` in your working directory or above it." A `CLAUDE.md`, `.claude/CLAUDE.md` or `CLAUDE.local.md` on that path suppresses it. Your `~/.claude/CLAUDE.md`, a managed `CLAUDE.md` and `.claude/rules/` keep loading alongside it.
+- **The default is either/or.** "By default, Claude reads `AGENTS.md` only when you have no `CLAUDE.md` [in your working directory or above it.](https://code.claude.com/docs/en/memory)" A `CLAUDE.md`, `.claude/CLAUDE.md` or `CLAUDE.local.md` on that path suppresses it. Your `~/.claude/CLAUDE.md`, a managed `CLAUDE.md` and `.claude/rules/` keep loading alongside it.
 - **A setting changes that.** `/config`, then **Project instructions**: `claude-md-or-agents-md` (default), `claude-md-and-agents-md` (both, each directory's `CLAUDE.md` first, no double load), `claude-md`, or `managed-only`.
 - **Nested files load on demand.** A subdirectory's `AGENTS.md` loads when Claude reads a file there and that directory has no `CLAUDE.md` of its own. `@path` imports inside `AGENTS.md` are expanded.
-- **Not read:** `AGENTS.local.md`, `AGENTS.override.md`, or anything under a `.agents/` directory.
-- **Two differences from `CLAUDE.md`.** `InstructionsLoaded` hooks do not fire for an `AGENTS.md` read through the setting, and `--add-dir` directories do not load theirs.
+- **Not read:** `AGENTS.local.md`, `AGENTS.override.md`, [or anything under a](https://code.claude.com/docs/en/memory) `.agents/` directory.
+- **Two differences from `CLAUDE.md`.** `InstructionsLoaded` [hooks do not fire for an](https://code.claude.com/docs/en/memory) `AGENTS.md` read through the setting, and `--add-dir` directories do not load theirs.
 - **Check it.** Run `/memory` and look for the file's path in the list.
 
-> **Warning:** Adding a `CLAUDE.local.md` for personal notes stops Claude Code from reading `AGENTS.md` under the default setting. And if you once used a `SessionStart` hook to print `AGENTS.md`, remove it: the file now loads twice.
+> **Warning:** Adding a `CLAUDE.local.md` for personal notes stops Claude Code from reading `AGENTS.md` under the default setting. And if you once used a `SessionStart` hook to print `AGENTS.md`, remove it: [the file now loads twice](https://code.claude.com/docs/en/memory).
 
 ## Six tools, one table
 
@@ -69,19 +69,19 @@ All facts below are from each vendor's docs as read on 2026-11-25; treat them as
 
 | Tool | Instruction file | Scoping | Skills / commands | Hooks | MCP | Subagents |
 |---|---|---|---|---|---|---|
-| **Claude Code** | `CLAUDE.md` (+ `CLAUDE.local.md`); `AGENTS.md` natively (v2.1.277+) when no `CLAUDE.md` or `CLAUDE.local.md` is on the path | Managed → user → project → local; nested files on demand; `.claude/rules/*.md` with `paths:` globs | `.claude/skills/<name>/SKILL.md`, run as `/name` or auto-invoked; custom commands merged into skills | Settings-file hooks: `PreToolUse`, `PostToolUse`, `Stop`, `SessionStart`, ... | Local, project and user scopes | `.claude/agents/*.md`; built-in Explore and Plan; forks |
-| **Cursor** | `.cursor/rules/*.mdc`; `AGENTS.md` in the root and subdirectories | `alwaysApply`, `globs`, `description`, or @-mention; Team → Project → User | `.cursor/skills/`, `.agents/skills/`; also loads `.claude/skills/` and `.codex/skills/` | `.cursor/hooks.json`, `~/.cursor/hooks.json`: `beforeShellExecution`, `afterFileEdit`, `preToolUse`, `stop`, ... | `.cursor/mcp.json`, `~/.cursor/mcp.json` | `.cursor/agents/` (also reads `.claude/agents/`) |
-| **Codex CLI** | `AGENTS.md` (+ `AGENTS.override.md`) | `~/.codex`, then Git root → working directory; one file per directory; 32 KiB cap | `.agents/skills` (cwd, parent, repo root), `~/.agents/skills`; `/skills` or `$name` | `hooks.json`, or `[hooks]` in `config.toml` | `[mcp_servers.<name>]` in `config.toml`; `codex mcp add` | Built-in `default`, `worker`, `explorer`; custom TOML in `.codex/agents/` |
-| **Gemini CLI** (consumer tiers: Antigravity CLI since 2026-06-18) | `GEMINI.md`; file name configurable to include `AGENTS.md`; Antigravity reads both | Global → workspace and parents → each accessed directory; all concatenated | `.gemini/skills/` or `.agents/skills/`; TOML commands in `.gemini/commands/` | `settings.json`: `BeforeTool`, `AfterTool`, `BeforeAgent`, `AfterAgent`, `SessionStart`, ... | `mcpServers` in `settings.json`; `gemini mcp add` | `.gemini/agents/*.md`; `@name` to force one |
-| **OpenCode** | `AGENTS.md`; falls back to `CLAUDE.md` | Global plus every `AGENTS.md` up the tree, concatenated; `instructions` globs or URLs | `.opencode/skills`, plus `.claude/skills` and `.agents/skills`; Markdown commands in `.opencode/commands/` | No feature named "hooks" on the pages read; plugins in `.opencode/plugins/` can add them | `mcp.servers` with `type: local` or `remote` | Primary and subagent modes; `.opencode/agents/*.md` |
-| **GitHub Copilot** | `.github/copilot-instructions.md`; `AGENTS.md` anywhere; or one root `CLAUDE.md` or `GEMINI.md` | `.github/instructions/*.instructions.md` with `applyTo` globs; nearest `AGENTS.md` wins | `.github/skills`, `.claude/skills`, `.agents/skills`; personal `~/.copilot/skills` | `.github/hooks/*.json`: `sessionStart`, `preToolUse`, `postToolUse`, `agentStop`, ... | Built-in GitHub MCP server; organization policy off by default | Custom agents (Markdown with a YAML profile) |
+| **Claude Code** | `CLAUDE.md` (+ `CLAUDE.local.md`); `AGENTS.md` natively (v2.1.277+) when no `CLAUDE.md` or `CLAUDE.local.md` is on the path | Managed → user → project → local; [nested files on demand](https://code.claude.com/docs/en/memory); `.claude/rules/*.md` with `paths:` globs | `.claude/skills/<name>/SKILL.md`, run as `/name` or auto-invoked; [custom commands merged into skills](https://code.claude.com/docs/en/skills) | [Settings-file hooks](https://code.claude.com/docs/en/hooks): `PreToolUse`, `PostToolUse`, `Stop`, `SessionStart`, ... | Local, project and user scopes | `.claude/agents/*.md`; [built-in Explore and Plan](https://code.claude.com/docs/en/sub-agents); forks |
+| **Cursor** | `.cursor/rules/*.mdc`; `AGENTS.md` [in the root and subdirectories](https://cursor.com/docs/rules) | `alwaysApply`, `globs`, `description`, or @-mention; Team → Project → User | `.cursor/skills/`, `.agents/skills/`; [also loads](https://cursor.com/docs/skills) `.claude/skills/` and `.codex/skills/` | `.cursor/hooks.json`, `~/.cursor/hooks.json`: `beforeShellExecution`, `afterFileEdit`, `preToolUse`, `stop`, ... | `.cursor/mcp.json`, `~/.cursor/mcp.json` | `.cursor/agents/` ([also reads](https://cursor.com/docs/subagents) `.claude/agents/`) |
+| **Codex CLI** | `AGENTS.md` (+ `AGENTS.override.md`) | `~/.codex`, then Git root → working directory; [one file per directory; 32 KiB cap](https://learn.chatgpt.com/docs/agent-configuration/agents-md) | `.agents/skills` ([cwd, parent, repo root](https://learn.chatgpt.com/docs/build-skills)), `~/.agents/skills`; `/skills` or `$name` | `hooks.json`, or `[hooks]` in `config.toml` | `[mcp_servers.<name>]` in `config.toml`; `codex mcp add` | Built-in `default`, `worker`, `explorer`; [custom TOML](https://learn.chatgpt.com/docs/agent-configuration/subagents) in `.codex/agents/` |
+| **Gemini CLI** (consumer tiers: [Antigravity CLI since 2026-06-18](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/)) | `GEMINI.md`; [file name configurable to include](https://geminicli.com/docs/cli/gemini-md/) `AGENTS.md`; [Antigravity reads both](https://antigravity.google/docs/cli/gcli-migration) | Global → workspace and parents → each accessed directory; all concatenated | `.gemini/skills/` or `.agents/skills/`; TOML commands in `.gemini/commands/` | `settings.json`: `BeforeTool`, `AfterTool`, `BeforeAgent`, `AfterAgent`, `SessionStart`, ... | `mcpServers` in `settings.json`; `gemini mcp add` | `.gemini/agents/*.md`; `@name` [to force one](https://geminicli.com/docs/core/subagents/) |
+| **OpenCode** | `AGENTS.md`; [falls back to](https://opencode.ai/docs/instructions/) `CLAUDE.md` | Global plus every `AGENTS.md` up the tree, concatenated; `instructions` [globs or URLs](https://opencode.ai/docs/config/) | `.opencode/skills`, plus `.claude/skills` and `.agents/skills`; Markdown commands in `.opencode/commands/` | No feature named "hooks" on the pages read; plugins in `.opencode/plugins/` [can add them](https://opencode.ai/docs/plugins/) | `mcp.servers` with `type: local` or `remote` | [Primary and subagent modes](https://opencode.ai/docs/agents/); `.opencode/agents/*.md` |
+| **GitHub Copilot** | `.github/copilot-instructions.md`; `AGENTS.md` [anywhere; or one root](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/add-custom-instructions/add-repository-instructions) `CLAUDE.md` or `GEMINI.md` | `.github/instructions/*.instructions.md` with `applyTo` globs; nearest `AGENTS.md` wins | `.github/skills`, `.claude/skills`, `.agents/skills`; personal `~/.copilot/skills` | `.github/hooks/*.json`: `sessionStart`, `preToolUse`, `postToolUse`, `agentStop`, ... | Built-in GitHub MCP server; [organization policy off by default](https://docs.github.com/en/copilot/concepts/customizations/mcp) | Custom agents (Markdown with a YAML profile) |
 
 Details the table cannot hold:
 
-- **Codex CLI** reads at most one file per directory (`AGENTS.override.md` first, then `AGENTS.md`) and "concatenates files from the root down", so text closer to your working directory wins by appearing later. It stops adding files at `project_doc_max_bytes`, 32 KiB by default.
-- **Gemini CLI** concatenates every `GEMINI.md` it finds and sends the result with every prompt. For unpaid-tier and Google One users it "was replaced by Antigravity CLI on June 18th, 2026"; paid API-key and enterprise access is unchanged. Antigravity still reads `GEMINI.md`, also reads a project `AGENTS.md`, and moves workspace skills to `.agents/skills/`.
-- **OpenCode** reads `CLAUDE.md` in any directory that has no `AGENTS.md`; where both exist, the `AGENTS.md` wins. It combines the files it finds and "does not resolve conflicts between them".
-- **Cursor** ignores a plain `.md` file in `.cursor/rules`: "Project rules must use the `.mdc` extension."
+- **Codex CLI** reads at most one file per directory (`AGENTS.override.md` first, then `AGENTS.md`) and "[concatenates files from the root down](https://learn.chatgpt.com/docs/agent-configuration/agents-md)", so text closer to your working directory wins by appearing later. It stops adding files at `project_doc_max_bytes`, 32 KiB by default.
+- **Gemini CLI** concatenates every `GEMINI.md` it finds and sends the result with every prompt. For unpaid-tier and Google One users it "[was replaced by Antigravity CLI on June 18th, 2026](https://geminicli.com/docs/cli/gemini-md/)"; [paid API-key and enterprise access is unchanged](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/). [Antigravity still reads](https://antigravity.google/docs/cli/gcli-migration) `GEMINI.md`, also reads a project `AGENTS.md`, and moves workspace skills to `.agents/skills/`.
+- **OpenCode** reads `CLAUDE.md` in any directory that has no `AGENTS.md`; where both exist, the `AGENTS.md` wins. It combines the files it finds and "[does not resolve conflicts between them](https://opencode.ai/docs/instructions/)".
+- **Cursor** [ignores a plain](https://cursor.com/docs/rules) `.md` file in `.cursor/rules`: "Project rules must use the `.mdc` extension."
 
 > **Note:** Not confirmed on the pages read for this book, so check before you rely on them: OpenCode's hook event names, whether Cursor still loads a legacy `.cursorrules` file, the file path for Copilot custom agents, and a default for Codex subagent concurrency.
 
@@ -89,16 +89,16 @@ Details the table cannot hold:
 
 Three convergence points are real:
 
-1. **`AGENTS.md`** can be read by all six tools: natively, as a fallback, or in Gemini CLI through the one-line `context.fileName` setting.
-2. **`SKILL.md` folders** are a shared format. The Agent Skills spec says it "was originally developed by Anthropic, released as an open standard", and Cursor, Copilot and OpenCode load `.claude/skills/` explicitly. The standard requires `name` and `description`; "all fields optional" is true only inside Claude Code ([chapter 15](15-skills.md)).
-3. **`.agents/skills/`** is emerging as the neutral skills directory (Codex, Cursor, Gemini and Antigravity, OpenCode, Copilot). Claude Code keeps skills in `.claude/skills/` and lists `.agents/` among the places it does not read for instructions, which is why cross-tool repositories keep both and check that they match.
+1. **`AGENTS.md`** can be read by all six tools: natively, as a fallback, or in Gemini CLI [through the one-line](https://geminicli.com/docs/cli/gemini-md/) `context.fileName` setting.
+2. **`SKILL.md` folders** are a shared format. The Agent Skills spec says it "[was originally developed by Anthropic, released as an open standard](https://agentskills.io/home)", and Cursor, Copilot and OpenCode load `.claude/skills/` explicitly. [The standard requires](https://agentskills.io/specification) `name` and `description`; "all fields optional" is true only inside Claude Code ([chapter 15](15-skills.md)).
+3. **`.agents/skills/`** is emerging as the neutral skills directory ([Codex](https://learn.chatgpt.com/docs/build-skills), [Cursor](https://cursor.com/docs/skills), [Gemini](https://geminicli.com/docs/cli/skills/) and [Antigravity](https://antigravity.google/docs/cli/gcli-migration), [OpenCode](https://opencode.ai/docs/skills/), [Copilot](https://docs.github.com/en/copilot/concepts/customizations/agent-skills)). Claude Code keeps skills in `.claude/skills/` and lists `.agents/` [among the places it does not read for instructions](https://code.claude.com/docs/en/memory), which is why cross-tool repositories keep both and check that they match.
 
 Slash commands are also converging: they are being folded into skills in Claude Code, Cursor and Antigravity. The rest does not port:
 
 | What | How the tools differ | What to do |
 |---|---|---|
-| Precedence | The format says the nearest file wins. Codex concatenates root-down, so later text wins. OpenCode concatenates and resolves nothing. Claude Code treats files as additive and "uses judgment to reconcile them" | Nested files add detail; they never contradict the root |
-| Hook events | `PreToolUse` in Claude Code, `beforeShellExecution` in Cursor, `BeforeTool` in Gemini CLI, `preToolUse` in Copilot | One guard script, a thin registration per tool, and an honest statement of where it is enforced |
+| Precedence | [The format says the nearest file wins](https://agents.md/). [Codex concatenates root-down](https://learn.chatgpt.com/docs/agent-configuration/agents-md), so later text wins. [OpenCode concatenates and resolves nothing](https://opencode.ai/docs/instructions/). Claude Code treats files as additive and "[uses judgment to reconcile them](https://code.claude.com/docs/en/features-overview)" | Nested files add detail; they never contradict the root |
+| Hook events | `PreToolUse` [in Claude Code](https://code.claude.com/docs/en/hooks), `beforeShellExecution` [in Cursor](https://cursor.com/docs/hooks), `BeforeTool` [in Gemini CLI](https://geminicli.com/docs/hooks/), `preToolUse` [in Copilot](https://docs.github.com/en/copilot/concepts/customizations/hooks) | One guard script, a thin registration per tool, and an honest statement of where it is enforced |
 | Tool allowlists | The same list can mean "only these tools" in one format and "these, plus everything not mentioned" in another | Translate the meaning, emit explicit deny rules, test the result per tool |
 | Skill auto-invocation | In the author's plugin, triggering from a skill's description was measured as reliable only on Claude Code | Name the skill in `AGENTS.md` at the moment it applies |
 | Skill discovery | Measured in the same repo: one tool finds skills one level deep and follows symlinks, another recurses | Treat the install layout as something you measure per tool |
@@ -106,7 +106,7 @@ Slash commands are also converging: they are being folded into skills in Claude 
 ## The canonical-source pattern
 
 1. **Write policy once, in `AGENTS.md`.**
-2. **Point Claude Code at it.** Either a `CLAUDE.md` whose first line is `@AGENTS.md`, followed by Claude-only addenda, or `ln -s AGENTS.md CLAUDE.md`. A symlink cannot drift, but Edit and Write "refuse to write through a symlink" (Claude is told to edit `AGENTS.md` instead), and on Windows Git can check a committed symlink out as a plain text file. Use the import if anyone works on Windows or you need Claude-only lines.
+2. **Point Claude Code at it.** Either a `CLAUDE.md` whose first line is `@AGENTS.md`, followed by Claude-only addenda, or `ln -s AGENTS.md CLAUDE.md`. A symlink cannot drift, but Edit and Write "[refuse to write through a symlink](https://code.claude.com/docs/en/memory)" (Claude is told to edit `AGENTS.md` instead), and on Windows Git can check a committed symlink out as a plain text file. Use the import if anyone works on Windows or you need Claude-only lines.
 3. **Give every other tool a pointer, not a copy** (table below).
 4. **Mirror skills** from `.claude/skills/` to `.agents/skills/` and check that the two trees are identical.
 5. **Generate what cannot be a pointer**, such as per-tool agent definitions, command stubs and hook registrations. Commit the output and give the generator a `--check` mode.
@@ -117,9 +117,9 @@ Slash commands are also converging: they are being folded into skills in Claude 
 | Claude Code | `CLAUDE.md` | `@AGENTS.md` plus addenda, or a symlink |
 | Cursor | `.cursor/rules/000-project.mdc` | `alwaysApply: true` and one line pointing at `AGENTS.md` |
 | GitHub Copilot | `.github/copilot-instructions.md` | A short pointer back to `AGENTS.md` |
-| Codex CLI | `.codex/config.toml` | CLI overrides only, such as `project_doc_max_bytes = 32768`; no policy |
+| Codex CLI | `.codex/config.toml` | [CLI overrides only](https://learn.chatgpt.com/docs/config-file/config-basic), such as `project_doc_max_bytes = 32768`; no policy |
 | Gemini CLI | `.gemini/settings.json` | `{ "context": { "fileName": "AGENTS.md" } }` |
-| OpenCode | none needed | Optional `instructions` array in `opencode.json` for extra files |
+| OpenCode | none needed | Optional `instructions` array in `opencode.json` [for extra files](https://opencode.ai/docs/config/) |
 
 Cursor and Copilot now read `AGENTS.md` themselves, so their pointer files are optional. Keep one only when you need a tool-specific line, and keep it a pointer. The two adapters most repositories need look like this (`CLAUDE.md` first, then the Cursor rule):
 
@@ -184,7 +184,7 @@ The check has a limit that the field version states in its own comments: it "pro
 
 For generated files, the author's plugin follows one contract: the output is committed; it starts with a `GENERATED FILE — DO NOT EDIT` header that names the source, the generator and the command to regenerate; the generator has a `--check` mode that regenerates into a temporary directory and diffs; and a test plants drift to prove the check fails. A generated command stub there is itself only a pointer: "read `skills/toolkit/retro/SKILL.md` and follow it exactly — it is authoritative and this command deliberately does not restate it."
 
-Going the other way, Claude Code's `/init` folds existing Cursor rules and `.github/copilot-instructions.md` into a new `CLAUDE.md`, and `/import` brings in another agent's instructions, MCP servers, commands, subagents and skills.
+Going the other way, Claude Code's `/init` [folds existing Cursor rules](https://code.claude.com/docs/en/memory) and `.github/copilot-instructions.md` into a new `CLAUDE.md`, and `/import` brings in another agent's instructions, MCP servers, commands, subagents and skills.
 
 ## A capability registry
 
@@ -217,7 +217,7 @@ The registry in the author's plugin held these values for each tool's primary su
 | `mcp` | native | native | native | native | native |
 | `worktree_isolation` | native | emulated | emulated | emulated | emulated |
 
-> **Note:** This is what one maintainer had verified in one repository, not a vendor comparison. `unknown` means "not tested here": the Codex docs do describe subagents, for example. The value of the table is that it never claims more than was checked.
+> **Note:** This is what one maintainer had verified in one repository, not a vendor comparison. `unknown` means "not tested here": [the Codex docs do describe subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents), for example. The value of the table is that it never claims more than was checked.
 
 ## Handing a task to another tool mid-flight
 

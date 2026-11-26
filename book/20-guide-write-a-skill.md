@@ -38,29 +38,29 @@ Expect no modified tracked files and `diff-reviewer.md` (if you left the bug fix
 
 ## Step 2 — Decide: skill, CLAUDE.md or subagent
 
-The official guide ties each feature to a trigger. "You paste the same playbook or multi-step procedure into chat for the third time" means "Capture it as a skill". The other candidates:
+[The official guide](https://code.claude.com/docs/en/features-overview) ties each feature to a trigger. "You paste the same playbook or multi-step procedure into chat for the third time" means "Capture it as a skill". The other candidates:
 
 | Option | Loads | Fit for "write a PR body" |
 |---|---|---|
-| `CLAUDE.md` | Every session | Poor: a multi-step procedure costs tokens in every session. The docs say to move such entries "to a skill or a path-scoped rule instead" |
-| Skill | "On demand, when invoked or relevant" | Good: a repeatable workflow with a script and a template |
+| `CLAUDE.md` | Every session | Poor: a multi-step procedure costs tokens in every session. The docs say to move such entries ["to a skill or a path-scoped rule instead"](https://code.claude.com/docs/en/memory) |
+| Skill | ["On demand, when invoked or relevant"](https://code.claude.com/docs/en/features-overview) | Good: a repeatable workflow with a script and a template |
 | Subagent | Its own context window | Right for one step only: the review, where fresh eyes matter |
 
-"They can combine", says the guide, which is the plan here. A must-hold rule is a hook (chapter 21 adds one). The full decision guide is [chapter 11](11-the-extension-model.md).
+["They can combine"](https://code.claude.com/docs/en/features-overview), says the guide, which is the plan here. A must-hold rule is a hook (chapter 21 adds one). The full decision guide is [chapter 11](11-the-extension-model.md).
 
 **Check:** you can name which part is the skill (the procedure) and which is the subagent (the review).
 
 ## Step 3 — Create the skill folder by hand
 
-Claude Code has no bundled skill creator and no `claude skill` command. The docs' own first skill is a `mkdir` and a `SKILL.md`:
+Claude Code has no bundled skill creator and no `claude skill` command. [The docs' own first skill](https://code.claude.com/docs/en/skills) is a `mkdir` and a `SKILL.md`:
 
 ```bash
 mkdir -p .claude/skills/pr-description/references .claude/skills/pr-description/scripts
 ```
 
-`/skills` lists skills but does not create them; `/reload-skills` re-scans if a new one does not show up. `claude plugin init <name>` scaffolds a skills-directory plugin, but only at `~/.claude/skills/<name>/` (your user folder), so this guide stays in the project.
+`/skills` [lists skills but does not create them](https://code.claude.com/docs/en/commands); `/reload-skills` re-scans if a new one does not show up. `claude plugin init <name>` [scaffolds a skills-directory plugin](https://code.claude.com/docs/en/plugins/create), but only at `~/.claude/skills/<name>/` (your user folder), so this guide stays in the project.
 
-The optional official **skill-creator** plugin drafts and evaluates skills (`/plugin install skill-creator@claude-plugins-official`). Its `evals/evals.json` format and `claude plugin eval`'s format are "not interchangeable", so pick one per skill.
+The optional official **skill-creator** plugin [drafts and evaluates skills](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/skill-creator) (`/plugin install skill-creator@claude-plugins-official`). Its `evals/evals.json` format and `claude plugin eval`'s format are ["not interchangeable"](https://code.claude.com/docs/en/skills), so pick one per skill.
 
 **Check:** `ls .claude/skills/pr-description` shows `references` and `scripts`.
 
@@ -76,7 +76,7 @@ description: Helps with pull requests.
 description: "Use when the user asks for a PR description, a pull request body or to 'write up this branch'. Drafts the body from the branch diff, has the diff-reviewer subagent review it, and adds a Verification section. Not for commit messages or release notes."
 ```
 
-- Lead with the main use case (`description` plus `when_to_use` is cut at 1,536 characters), quote the phrases people type, and add a `Not for …` line against near-misses.
+- Lead with the main use case (`description` plus `when_to_use` [is cut at 1,536 characters](https://code.claude.com/docs/en/skills)), quote the phrases people type, and add a `Not for …` line against near-misses.
 - No `disable-model-invocation`: the skill only prints, so Claude may trigger it. Set it to `true` for side effects such as a deploy ([chapter 15](15-skills.md)).
 
 **Check:** the strong description is under three sentences and names a sibling task it should not take.
@@ -121,9 +121,9 @@ Write a pull request body for the current branch. Base branch: `$ARGUMENTS` (emp
 
 Why it is written this way:
 
-- **Hard rules first:** after compaction, skill bodies are re-attached with a per-skill cap.
+- **Hard rules first:** after compaction, [skill bodies are re-attached with a per-skill cap](https://code.claude.com/docs/en/skills).
 - **`$ARGUMENTS`** is whatever follows the command: `/pr-description develop` compares with `develop`.
-- **`allowed-tools`** pre-approves these calls "during the turn that invokes the skill"; it is not a sandbox, so no bare `Bash`. `${CLAUDE_SKILL_DIR}` is the skill's folder, from any directory.
+- **`allowed-tools`** pre-approves these calls ["during the turn that invokes the skill"](https://code.claude.com/docs/en/skills); it is not a sandbox, so no bare `Bash`. `${CLAUDE_SKILL_DIR}` is the skill's folder, from any directory.
 - **Step 2 is a delegation brief** (goal, input, scope, return; [chapter 14](14-subagents.md)). The subagent reads that brief, not this file.
 
 **Check:** `head -1 .claude/skills/pr-description/SKILL.md` prints `---`.
@@ -200,15 +200,15 @@ With the branch itself as base it printed `collect-diff: no changes between …`
 
 ## Step 8 — Wire in the subagent
 
-There are three documented ways to combine a skill with a subagent. This guide uses the first.
+There are [three documented ways](https://code.claude.com/docs/en/skills) to combine a skill with a subagent. This guide uses the first.
 
 | Way | How | Why or why not here |
 |---|---|---|
 | Delegate from the body | Workflow step 2 asks Claude to use `diff-reviewer` | Chosen: the skill runs in your session, so it can run the script and the tests; only the review is isolated |
-| `context: fork` with `agent` | The whole skill runs as a new subagent of the type named in `agent` (default `general-purpose`) | Not here: `diff-reviewer` has no `Bash`, so it could not run the script. The docs warn it "doesn't run in a fork of the current conversation" |
+| `context: fork` with `agent` | The whole skill runs as a new subagent of the type named in `agent` (default `general-purpose`) | Not here: `diff-reviewer` has no `Bash`, so it could not run the script. The docs warn it ["doesn't run in a fork of the current conversation"](https://code.claude.com/docs/en/skills) |
 | Preload with `skills:` | An agent definition lists skills whose full body it gets at startup | The reverse direction; useful when the agent is the entry point |
 
-> **Note:** `agent:` takes a built-in agent (`Explore`, `Plan`, `general-purpose`) "or any custom subagent from `.claude/agents/`", so `agent: diff-reviewer` is valid; it is the missing `Bash` that rules it out here.
+> **Note:** `agent:` [takes a built-in agent](https://code.claude.com/docs/en/skills) (`Explore`, `Plan`, `general-purpose`) "or any custom subagent from `.claude/agents/`", so `agent: diff-reviewer` is valid; it is the missing `Bash` that rules it out here.
 
 **Check:** `.claude/agents/diff-reviewer.md` exists, and SKILL.md names it exactly `diff-reviewer`.
 
@@ -220,15 +220,15 @@ python3 -c "import sys,yaml; print(sorted(yaml.safe_load(open(sys.argv[1]).read(
   .claude/skills/pr-description/SKILL.md
 ```
 
-This guide's run printed `✔ Validation passed`, then `['allowed-tools', 'argument-hint', 'description', 'name']` (directory validation needs v2.1.233+; the parse check is there because, as chapter 19 found, the validator misses some YAML mistakes).
+This guide's run printed `✔ Validation passed`, then `['allowed-tools', 'argument-hint', 'description', 'name']` ([directory validation needs v2.1.233+](https://code.claude.com/docs/en/skills); the parse check is there because, as chapter 19 found, the validator misses some YAML mistakes).
 
-In a session, `/doctor prompt-audit .claude/skills/pr-description` (v2.1.283+) checks it with your `CLAUDE.md`, rules and subagents for outdated or conflicting instructions (not run for this guide).
+In a session, `/doctor prompt-audit .claude/skills/pr-description` (v2.1.283+) [checks it with your](https://code.claude.com/docs/en/memory) `CLAUDE.md`, rules and subagents for outdated or conflicting instructions (not run for this guide).
 
 **Check:** validation passes and the YAML field list has no typos.
 
 ## Step 10 — Invoke it by name and by request
 
-Open a **fresh** session in the repo; leftover context from authoring "will mask gaps in the written instructions".
+Open a **fresh** session in the repo; leftover context from authoring ["will mask gaps in the written instructions"](https://code.claude.com/docs/en/skills).
 
 1. Ask `What skills are available?` and confirm `pr-description` is listed. Then type `/pr-description main`.
 2. In another fresh session ask `Write the PR description for this branch.`, then the near-miss `Write a commit message for my staged changes.`, which the skill should stay out of.
@@ -254,17 +254,17 @@ VERDICT: request-changes
 
 | Command | What it shows |
 |---|---|
-| `/skills` | Every skill; press `t` to sort by token count |
+| `/skills` | [Every skill](https://code.claude.com/docs/en/commands); press `t` to sort by token count |
 | `/context` | The skills section, including bundled skills that `/skills` does not list |
-| `/skill-doctor` | "what each of your skills costs in context and how often it gets used"; needs v2.1.252+ and opens in the `/plugin` manager's **Stats** tab |
+| `/skill-doctor` | ["what each of your skills costs in context and how often it gets used"](https://code.claude.com/docs/en/skills); needs v2.1.252+ and opens in the `/plugin` manager's **Stats** tab |
 
 `/skill-doctor` neither lints content nor tests triggering. **Check:** `pr-description` appears in `/skills` with its token count.
 
 ## Step 12 — Prepare it for evaluation
 
-`claude plugin eval` needs "a plugin directory with a `plugin.json` or `.claude-plugin/plugin.json` manifest, or a skills-directory plugin"; a bare skill folder is neither. Chapter 21 adds it. Until then:
+`claude plugin eval` [needs](https://code.claude.com/docs/en/plugin-evals) "a plugin directory with a `plugin.json` or `.claude-plugin/plugin.json` manifest, or a skills-directory plugin"; a bare skill folder is neither. Chapter 21 adds it. Until then:
 
-- **Baseline by hand:** run your prompts with the skill on, then off, via `"skillOverrides": { "pr-description": "off" }` in `.claude/settings.local.json`.
+- **Baseline by hand:** [run your prompts with the skill on, then off](https://code.claude.com/docs/en/skills), via `"skillOverrides": { "pr-description": "off" }` in `.claude/settings.local.json`.
 - **Write cases now in `claude plugin eval` format**; save `evals/writes-pr-body/prompt.md`:
 
 ```markdown
@@ -313,7 +313,7 @@ Change one thing per round, in a fresh session, and write down the result before
 | Project | `.claude/skills/pr-description/SKILL.md` | `/pr-description`, for everyone who clones the repo |
 | Plugin | `<plugin>/skills/pr-description/SKILL.md` | `/<plugin>:pr-description` ([chapter 21](21-guide-build-and-ship-a-plugin.md)) |
 
-Precedence is "managed > user > project for skills". Commit the folder with the script's executable bit, on `main` as in chapter 19, so the feature branch diff stays about pricing:
+Precedence is ["managed > user > project for skills"](https://code.claude.com/docs/en/features-overview). Commit the folder with the script's executable bit, on `main` as in chapter 19, so the feature branch diff stays about pricing:
 
 ```bash
 git switch main
@@ -324,7 +324,7 @@ git switch feature/bulk-discount
 git rebase main
 ```
 
-> **Warning:** A project skill's `allowed-tools` applies even in a `-p` run in a folder nobody trusted. Anyone who clones the repo should read it, and you should keep every entry scoped.
+> **Warning:** A project skill's `allowed-tools` [applies even in a](https://code.claude.com/docs/en/skills) `-p` run in a folder nobody trusted. Anyone who clones the repo should read it, and you should keep every entry scoped.
 
 ## From the field
 

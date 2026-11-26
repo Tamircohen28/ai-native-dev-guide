@@ -10,7 +10,7 @@ After this chapter you can run Claude Code from a script, a cron job or a CI pip
 - **Nobody sees a trust dialog.** That is the prompt an interactive session shows before it uses a new folder's configuration ([chapter 9](09-settings-and-permissions.md)). A headless run uses the repository's hooks and MCP servers without asking, so you choose what loads.
 - **A program reads the output.** You pick a format the next step in the script can parse.
 
-There are three ways in and one engine behind them. The docs call `claude -p` "the Agent SDK via the CLI", describe the GitHub Action as "built on the SDK", and say the SDK gives you "the same tools, agent loop, and context management that power Claude Code".
+There are three ways in and one engine behind them. The docs call `claude -p` "[the Agent SDK via the CLI](https://code.claude.com/docs/en/headless)", describe the GitHub Action as "[built on the SDK](https://code.claude.com/docs/en/github-actions)", and say the SDK gives you "[the same tools, agent loop, and context management that power Claude Code](https://code.claude.com/docs/en/agent-sdk/overview)".
 
 ```mermaid
 flowchart TD
@@ -40,17 +40,17 @@ claude -p "Now focus on the database queries" --continue    # continue the most 
 
 What a script needs to know:
 
-- **Exit code.** `0` on success, non-zero when the run fails; a `SIGTERM` gives 143. A failure inside the run, such as missing authentication, is printed "as the result on stdout", so check the output and not only the status.
-- **Input.** Piped stdin is capped at 10 MB; for more, write a file and name its path in the prompt.
-- **Background work.** `--bg` is rejected with `-p`. When a subagent's long command moves to the background at its timeout, the run "can exit with code 0 before the command finishes".
-- **Skills and flags.** User-invoked skills work: put `/skill-name` in the prompt string. `--max-turns`, `--max-budget-usd` and `--json-schema` exist only in print mode, and the CLI reference warns that "`claude --help` does not list every flag".
+- **Exit code.** `0` on success, non-zero when the run fails; a `SIGTERM` gives 143. A failure inside the run, such as missing authentication, is printed "[as the result on stdout](https://code.claude.com/docs/en/headless)", so check the output and not only the status.
+- **Input.** [Piped stdin is capped at 10 MB](https://code.claude.com/docs/en/headless); for more, write a file and name its path in the prompt.
+- **Background work.** `--bg` is rejected with `-p`. When a subagent's long command moves to the background at its timeout, the run "[can exit with code 0 before the command finishes](https://code.claude.com/docs/en/headless)".
+- **Skills and flags.** User-invoked skills work: put `/skill-name` in the prompt string. `--max-turns`, `--max-budget-usd` and `--json-schema` exist only in print mode, and [the CLI reference warns](https://code.claude.com/docs/en/cli-reference) that "`claude --help` does not list every flag".
 
 ### Output formats
 
 | `--output-format` | What you get | Good for |
 |---|---|---|
 | `text` (default) | The final answer as plain text | Pipes, and logs a person reads |
-| `json` | One object with the result, the session ID and metadata, including `total_cost_usd` and a per-model cost breakdown | Scripts that branch on the answer or record cost |
+| `json` | One object with the result, the session ID and metadata, including `total_cost_usd` and [a per-model cost breakdown](https://code.claude.com/docs/en/headless) | Scripts that branch on the answer or record cost |
 | `stream-json` | Newline-delimited JSON events while the run is in progress | Live UIs, relays, long runs |
 
 ```bash
@@ -64,7 +64,7 @@ The JSON also carries `session_id`; pass it to `--resume` to continue that exact
 
 ### Structured output with a JSON schema
 
-Parsing prose with `grep` breaks the first time the wording changes. Pass a JSON Schema with `--json-schema` together with `--output-format json`, and the data that matches the schema arrives in a `structured_output` field.
+Parsing prose with `grep` breaks the first time the wording changes. Pass a JSON Schema with `--json-schema` together with `--output-format json`, and [the data that matches the schema arrives](https://code.claude.com/docs/en/headless) in a `structured_output` field.
 
 ```bash
 schema='{"type":"object","required":["risk","reasons"],"properties":{
@@ -75,47 +75,47 @@ git diff origin/main...HEAD |
   jq -e '.structured_output' > verdict.json || { echo "no structured output" >&2; exit 1; }
 ```
 
-Three rules from the docs: an invalid schema makes `claude` exit with an error; the `format` keyword is accepted but not enforced; and the field is **absent** when the run ends without valid structured output, for example because Claude declined. `jq -e` turns that absence into a failed step.
+[Three rules from the docs](https://code.claude.com/docs/en/headless): an invalid schema makes `claude` exit with an error; the `format` keyword is accepted but not enforced; and the field is **absent** when the run ends without valid structured output, for example because Claude declined. `jq -e` turns that absence into a failed step.
 
 ## Start clean with `--bare`
 
-`--bare` skips auto-discovery of hooks, skills, custom commands, subagents, installed plugins, MCP servers, auto memory and `CLAUDE.md`. Without it, `claude -p` loads them "as an interactive session would", including whatever is configured in the working directory. The docs recommend bare mode for scripted and SDK calls and say it "will become the default for `-p` in a future release". Your `CLAUDE.md` conventions are then not in context; if the job needs a few of them, pass them with `--append-system-prompt-file`.
+`--bare` skips auto-discovery of hooks, skills, custom commands, subagents, installed plugins, MCP servers, auto memory and `CLAUDE.md`. Without it, `claude -p` loads them "[as an interactive session would](https://code.claude.com/docs/en/headless)", including whatever is configured in the working directory. The docs recommend bare mode for scripted and SDK calls and say it "will become the default for `-p` in a future release". Your `CLAUDE.md` conventions are then not in context; if the job needs a few of them, pass them with `--append-system-prompt-file`.
 
 | In bare mode | Detail |
 |---|---|
 | Still available | Bash, file read and file edit tools; settings files and their permission rules are still read |
 | Off | Hooks, even when passed with `--settings` or inside a plugin you load by flag; system reminders; background tasks |
 | Load on purpose | `--append-system-prompt[-file]`, `--settings`, `--mcp-config`, `--agents`, `--plugin-dir` |
-| Authentication | OAuth and keychain credentials are never read. Set `ANTHROPIC_API_KEY`, or an `apiKeyHelper` (a settings key naming a command that generates the credential) in the `--settings` JSON. Amazon Bedrock, Google Cloud's Agent Platform and Microsoft Foundry keep reading their own credentials |
+| Authentication | [OAuth and keychain credentials are never read](https://code.claude.com/docs/en/headless). Set `ANTHROPIC_API_KEY`, or an `apiKeyHelper` (a settings key naming a command that generates the credential) in the `--settings` JSON. Amazon Bedrock, Google Cloud's Agent Platform and Microsoft Foundry keep reading their own credentials |
 
 ## Permissions when nobody can answer
 
-New interactive sessions start in `auto` mode (v2.1.283 or later). Headless runs do not: with no mode set, `claude -p` and the Agent SDK start in `default` (Manual). From v2.1.302 the docs spell out the consequence: "Calls needing approval are denied unless you approve them with an allow rule, hook, `canUseTool` callback, or `--permission-prompt-tool`". The run does not stop; the denied call does not happen, and Claude works around it or reports it.
+New interactive sessions start in `auto` mode (v2.1.283 or later). Headless runs do not: with no mode set, `claude -p` and the Agent SDK start in `default` (Manual). From v2.1.302 [the docs spell out the consequence](https://code.claude.com/docs/en/permission-modes): "Calls needing approval are denied unless you approve them with an allow rule, hook, `canUseTool` callback, or `--permission-prompt-tool`". The run does not stop; the denied call does not happen, and Claude works around it or reports it.
 
-So you allow tools explicitly. The docs' recipe for CI with an exact allowlist is `claude -p "run the test suite" --permission-mode dontAsk --allowedTools "Bash(npm test)" "Read"`.
+So you allow tools explicitly. [The docs' recipe for CI with an exact allowlist](https://code.claude.com/docs/en/permission-modes) is `claude -p "run the test suite" --permission-mode dontAsk --allowedTools "Bash(npm test)" "Read"`.
 
 | Flag | What it does | Trap |
 |---|---|---|
 | `--allowedTools` | Listed calls run without asking; permission rule syntax | It does not limit which tools exist. `Bash(git diff *)` needs the space before `*`, or it also matches `git diff-index` |
 | `--tools` | Restricts built-in tools: `""` for none, or names like `"Bash,Edit,Read"` | Does not affect MCP tools |
 | `--disallowedTools` | Deny rules: a bare name removes the tool; `Bash(rm *)` denies matching calls | Deny wins in every mode |
-| `--permission-prompts none` | Denies anything that would wait for an approver (v2.1.259 or later) | Lasts one run; `permissions.denyInsteadOfPrompting` makes it permanent |
+| `--permission-prompts none` | [Denies anything that would wait for an approver](https://code.claude.com/docs/en/headless) (v2.1.259 or later) | Lasts one run; `permissions.denyInsteadOfPrompting` makes it permanent |
 
 | `--permission-mode` | A call that needs approval... | Use it for |
 |---|---|---|
 | `default` | is denied unless a rule, hook or callback approves it | Jobs where you list every allowed call |
 | `dontAsk` | is denied; reads in the working directories and pre-approved tools still run | Locked-down CI with an exact allowlist |
-| `acceptEdits` | file writes and common filesystem commands (`mkdir`, `touch`, `mv`, `cp`) run; other shell commands still need a rule | Jobs that change files |
+| `acceptEdits` | [file writes and common filesystem commands](https://code.claude.com/docs/en/permission-modes) (`mkdir`, `touch`, `mv`, `cp`) run; other shell commands still need a rule | Jobs that change files |
 | `auto` | goes to a classifier; when repeated blocks reach a threshold "the action doesn't run and Claude keeps working" | Runs where you list nothing beforehand |
 | `bypassPermissions` | runs immediately | Only a container, VM or sandbox runtime, as a non-root user |
 
-> **Warning:** `--dangerously-skip-permissions` equals `--permission-mode bypassPermissions`, which "offers no protection against prompt injection or unintended actions". Deny rules still apply. On Linux and macOS it refuses to start as root or under `sudo`, which matters in CI containers that run as root.
+> **Warning:** `--dangerously-skip-permissions` equals `--permission-mode bypassPermissions`, which "[offers no protection against prompt injection or unintended actions](https://code.claude.com/docs/en/permission-modes)". Deny rules still apply. On Linux and macOS it refuses to start as root or under `sudo`, which matters in CI containers that run as root.
 
 ## Shell recipes
 
 **Pipe a log or history in.** `git log --oneline -20 | claude -p "summarize these recent commits"` is the docs' own example. Piping also means Claude needs no Bash permission to read the data.
 
-**Review a diff, read-only.** This combines the flags the best-practices page lists for scripts:
+**Review a diff, read-only.** This combines [the flags the best-practices page lists for scripts](https://code.claude.com/docs/en/best-practices):
 
 ```bash
 git diff origin/main...HEAD |
@@ -139,24 +139,24 @@ done
 
 ## The GitHub Action
 
-`anthropics/claude-code-action@v1` runs the same engine inside GitHub Actions.
+`anthropics/claude-code-action@v1` [runs the same engine inside GitHub Actions](https://github.com/anthropics/claude-code-action).
 
-1. **Fast setup:** in Claude Code run `/install-github-app` (github.com repositories only; needs `gh` signed in and repository admin rights). It installs the Claude GitHub App, saves the secret and pushes a branch with `claude.yml` (and `claude-code-review.yml` if selected) for you to merge as a pull request.
-2. **Manual setup:** store one secret and pass it as an input: `ANTHROPIC_API_KEY` as `anthropic_api_key`, or `CLAUDE_CODE_OAUTH_TOKEN` as `claude_code_oauth_token` (create it with `claude setup-token`; runs then use your Claude subscription instead of API billing).
-3. **No stored secret:** workload identity federation, where the action exchanges the workflow's short-lived GitHub OpenID Connect (OIDC) token for API access (`anthropic_federation_rule_id`, `anthropic_organization_id`, plus `id-token: write`), or a cloud provider over OIDC with `use_bedrock`, `use_vertex` or `use_foundry`.
+1. **Fast setup:** in Claude Code run `/install-github-app` (github.com repositories only; needs `gh` signed in and repository admin rights). [It installs the Claude GitHub App](https://code.claude.com/docs/en/github-actions), saves the secret and pushes a branch with `claude.yml` (and `claude-code-review.yml` if selected) for you to merge as a pull request.
+2. **Manual setup:** store one secret and pass it as an input: `ANTHROPIC_API_KEY` as `anthropic_api_key`, or `CLAUDE_CODE_OAUTH_TOKEN` as `claude_code_oauth_token` (create it with `claude setup-token`; [runs then use your Claude subscription instead of API billing](https://code.claude.com/docs/en/github-actions)).
+3. **No stored secret:** [workload identity federation](https://code.claude.com/docs/en/github-actions), where the action exchanges the workflow's short-lived GitHub OpenID Connect (OIDC) token for API access (`anthropic_federation_rule_id`, `anthropic_organization_id`, plus `id-token: write`), or a cloud provider over OIDC with `use_bedrock`, `use_vertex` or `use_foundry`.
 
-The app needs read and write access to Contents, Issues and Pull requests. The action has two modes. Without a `prompt` input it waits for the trigger phrase (`trigger_phrase`, default `@claude`) and replies in a comment. With `prompt` it runs immediately, and results stay in the workflow run log unless the prompt and a tool post them.
+The app needs read and write access to Contents, Issues and Pull requests. [The action has two modes](https://code.claude.com/docs/en/github-actions). Without a `prompt` input it waits for the trigger phrase (`trigger_phrase`, default `@claude`) and replies in a comment. With `prompt` it runs immediately, and results stay in the workflow run log unless the prompt and a tool post them.
 
 | Input | Purpose |
 |---|---|
-| `prompt` | Plain text or a skill invocation. With plain text, "Claude has no shell or GitHub API access until you grant the tools" |
+| `prompt` | Plain text or a skill invocation. With plain text, "[Claude has no shell or GitHub API access until you grant the tools](https://code.claude.com/docs/en/github-actions)" |
 | `claude_args` | Any CLI argument: `--max-turns`, `--model`, `--mcp-config`, `--allowedTools`, `--debug` |
 | `settings` | Claude Code settings, as a JSON string or a path to a settings JSON file |
 | `github_token` | Token for GitHub operations; when omitted, the action authenticates as the Claude GitHub App |
 
-On issue and pull request events the triggering user must have write access (`allowed_non_write_users` plus your own `github_token` overrides that), and bot actors are rejected unless listed in `allowed_bots`. The full input list is in the action repository's `docs/usage.md`.
+On issue and pull request events the triggering user must have write access (`allowed_non_write_users` plus your own `github_token` overrides that), and [bot actors are rejected unless listed](https://code.claude.com/docs/en/github-actions) in `allowed_bots`. The full input list is in [the action repository's](https://github.com/anthropics/claude-code-action) `docs/usage.md`.
 
-> **Note:** The docs print these workflows with `actions/checkout@v6` and `anthropics/claude-code-action@v1`. The copies below pin each action to a full commit SHA and keep the version in a comment: a tag can be moved by the action's owner, a SHA cannot, and Dependabot updates both when it proposes a bump. Everything else is as documented.
+> **Note:** [The docs print these workflows](https://code.claude.com/docs/en/github-actions) with `actions/checkout@v6` and `anthropics/claude-code-action@v1`. The copies below pin each action to a full commit SHA and keep the version in a comment: a tag can be moved by the action's owner, a SHA cannot, and Dependabot updates both when it proposes a bump. Everything else is as documented.
 
 **Workflow 1: answer `@claude` mentions** (as documented)
 
@@ -214,15 +214,15 @@ jobs:
           claude_args: '--allowedTools "mcp__github_inline_comment__create_inline_comment"'
 ```
 
-In workflow 2, `--comment` makes Claude post the review; without it the findings stay in the run log. The `claude_args` line is required because the action only starts the inline-comment MCP server when `--allowedTools` names it. `id-token: write` is "required for the Claude Code GitHub Action's default GitHub App authentication". On public repositories, pull requests from forks get no secrets, so the review does not run for them. If you come from `@beta`: change to `@v1`, remove `mode`, rename `direct_prompt` to `prompt`, and move `max_turns` and `model` into `claude_args`.
+In workflow 2, `--comment` makes Claude post the review; without it the findings stay in the run log. The `claude_args` line is required because the action only starts the inline-comment MCP server when `--allowedTools` names it. `id-token: write` is "[required for the Claude Code GitHub Action's default GitHub App authentication](https://code.claude.com/docs/en/github-actions)". On public repositories, pull requests from forks get no secrets, so the review does not run for them. If you come from `@beta`: change to `@v1`, remove `mode`, rename `direct_prompt` to `prompt`, and move `max_turns` and `model` into `claude_args`.
 
 ## The Agent SDK
 
-The SDK is the same agent as a library, for a process you operate. For TypeScript, `npm install @anthropic-ai/claude-agent-sdk` (Node.js 18.14+). For Python, `pip install claude-agent-sdk` or `uv add claude-agent-sdk`, imported as `claude_agent_sdk` (Python 3.10+).
+The SDK is the same agent as a library, for a process you operate. For TypeScript, `npm install @anthropic-ai/claude-agent-sdk` ([Node.js 18.14+](https://code.claude.com/docs/en/agent-sdk/quickstart)). For Python, `pip install claude-agent-sdk` or `uv add claude-agent-sdk`, imported as `claude_agent_sdk` (Python 3.10+).
 
-Both packages bundle a native Claude Code binary. Authenticate with `ANTHROPIC_API_KEY` in the process environment (the SDK "doesn't load `.env` files automatically") or a cloud provider switch such as `CLAUDE_CODE_USE_BEDROCK=1`. A product built on the SDK may not offer claude.ai login to its users, and may call itself "Claude Agent" or "Powered by Claude", not "Claude Code".
+Both packages bundle a native Claude Code binary. Authenticate with `ANTHROPIC_API_KEY` [in the process environment](https://code.claude.com/docs/en/agent-sdk/quickstart) (the SDK "doesn't load `.env` files automatically") or a cloud provider switch such as `CLAUDE_CODE_USE_BEDROCK=1`. A product built on the SDK [may not offer claude.ai login to its users](https://code.claude.com/docs/en/agent-sdk/overview), and may call itself "Claude Agent" or "Powered by Claude", not "Claude Code".
 
-The quickstart's minimal agent, in TypeScript:
+[The quickstart's minimal agent](https://code.claude.com/docs/en/agent-sdk/quickstart), in TypeScript:
 
 ```typescript
 import { query } from "@anthropic-ai/claude-agent-sdk";
@@ -274,16 +274,16 @@ Options map onto the CLI features you already know:
 
 | CLI feature | TypeScript | Python | Note |
 |---|---|---|---|
-| `--allowedTools` | `allowedTools` | `allowed_tools` | "This does not restrict Claude to only these tools" |
+| `--allowedTools` | `allowedTools` | `allowed_tools` | "[This does not restrict Claude to only these tools](https://code.claude.com/docs/en/agent-sdk/typescript#options)" |
 | `--disallowedTools`, `--tools` | `disallowedTools`, `tools` | `disallowed_tools` | A scoped rule like `"Bash(rm *)"` denies in every mode |
 | `--permission-mode` | `permissionMode`, `canUseTool` | `permission_mode`, `can_use_tool` | The callback approves or denies each call in your code |
-| `--mcp-config` | `mcpServers`, `strictMcpConfig` | `mcp_servers` | Python also accepts a config-file path |
+| `--mcp-config` | `mcpServers`, `strictMcpConfig` | `mcp_servers` | [Python also accepts a config-file path](https://code.claude.com/docs/en/agent-sdk/python#claudeagentoptions) |
 | `--agents`, hooks | `agents`, `hooks` | `agents`, `hooks` | Hooks are callbacks per hook event |
 | `--resume`, `--continue` | `resume`, `continue`, `forkSession` | `resume`, `continue_conversation`, `fork_session` | `resume` takes a session ID |
 | `--setting-sources` | `settingSources` | `setting_sources` | Omitted means user, project and local, as in the CLI; `[]` disables all three |
-| `--max-turns`, `--max-budget-usd` | `maxTurns`, `maxBudgetUsd` | `max_turns`, `max_budget_usd` | The budget is a client-side estimate and can pass the cap |
+| `--max-turns`, `--max-budget-usd` | `maxTurns`, `maxBudgetUsd` | `max_turns`, `max_budget_usd` | [The budget is a client-side estimate and can pass the cap](https://code.claude.com/docs/en/agent-sdk/typescript#options) |
 
-With `settingSources` omitted, `query()` reads user, project and local settings, `CLAUDE.md` files and `.claude/` skills, agents and commands. Managed policy and `~/.claude.json` are read whatever you pass.
+With `settingSources` omitted, `query()` reads user, project and local settings, `CLAUDE.md` files and `.claude/` skills, agents and commands. [Managed policy](https://code.claude.com/docs/en/agent-sdk/claude-code-features) and `~/.claude.json` are read whatever you pass.
 
 | You want | Use |
 |---|---|
@@ -293,17 +293,17 @@ With `settingSources` omitted, `query()` reads user, project and local settings,
 
 ## Security for unattended runs
 
-The docs are direct: "A `-p` session shows no workspace trust dialog and no per-server approval prompt". In a folder you never trusted, a `-p` or SDK run still **uses** the repository's hooks, its settings `env` block and helper commands such as `apiKeyHelper`, and connects the servers in `.mcp.json` "without asking, approved or not". Its `permissions.allow` rules are among the few things held back.
+[The docs are direct](https://code.claude.com/docs/en/headless): "A `-p` session shows no workspace trust dialog and no per-server approval prompt". In a folder you never trusted, a `-p` or SDK run still **uses** the repository's hooks, its settings `env` block and helper commands such as `apiKeyHelper`, and connects the servers in `.mcp.json` "[without asking, approved or not](https://code.claude.com/docs/en/permissions#what-runs-before-you-trust-a-folder)". Its `permissions.allow` rules are among the few things held back.
 
-Repository-supplied configuration is how real advisories happened in interactive mode: project hooks that ran without meaningful consent, `.mcp.json` servers that started before the trust dialog was answered (CVE-2025-59536), and an `ANTHROPIC_BASE_URL` in repository settings that sent the API key to an attacker's endpoint (CVE-2026-21852). The two CVEs are patched (in 1.0.111 and 2.0.65), and the trust warning for hooks was clarified in 1.0.87. In CI there is no dialog to patch, so you close the gap yourself:
+Repository-supplied configuration is how [real advisories happened in interactive mode](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/): project hooks that ran without meaningful consent, `.mcp.json` servers that started before the trust dialog was answered (CVE-2025-59536), and an `ANTHROPIC_BASE_URL` in repository settings that sent the API key to an attacker's endpoint (CVE-2026-21852). The two CVEs are patched (in 1.0.111 and 2.0.65), and the trust warning for hooks was clarified in 1.0.87. In CI there is no dialog to patch, so you close the gap yourself:
 
 | Risk | Control |
 |---|---|
 | Repository settings, hooks and `.mcp.json` load | `--setting-sources user` (SDK: `settingSources` without project) reads neither the project's settings files nor its `.mcp.json` |
 | Repository hooks, skills, plugins, MCP servers load | `--bare`; the project's `env` block still applies, so combine it with the row above. For hooks alone: `--settings '{"disableAllHooks": true}'` |
-| Unknown MCP servers | `--strict-mcp-config` with your own `--mcp-config`; `disabledMcpjsonServers` to reject one by name |
+| Unknown MCP servers | `--strict-mcp-config` with your own `--mcp-config`; `disabledMcpjsonServers` [to reject one by name](https://code.claude.com/docs/en/mcp#project-scope) |
 | Token can do more than the job | Minimal workflow `permissions` (workflow 2 only reads); credentials in GitHub Secrets or OIDC, never committed |
-| Untrusted text steers the agent | Issue bodies, PR descriptions and diffs are data. The docs say "Avoid piping untrusted content directly to Claude" |
+| Untrusted text steers the agent | Issue bodies, PR descriptions and diffs are data. The docs say "[Avoid piping untrusted content directly to Claude](https://code.claude.com/docs/en/security)" |
 
 A hardened call for a repository you did not write:
 
@@ -314,15 +314,15 @@ claude -p "$PROMPT" --bare --setting-sources user \
   --max-turns 15 --max-budget-usd 2
 ```
 
-Least privilege applies to the agent's token as much as to its tools. An agent that can read private data, reads untrusted content and can send data out has all three parts of what one widely cited post calls the "lethal trifecta"; remove one of them per job. In one vendor's 2025 incident, attacker-committed code shipped inside a coding-assistant release, and the stated root cause was an "inappropriately scoped GitHub token". [Chapter 29](29-security-and-guardrails.md) goes deeper.
+Least privilege applies to the agent's token as much as to its tools. An agent that can read private data, reads untrusted content and can send data out has all three parts of what one widely cited post calls the "[lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/)"; remove one of them per job. In one vendor's 2025 incident, attacker-committed code shipped inside a coding-assistant release, and the stated root cause was an "[inappropriately scoped GitHub token](https://aws.amazon.com/security/security-bulletins/AWS-2025-015/)". [Chapter 29](29-security-and-guardrails.md) goes deeper.
 
 ## Cost control in CI
 
-- **Cap every run.** `--max-turns` has no limit by default. `--max-budget-usd` stops the run when the client-side estimate reaches the amount; it counts subagent spend, and "Spend can pass the cap", so leave headroom. In the action, pass both through `claude_args`.
-- **Cap the job.** The docs' list: workflow-level timeouts, and GitHub's concurrency controls to limit parallel runs.
-- **Trigger less, send less.** Reviewing on every `synchronize` pays for a review per push; make re-review opt-in if pushes come in bursts. A concise `CLAUDE.md` is read on every run, and a specific `@claude` request needs fewer turns.
-- **Choose the model on purpose** with `--model` in `claude_args` (the docs' example pins `claude-sonnet-5`, as of Nov 2026), and revisit pinned IDs: of nine workflows in the author's repositories, five still named an older Opus model than three others.
-- **Record the estimate.** Log `total_cost_usd` per job. With `--continue` or `--resume` it reports the conversation's whole total.
+- **Cap every run.** `--max-turns` has no limit by default. `--max-budget-usd` stops the run when the client-side estimate reaches the amount; it counts subagent spend, and "[Spend can pass the cap](https://code.claude.com/docs/en/cli-reference)", so leave headroom. In the action, pass both through `claude_args`.
+- **Cap the job.** [The docs' list](https://code.claude.com/docs/en/github-actions): workflow-level timeouts, and GitHub's concurrency controls to limit parallel runs.
+- **Trigger less, send less.** Reviewing on every `synchronize` pays for a review per push; make re-review opt-in if pushes come in bursts. A concise `CLAUDE.md` [is read on every run](https://code.claude.com/docs/en/costs), and a specific `@claude` request needs fewer turns.
+- **Choose the model on purpose** with `--model` in `claude_args` ([the docs' example pins](https://code.claude.com/docs/en/github-actions) `claude-sonnet-5`, as of Nov 2026), and revisit pinned IDs: of nine workflows in the author's repositories, five still named an older Opus model than three others.
+- **Record the estimate.** Log `total_cost_usd` per job. With `--continue` or `--resume` it [reports the conversation's whole total](https://code.claude.com/docs/en/headless).
 
 ## From the field
 
@@ -336,7 +336,7 @@ a = append(a, "--setting-sources", "user", "--disable-slash-commands",
 	"--mcp-config", s.mcpConfig(sid), "--strict-mcp-config")
 ```
 
-The source comment gives the reason: only user settings load, so "a cloned repo cannot add permission rules, hooks or env". Approvals go to a loopback MCP tool through `--permission-prompt-tool`, models are reached only through a gateway, and credentials never enter the sandbox. (`--disable-slash-commands` is in the CLI reference: "Disable all skills and commands for this session".)
+The source comment gives the reason: only user settings load, so "a cloned repo cannot add permission rules, hooks or env". Approvals go to a loopback MCP tool through `--permission-prompt-tool`, models are reached only through a gateway, and credentials never enter the sandbox. (`--disable-slash-commands` is in the CLI reference: "[Disable all skills and commands for this session](https://code.claude.com/docs/en/cli-reference)".)
 
 **Sometimes the right headless tool is not an agent.** Across the 16 repositories surveyed, no Agent SDK import was found; unattended work either drives the CLI or goes through a gateway. One pipeline that turns past bug fixes into lint rules calls the Messages API directly: a streamed request with `thinking={"type": "adaptive"}`, an effort setting, and a system prompt marked `"cache_control": {"type": "ephemeral"}`, behind a concurrency semaphore. Its own comment notes that the cache marker "is a no-op for short prompts". If a step is one generation with no tools, a direct call is simpler to cap and to test than an agent loop.
 
@@ -352,9 +352,9 @@ The source comment gives the reason: only user settings load, so "a cloned repo 
 | The captured output is an authentication error, not an answer | In-run failures are printed as the result on stdout; `--bare` never reads OAuth or keychain credentials | Check the exit status and the result text; set `ANTHROPIC_API_KEY` or an `apiKeyHelper` in `--settings` |
 | Script crashes reading `structured_output` | The field is absent when no valid structured output was produced | Test for it first (`jq -e`) |
 | A hook or MCP server you never approved ran in CI | `-p` uses project hooks and `.mcp.json` with no dialog | `--setting-sources user`, `--bare`, `--strict-mcp-config` |
-| An MCP server is silently missing | Invalid `--mcp-config` entries are skipped and the run exits cleanly | Fail the job when `mcp_server_errors` (or `plugin_errors`) is present in the `system/init` event |
+| An MCP server is silently missing | Invalid `--mcp-config` [entries are skipped and the run exits cleanly](https://code.claude.com/docs/en/headless) | Fail the job when `mcp_server_errors` (or `plugin_errors`) is present in the `system/init` event |
 | CI does not run on Claude's commits | GitHub does not trigger workflows on commits made with the default `GITHUB_TOKEN` | Remove that `github_token` input so the action authenticates as the Claude GitHub App, or pass a custom app token |
-| `@claude` gets no reply | App not installed, secret missing, commenter lacks write access, or the phrase is not a whole word | Check each; `@claude-bot` does not match |
+| `@claude` gets no reply | App not installed, secret missing, commenter lacks write access, or [the phrase is not a whole word](https://code.claude.com/docs/en/github-actions) | Check each; `@claude-bot` does not match |
 
 ## Checklist
 

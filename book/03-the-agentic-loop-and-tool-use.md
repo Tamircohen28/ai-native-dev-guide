@@ -12,10 +12,10 @@ describe some functions to the model, and when it wants one it writes a structur
 prose. Your program, the **harness**, runs the function and sends the output back as the next message.
 The model reads the result and decides what to do next. This repeats until it answers in plain text.
 
-The API docs put the contract this way: "The model never runs anything on its own. It emits a
+[The API docs](https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works) put the contract this way: "The model never runs anything on its own. It emits a
 structured request, your code (or Anthropic's servers) runs the operation, and the result flows back
 into the conversation." That repetition is the **agentic loop**, and Anthropic's shortest definition
-of an agent is "LLMs autonomously using tools in a loop." Claude Code, other coding agents and the
+of an agent is ["LLMs autonomously using tools in a loop."](https://www.anthropic.com/research/effective-context-engineering-for-ai-agents) Claude Code, other coding agents and the
 script below are all this loop, with different tools and different guardrails around it.
 
 ```mermaid
@@ -78,13 +78,13 @@ JSON Schema for the input.
 ```
 
 The model never sees your code, only the name, description and schema, so write those as carefully as
-a prompt. Anthropic's team says of an agent it built that "we actually spent more time optimizing
+a prompt. [Anthropic's team](https://www.anthropic.com/research/building-effective-agents) says of an agent it built that "we actually spent more time optimizing
 our tools than the overall prompt". One fix was to stop accepting relative paths: "we changed the
 tool to always require absolute filepaths—and we found that the model used this method flawlessly."
 
 ## The loop, step by step
 
-The client-side loop, as the docs give it:
+The client-side loop, [as the docs give it](https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works):
 
 1. Send a request with your `tools` array and the user message.
 2. Claude responds with `stop_reason: "tool_use"` and one or more `tool_use` blocks.
@@ -93,7 +93,7 @@ The client-side loop, as the docs give it:
    with the `tool_result` blocks.
 5. Repeat from step 2 while `stop_reason` is `"tool_use"`.
 
-Every response carries a `stop_reason`, and the harness branches on it:
+Every response carries a `stop_reason`, and [the harness branches on it](https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons):
 
 | `stop_reason` | Meaning | What the harness does |
 | :-- | :-- | :-- |
@@ -101,13 +101,13 @@ Every response carries a `stop_reason`, and the harness branches on it:
 | `tool_use` | It wants one or more tools run | Run them, append the results, call again |
 | `max_tokens` | Output hit your `max_tokens` cap | If a `tool_use` block was cut off, "retry the request with a higher `max_tokens` value" |
 | `stop_sequence` | Claude emitted one of the `stop_sequences` you set on the request | Read the response's `stop_sequence` field to see which one fired |
-| `pause_turn` | "A server-tool loop reached its iteration limit" | Append the response `content` unchanged as an `assistant` message; resend with the same `tools` and no new user message |
-| `refusal` | A safety classifier declined, as "a normal HTTP 200 response, not an error" | Check `stop_reason`, not only the HTTP status |
+| `pause_turn` | ["A server-tool loop reached its iteration limit"](https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons) | Append the response `content` unchanged as an `assistant` message; resend with the same `tools` and no new user message |
+| `refusal` | A safety classifier declined, as ["a normal HTTP 200 response, not an error"](https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons) | Check `stop_reason`, not only the HTTP status |
 | `model_context_window_exceeded` | Generation ran into the context window limit | Shrink the context ([chapter 04](04-prompt-caching-compaction-and-cost.md)) |
 
 ## A minimal loop you can run
 
-The script below is a complete agent with two read-only tools. Install the SDK with
+The script below is a complete agent with two read-only tools. [Install the SDK](https://platform.claude.com/docs/en/cli-sdks-libraries/sdks/python) with
 `pip install anthropic`, set `ANTHROPIC_API_KEY`, and run it from inside a small project.
 
 ```python
@@ -163,30 +163,30 @@ print(next((block.text for block in response.content if block.type == "text"), "
 Four details in that code are rules, not style:
 
 - **Echo the assistant message unchanged.** Current models think between tool calls, and "you must
-  pass the thinking blocks from the assistant message back to the API, complete and unmodified."
+  pass the thinking blocks from the assistant message back to the API, [complete and unmodified."](https://platform.claude.com/docs/en/build-with-claude/thinking)
 - **Return every result in one user message, results first**: "return one `tool_result` for each
-  `tool_use` block, all together in the next user message", each "before any text content".
+  `tool_use` block, all together in the next user message", each ["before any text content"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/parallel-tool-use).
 - **Report failures.** `is_error: true` plus a message saying what to change lets the model fix its call.
-- **Bound the loop.** Agents bring "higher costs, and the potential for compounding errors", and a
+- **Bound the loop.** Agents bring ["higher costs, and the potential for compounding errors"](https://www.anthropic.com/research/building-effective-agents), and a
   ceiling on iterations is the cheapest guardrail there is.
 
 > **Warning:** `read_file` returns anything under the project root, a `.env` file included, and that
 > content is sent to the API. Run the script in a repository that holds no secrets.
 
-> **Note:** The SDK can run this loop for you ("For most tool use implementations, use the tool
-> runner"): `client.beta.messages.tool_runner(...)`, then `runner.until_done()`. Write it by hand once.
+> **Note:** The SDK can run this loop for you ("For most tool use implementations, [use the tool
+> runner](https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons)"): `client.beta.messages.tool_runner(...)`, then `runner.until_done()`. Write it by hand once.
 
 ## Parallel tool calls
 
-"By default, Claude may call multiple tools in a single response", and "The API doesn't prescribe an
+["By default, Claude may call multiple tools in a single response"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/parallel-tool-use), and "The API doesn't prescribe an
 execution order", so a harness may run them concurrently. The script above already copes: it collects
 one result per `tool_use` block and sends them together.
 
-- Sending each result in its own user message "“teaches” Claude to avoid parallel calls."
+- Sending each result in its own user message ["“teaches” Claude to avoid parallel calls."](https://platform.claude.com/docs/en/agents-and-tools/tool-use/parallel-tool-use)
 - To switch parallel calls off, "set `disable_parallel_tool_use: true` inside the `tool_choice`
   object. It is not a top-level request parameter."
-- As of Nov 2026, Fable 5.2, Opus 5.5 and Sonnet 5.5 "reject forced tool use on every request with a
-  400 error". Use `tool_choice: {"type": "auto"}` with strict tool use or structured outputs instead.
+- As of Nov 2026, Fable 5.2, Opus 5.5 and Sonnet 5.5 ["reject forced tool use on every request with a
+  400 error"](https://platform.claude.com/docs/en/build-with-claude/thinking). Use `tool_choice: {"type": "auto"}` with strict tool use or structured outputs instead.
 
 ## Client tools and server tools
 
@@ -196,27 +196,27 @@ one result per `tool_use` block and sends them together.
 | Anthropic-schema | Anthropic | Your machine | `bash`, `text_editor`, `memory`, `computer`, `browser` | The same |
 | Server-executed | Anthropic | Anthropic's servers | `web_search`, `web_fetch`, `code_execution`, `tool_search` | `server_tool_use` plus a result block such as `web_search_tool_result` |
 
-- Anthropic-schema tools exist because "these schemas are trained-in": the model was optimised on
+- Anthropic-schema tools exist because ["these schemas are trained-in"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works): the model was optimised on
   many trajectories that use those exact signatures. You still execute them yourself.
 - For server tools "You never construct a `tool_result` block". The API runs its own inner loop
-  ("The default limit is 10 iterations for each request") and returns `pause_turn` when it runs out.
+  (["The default limit is 10 iterations for each request"](https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons)) and returns `pause_turn` when it runs out.
 - Claude Code's shell and file tools (Bash, Read, Edit) run on your machine, and it forwards MCP tool
   calls to the MCP server ([chapter 12](12-mcp-how-it-works.md)), so it can check every call first.
 
 ## Tool definitions are context
 
-"Tool definitions and accumulated `tool_result` blocks consume your context window." Sizes the docs
+"Tool definitions and accumulated `tool_result` blocks [consume your context window."](https://platform.claude.com/docs/en/agents-and-tools/tool-use/manage-tool-context) Sizes the docs
 publish (as of Nov 2026):
 
 | Item | Tokens |
 | :-- | --: |
-| Token-counting example without tools ("Hello, Claude" and a four-word system prompt) | 14 |
+| [Token-counting example](https://platform.claude.com/docs/en/build-with-claude/token-counting) without tools ("Hello, Claude" and a four-word system prompt) | 14 |
 | Token-counting example with one small tool (`get_weather`) | 403 |
-| Tool-use system prompt the API adds when you send `tools` (Opus 5.5, Sonnet 5.5, Haiku 5.5) | 286 |
-| "A typical multiserver setup (GitHub, Slack, Sentry, Grafana, and Splunk)" | ~55,000 |
+| [Tool-use system prompt](https://platform.claude.com/docs/en/about-claude/pricing) the API adds when you send `tools` (Opus 5.5, Sonnet 5.5, Haiku 5.5) | 286 |
+| ["A typical multiserver setup (GitHub, Slack, Sentry, Grafana, and Splunk)"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool) | ~55,000 |
 
-Size is not the only cost: "Claude's ability to pick the right tool degrades once you exceed 30–50
-available tools." The fix is **tool search**, which defers loading. You still send every
+Size is not the only cost: ["Claude's ability to pick the right tool degrades once you exceed 30–50
+available tools."](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool) The fix is **tool search**, which defers loading. You still send every
 definition, but you mark the rarely used ones `defer_loading: true` and add a search tool. A deferred
 definition stays out of the context window until the model searches for it. A request fragment:
 
@@ -230,15 +230,15 @@ definition stays out of the context window until the model searches for it. A re
 }
 ```
 
-- "`defer_loading` controls what enters the context window, not what you send in the request". Search
+- "`defer_loading` [controls what enters the context window](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool), not what you send in the request". Search
   hits come back as `tool_reference` blocks, which the API expands into full definitions.
-- The docs report that tool search "typically reduces this by over 85 percent". Use it when "You have
+- [The docs report](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool) that tool search "typically reduces this by over 85 percent". Use it when "You have
   10 or more tools", and "Keep your 3–5 most frequently used tools non-deferred".
-- **Claude Code does this for MCP servers by default**: "Only tool names and server instructions load
-  at session start". `ENABLE_TOOL_SEARCH` changes that (`auto` loads definitions up front while they
+- **Claude Code does this for MCP servers by default**: ["Only tool names and server instructions load
+  at session start"](https://code.claude.com/docs/en/mcp#scale-with-mcp-tool-search). `ENABLE_TOOL_SEARCH` changes that (`auto` loads definitions up front while they
   total under 10% of the context window, `false` always does), and `"alwaysLoad": true` on a server
   entry exempts one server ([chapter 13](13-mcp-in-practice.md)).
-- Results cost context too, so harnesses cap them: Claude Code keeps Bash output inline "up to roughly
+- Results cost context too, so harnesses cap them: [Claude Code keeps Bash output inline](https://code.claude.com/docs/en/tools-reference) "up to roughly
   30,000 characters", and Read returns "at most 25,000 tokens" per call.
 
 ## Where Claude Code puts its checks
@@ -262,12 +262,12 @@ flowchart TD
     X --> G
 ```
 
-- **Hooks run first.** "A hook that exits with code 2 stops the tool call before permission rules are
-  evaluated". Exit 1 does not block: by default it is a non-blocking error and the call goes ahead.
-- **Then permission rules.** "Rules are evaluated in order: deny, then ask, then allow." A hook cannot
+- **Hooks run first.** ["A hook that exits with code 2 stops the tool call before permission rules are
+  evaluated"](https://code.claude.com/docs/en/permissions#precedence-among-rules-hooks-and-mods). Exit 1 does not block: by default it is [a non-blocking error](https://code.claude.com/docs/en/hooks) and the call goes ahead.
+- **Then permission rules.** ["Rules are evaluated in order: deny, then ask, then allow."](https://code.claude.com/docs/en/permissions#precedence-among-rules-hooks-and-mods) A hook cannot
   loosen them: "PreToolUse hook decisions don't bypass permission rules."
 - **The permission mode sits between the ask and the allow rules.** `bypassPermissions`, and
-  `acceptEdits` for file edits, approve at that step; in `default` and `dontAsk` the call goes on to
+  `acceptEdits` for file edits, [approve at that step](https://code.claude.com/docs/en/permission-modes); in `default` and `dontAsk` the call goes on to
   the allow rules. Whatever is still unmatched is settled by the mode: prompt you, deny it (`dontAsk`),
   or in `auto` let a separate classifier model review it ([chapter 05](05-inside-the-harness.md)).
 - **A block is a result, not a crash.** The refusal returns to the model as the tool result, and the
@@ -277,7 +277,7 @@ Rules and modes are in [chapter 09](09-settings-and-permissions.md), hooks in [c
 
 ## Workflows or agents
 
-Not every LLM system needs an open-ended loop. Anthropic's "Building effective agents" (December 2024;
+Not every LLM system needs an open-ended loop. Anthropic's ["Building effective agents"](https://www.anthropic.com/research/building-effective-agents) (December 2024;
 the tooling it lists has changed since, the vocabulary has stuck) draws the line:
 
 - "**Workflows** are systems where LLMs and tools are orchestrated through predefined code paths."
@@ -294,8 +294,8 @@ In a workflow your code decides the next step; in an agent the model does. The f
 | Orchestrator-workers | "a central LLM dynamically breaks down tasks, delegates them to worker LLMs, and synthesizes their results" | Subtasks "aren't pre-defined", such as a change touching an unknown set of files |
 | Evaluator-optimizer | "one LLM call generates a response while another provides evaluation and feedback in a loop" | "we have clear evaluation criteria" and refinement gives measurable value |
 
-The post's rule is to find "the simplest solution possible, and only increasing complexity when
-needed", because agentic systems "often trade latency and cost for better task performance". Keep
+The post's rule is to find ["the simplest solution possible, and only increasing complexity when
+needed"](https://www.anthropic.com/research/building-effective-agents), because agentic systems "often trade latency and cost for better task performance". Keep
 agents "for open-ended problems where it's difficult or impossible to predict the required number of
 steps". In Claude Code, subagents are orchestrator-workers ([chapter 14](14-subagents.md)) and
 scripted multi-agent runs are workflows in exactly this sense
@@ -343,14 +343,14 @@ of 76 sessions ran in `bypassPermissions` mode, so stricter permissions may give
 
 | Symptom | Cause | Fix |
 | :-- | :-- | :-- |
-| The model ends its turn with an empty or tiny reply after tool results | A text block was added right after the `tool_result` blocks, which "sets a pattern of user input after every tool use" | Send the results alone; "Never add text blocks immediately after tool results" |
+| The model ends its turn with an empty or tiny reply after tool results | A text block was added right after the `tool_result` blocks, which ["sets a pattern of user input after every tool use"](https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons) | Send the results alone; "Never add text blocks immediately after tool results" |
 | The model stops calling tools in parallel | Each result went back in its own user message | Return all results together in one user message |
 | A 400 error in the middle of a loop | The assistant message was edited, or `system` or `tools` changed mid-loop, so thinking blocks fail the prefix check | Append `response.content` unchanged; change nothing earlier in the conversation |
 | `stop_reason` is `max_tokens` and the tool call is cut off | The output cap ended the `tool_use` block early | Retry with a higher `max_tokens` |
-| A 400 error when you force a tool through `tool_choice` | Fable 5.2, Opus 5.5 and Sonnet 5.5 reject forced tool use (as of Nov 2026) | `tool_choice: {"type": "auto"}` plus strict tool use or structured outputs |
+| A 400 error when you force a tool through `tool_choice` | Fable 5.2, Opus 5.5 and Sonnet 5.5 [reject forced tool use](https://platform.claude.com/docs/en/build-with-claude/thinking) (as of Nov 2026) | `tool_choice: {"type": "auto"}` plus strict tool use or structured outputs |
 | Wrong tool picked, or a large context before any work starts | Too many definitions loaded up front | Tool search with `defer_loading`; fewer, clearer tools; disconnect MCP servers you do not use |
-| The loop stops early with `pause_turn` | A server tool reached its 10-iteration limit | Resend with the response `content` as an `assistant` message, same `tools`, no new user message |
-| Your guard hook runs but the tool call still happens | The hook exits 1, a non-blocking error | Exit 2 to block ([chapter 16](16-hooks.md)) |
+| The loop stops early with `pause_turn` | A server tool reached its [10-iteration limit](https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons) | Resend with the response `content` as an `assistant` message, same `tools`, no new user message |
+| Your guard hook runs but the tool call still happens | The hook exits 1, [a non-blocking error](https://code.claude.com/docs/en/hooks) | Exit 2 to block ([chapter 16](16-hooks.md)) |
 
 ## Checklist
 

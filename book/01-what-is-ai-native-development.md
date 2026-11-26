@@ -73,20 +73,20 @@ flowchart TB
 
 The table uses names that later chapters explain in full. In one line each: `CLAUDE.md` is a file of project instructions loaded into every session; a **skill** is a packaged prompt whose body loads only when it is invoked; a **hook** is your own script that the harness runs at a fixed point in the loop; **MCP** (Model Context Protocol) is the standard way to connect external tools; a **subagent** is a second agent that the first one starts for a side task; **compaction** replaces the older part of a conversation with a summary.
 
-Anthropic's shortest definition of an agent is "LLMs autonomously using tools in a loop." In this book's framing, the harness is everything in that sentence except the LLM. This is why two products built on the same model can behave very differently: the tools, the loop and the context rules are not the same.
+Anthropic's shortest definition of an agent is ["LLMs autonomously using tools in a loop."](https://www.anthropic.com/research/effective-context-engineering-for-ai-agents) In this book's framing, the harness is everything in that sentence except the LLM. This is why two products built on the same model can behave very differently: the tools, the loop and the context rules are not the same.
 
 ### Where Claude Code sits
 
-Claude Code is Anthropic's harness for software work. The model is Claude; Claude Code supplies the tools, the loop, the permission system and the context management. The official docs draw the same line, and it is the most useful distinction in this book:
+Claude Code is Anthropic's harness for software work. The model is Claude; [Claude Code supplies the tools](https://code.claude.com/docs/en/how-claude-code-works), the loop, the permission system and the context management. [The official docs draw the same line](https://code.claude.com/docs/en/best-practices), and it is the most useful distinction in this book:
 
 | Kind of instruction | Docs' wording | Examples | How strong |
 |---|---|---|---|
-| Non-deterministic | "you write the instruction, and Claude (the model) reads it" | A prompt, `CLAUDE.md`, a skill | A guideline; the model may decide it does not apply |
-| Deterministic | "you configure the instruction, and Claude Code (the harness) *has* to execute this" | A hook, a deny rule, a managed setting | Enforced every time |
+| Non-deterministic | ["you write the instruction, and Claude (the model) reads it"](https://code.claude.com/docs/en/best-practices) | A prompt, `CLAUDE.md`, a skill | A guideline; the model may decide it does not apply |
+| Deterministic | ["you configure the instruction, and Claude Code (the harness) *has* to execute this"](https://code.claude.com/docs/en/best-practices) | A hook, a deny rule, a managed setting | Enforced every time |
 
-A deny rule is a permission setting that blocks matching tool calls; a managed setting is one your organization's administrator sets for you. The docs' advice on choosing: "Most of the time, you want Claude to decide." But "If something has to happen every time, make it a hook, a deny rule, or a managed setting."
+A deny rule is a permission setting that blocks matching tool calls; a managed setting is one your organization's administrator sets for you. The docs' advice on choosing: ["Most of the time, you want Claude to decide."](https://code.claude.com/docs/en/best-practices) But "If something has to happen every time, make it a hook, a deny rule, or a managed setting."
 
-The same harness runs as an interactive session (terminal, VS Code, desktop app, web) and without a UI. The non-interactive form is one command, which is what makes agents scriptable:
+[The same harness runs as an interactive session](https://code.claude.com/docs/en/how-claude-code-works) (terminal, VS Code, desktop app, web) and without a UI. [The non-interactive form is one command](https://code.claude.com/docs/en/common-workflows), which is what makes agents scriptable:
 
 ```bash
 # Pipe anything in, get an answer on stdout
@@ -98,7 +98,7 @@ git log --oneline -20 | claude -p "summarize these recent commits"
 
 ## What changes in your job
 
-The docs open their best-practices page with a reassuring claim: "Claude Code is built in a way that, in most cases, your first plain prompt in a fresh session already does the right thing, without any setup on your part." Typing is no longer the scarce resource. What is scarce is a precise description of the change and a trustworthy answer to "did it work?".
+The docs [open their best-practices page](https://code.claude.com/docs/en/best-practices) with a reassuring claim: "Claude Code is built in a way that, in most cases, your first plain prompt in a fresh session already does the right thing, without any setup on your part." Typing is no longer the scarce resource. What is scarce is a precise description of the change and a trustworthy answer to "did it work?".
 
 | Before | After |
 |---|---|
@@ -108,9 +108,9 @@ The docs open their best-practices page with a reassuring claim: "Claude Code is
 | Review is the last step | Review is the bottleneck; small changes and evidence keep it moving |
 | Conventions live in people | Conventions live in files the agent reads and rules the harness enforces |
 
-The reason verification moves to the centre is stated plainly in the docs: "Claude stops when the work looks done. If it has nothing to run that tells it whether the work actually *is* done, "looks done" is all it has to go on. In practice that makes you the test suite, and every mistake sits there until you happen to notice it."
+The reason verification moves to the centre is [stated plainly in the docs](https://code.claude.com/docs/en/best-practices): "Claude stops when the work looks done. If it has nothing to run that tells it whether the work actually *is* done, "looks done" is all it has to go on. In practice that makes you the test suite, and every mistake sits there until you happen to notice it."
 
-The same page says that when a session goes wrong, "it's almost always one of these". Each failure has a matching habit, and each habit has a part of this book.
+The same page says that when a session goes wrong, ["it's almost always one of these"](https://code.claude.com/docs/en/best-practices). Each failure has a matching habit, and each habit has a part of this book.
 
 | What went wrong (docs' wording) | The habit | Where it is taught |
 |---|---|---|
@@ -127,7 +127,7 @@ A prompt that leaves the agent guessing:
 fix the login bug
 ```
 
-The same task with the three things the docs ask for: "name the file, describe the symptom, and say what "fixed" looks like up front".
+The same task with [the three things the docs ask for](https://code.claude.com/docs/en/best-practices): "name the file, describe the symptom, and say what "fixed" looks like up front".
 
 ```text
 Users are logged out after about 5 minutes instead of 60.
@@ -137,7 +137,7 @@ Run the auth tests after, and keep going until they pass.
 Show me the test command you ran and its output.
 ```
 
-The second prompt is five lines, not five paragraphs. It names a place to start, a symptom, a pass/fail check and the evidence you want back. Asking for evidence matters because, in the docs' words, "'All tests pass' on its own tells you very little".
+The second prompt is five lines, not five paragraphs. It names a place to start, a symptom, a pass/fail check and the evidence you want back. Asking for evidence matters because, [in the docs' words](https://code.claude.com/docs/en/best-practices), "'All tests pass' on its own tells you very little".
 
 A brief you can reuse for any delegated task:
 
@@ -153,12 +153,12 @@ If you cannot fill in "Done when", you have found the real first task: build the
 
 ## Workflows versus agents
 
-Anthropic's post "Building effective agents" (Dec 2024) gives the vocabulary the rest of the field uses. Both of the following are "agentic systems":
+Anthropic's post ["Building effective agents"](https://www.anthropic.com/research/building-effective-agents) (Dec 2024) gives the vocabulary the rest of the field uses. Both of the following are "agentic systems":
 
 - "**Workflows** are systems where LLMs and tools are orchestrated through predefined code paths."
 - "**Agents**, on the other hand, are systems where LLMs dynamically direct their own processes and tool usage, maintaining control over how they accomplish tasks."
 
-The post names five workflow patterns before it gets to agents. The examples in the right-hand column are ours.
+[The post names five workflow patterns](https://www.anthropic.com/research/building-effective-agents) before it gets to agents. The examples in the right-hand column are ours.
 
 | Pattern | The post's description | A coding example |
 |---|---|---|
@@ -171,12 +171,12 @@ The post names five workflow patterns before it gets to agents. The examples in 
 
 Two pieces of the post's advice hold up well and shape this book:
 
-1. **Start simple.** "we recommend finding the simplest solution possible, and only increasing complexity when needed. This might mean not building agentic systems at all. Agentic systems often trade latency and cost for better task performance".
-2. **Autonomy has a price.** "The autonomous nature of agents means higher costs, and the potential for compounding errors." A later Anthropic post puts numbers on it: "agents typically use about 4× more tokens than chat interactions, and multi-agent systems use about 15× more tokens than chats."
+1. **Start simple.** "we recommend [finding the simplest solution possible](https://www.anthropic.com/research/building-effective-agents), and only increasing complexity when needed. This might mean not building agentic systems at all. Agentic systems often trade latency and cost for better task performance".
+2. **Autonomy has a price.** ["The autonomous nature of agents means higher costs, and the potential for compounding errors."](https://www.anthropic.com/research/building-effective-agents) [A later Anthropic post puts numbers on it](https://www.anthropic.com/research/multi-agent-research-system): "agents typically use about 4× more tokens than chat interactions, and multi-agent systems use about 15× more tokens than chats."
 
 What this means in practice: an interactive Claude Code session is an agent. When you call `claude -p` at a fixed step of a CI job, or make a hook run the type checker every time the agent tries to stop, you are wrapping that agent in a workflow, a predefined code path. Mature setups use both. The agent handles the open-ended part; deterministic paths handle the steps that must always happen. Part IV builds these up, from a single verify loop in chapter [22](22-explore-plan-implement-verify.md) to orchestrator-workers in chapter [26](26-multi-agent-orchestration.md).
 
-> **Note:** The post carries a banner: "Much of the tooling landscape described in this post has changed since December 2024." The definitions are still the standard ones; the product names in it are dated. Claude Code also has a feature of its own called dynamic workflows (scripts that orchestrate many subagents), covered in Part IV. In this section the word is the general design term.
+> **Note:** [The post carries a banner](https://www.anthropic.com/research/building-effective-agents): "Much of the tooling landscape described in this post has changed since December 2024." The definitions are still the standard ones; the product names in it are dated. Claude Code also has a feature of its own called dynamic workflows (scripts that orchestrate many subagents), covered in Part IV. In this section the word is the general design term.
 
 ## The productivity evidence, with its caveats
 
@@ -184,18 +184,18 @@ You will be asked whether this makes developers faster. The honest answer has se
 
 | Finding | Source | Caveat |
 |---|---|---|
-| 90% of respondents use AI at work; "More than 80% believe it has increased their productivity"; 30% report little or no trust in AI-generated code. AI adoption relates positively to throughput but "does continue to have a negative relationship with software delivery stability." | DORA 2025 report | Survey of about 5,000 people; self-reported and correlational; published by Google Cloud |
-| 16 experienced open-source developers, 246 issues: with AI allowed they "take 19% longer". They forecast 24% faster and afterwards still believed about 20% faster. | METR randomized trial, Jul 2025 | Early-2025 tools, large mature repos, n=16. METR now marks it out of date. Its lasting value is the perception gap |
-| Follow-up with 57 developers and 800+ tasks: raw estimates of −18% time for returning developers and −4% for new ones, both with confidence intervals that cross zero | METR update, Feb 2026 | METR calls its own data "only very weak evidence": 30–50% of developers skipped tasks they would not do without AI. Not a measured speedup |
-| 96 engineers at Google, one complex task: about 21% faster with AI | Enterprise trial, arXiv 2410.12944 | "our confidence interval is large"; summer-2024 internal tooling; a single lab task |
-| High-adoption teams: tasks completed +21%, pull requests merged +98%, **review time +91%**, **pull request size +154%**, bugs per developer +9%; no significant link to company-level throughput or quality | Faros AI report, Jul 2025 | Vendor telemetry (10,000+ developers); correlations; data to June 2025 |
-| AI-co-authored pull requests: 10.83 issues each against 6.45 for human-only | CodeRabbit report, Dec 2025 | The vendor sells AI review; 470 open-source pull requests; authorship was inferred |
-| 2025: 46% distrust the accuracy of AI tools against 33% who trust it; 66% are frustrated by "AI solutions that are almost right, but not quite". 2026: 73% use coding assistants or agents daily; 48% trust AI when answers are easy to validate | Stack Overflow Developer Surveys 2025 and 2026 | Self-selected respondents |
+| 90% of respondents use AI at work; "More than 80% believe it has increased their productivity"; 30% report little or no trust in AI-generated code. AI adoption relates positively to throughput but "does continue to have a negative relationship with software delivery stability." | [DORA 2025 report](https://cloud.google.com/blog/products/ai-machine-learning/announcing-the-2025-dora-report) | Survey of about 5,000 people; self-reported and correlational; published by Google Cloud |
+| 16 experienced open-source developers, 246 issues: with AI allowed they "take 19% longer". They forecast 24% faster and afterwards still believed about 20% faster. | [METR randomized trial, Jul 2025](https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/) | Early-2025 tools, large mature repos, n=16. METR now marks it out of date. Its lasting value is the perception gap |
+| Follow-up with 57 developers and 800+ tasks: raw estimates of −18% time for returning developers and −4% for new ones, both with confidence intervals that cross zero | [METR update, Feb 2026](https://metr.org/blog/2026-02-24-uplift-update/) | METR calls its own data "only very weak evidence": 30–50% of developers skipped tasks they would not do without AI. Not a measured speedup |
+| 96 engineers at Google, one complex task: about 21% faster with AI | [Enterprise trial, arXiv 2410.12944](https://arxiv.org/abs/2410.12944) | "our confidence interval is large"; summer-2024 internal tooling; a single lab task |
+| High-adoption teams: tasks completed +21%, pull requests merged +98%, **review time +91%**, **pull request size +154%**, bugs per developer +9%; no significant link to company-level throughput or quality | [Faros AI report, Jul 2025](https://www.faros.ai/blog/ai-software-engineering) | Vendor telemetry (10,000+ developers); correlations; data to June 2025 |
+| AI-co-authored pull requests: 10.83 issues each against 6.45 for human-only | [CodeRabbit report, Dec 2025](https://www.coderabbit.ai/blog/state-of-ai-vs-human-code-generation-report) | The vendor sells AI review; 470 open-source pull requests; authorship was inferred |
+| 2025: 46% distrust the accuracy of AI tools against 33% who trust it; 66% are frustrated by "AI solutions that are almost right, but not quite". 2026: 73% use coding assistants or agents daily; 48% trust AI when answers are easy to validate | [Stack Overflow Developer Surveys 2025](https://survey.stackoverflow.co/2025/ai) and [2026](https://survey.stackoverflow.co/2026/ai) | Self-selected respondents |
 
 What the evidence supports, read together:
 
 - **Individual output goes up.** More tasks, more pull requests.
-- **The cost lands in review and stability.** Bigger changes, longer reviews, and DORA's negative link to delivery stability. DORA's own summary is that "AI's primary role is as an amplifier": it magnifies the practices a team already has.
+- **The cost lands in review and stability.** Bigger changes, longer reviews, and DORA's negative link to delivery stability. DORA's own summary is that ["AI's primary role is as an amplifier"](https://dora.dev/research/2025/dora-report/): it magnifies the practices a team already has.
 - **People over-estimate their own speedup.** The 2025 METR trial is the cleanest evidence of this.
 - **Trust depends on being able to verify.** That is the Stack Overflow result, and it is the thesis of this book.
 - **There is no clean 2026 trial.** METR tried and reported that it could not produce one.
