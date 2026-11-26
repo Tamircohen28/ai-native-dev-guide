@@ -28,7 +28,7 @@ flowchart TD
     H -->|"yes"| M["Merge as a separate step"]
 ```
 
-The official best-practices page puts the last decision outside the model. Under "Who has the last word" it lists "Claude's summary of what it did" on the non-deterministic side and "Branch protection, a person who approves the merge" on the deterministic side.
+[The official best-practices page](https://code.claude.com/docs/en/best-practices) puts the last decision outside the model. Under "Who has the last word" it lists "Claude's summary of what it did" on the non-deterministic side and "Branch protection, a person who approves the merge" on the deterministic side.
 
 ## Branch per task, small commits
 
@@ -63,7 +63,7 @@ Two sessions that need different branches at the same time need separate working
 
 ## Open a pull request with gh
 
-When Claude needs an outside tool, the docs call a CLI such as `gh` "usually the easiest way in". The prompt can be as short as `create a pr`. A session is linked to a PR "when Claude creates it with `gh pr create` or `glab mr create`", and `claude --from-pr 1234` reopens the linked session later.
+When Claude needs an outside tool, the docs call a CLI such as `gh` ["usually the easiest way in"](https://code.claude.com/docs/en/best-practices). The prompt can be as short as `create a pr`. [A session is linked to a PR](https://code.claude.com/docs/en/common-workflows) "when Claude creates it with `gh pr create` or `glab mr create`", and `claude --from-pr 1234` reopens the linked session later.
 
 ```bash
 gh pr create --base main \
@@ -90,9 +90,9 @@ window arithmetic in `src/auth/limiter.js`.
 Behaviour behind the production load balancer.
 ```
 
-That shape matches a "PR contract" proposed in a January 2026 practitioner post on AI code review: what and why in one or two sentences, proof that it works, the risk tier and which parts were AI-generated, and one or two places where human review is wanted. The author's repos state the same rule in their instruction files: the PR body says what changed, why, and "how it was verified (the exact commands and their result)".
+That shape matches a "PR contract" proposed in [a January 2026 practitioner post on AI code review](https://addyosmani.com/blog/code-review-ai/): what and why in one or two sentences, proof that it works, the risk tier and which parts were AI-generated, and one or two places where human review is wanted. The author's repos state the same rule in their instruction files: the PR body says what changed, why, and "how it was verified (the exact commands and their result)".
 
-Read your own diff before you ask anyone else to. `/diff` shows the changes in your working tree, including Claude's edits.
+Read your own diff before you ask anyone else to. `/diff` [shows the changes in your working tree](https://code.claude.com/docs/en/commands), including Claude's edits.
 
 ## The built-in review commands
 
@@ -110,27 +110,27 @@ Read your own diff before you ask anyone else to. `/diff` shows the changes in y
 
 | Command | What the docs say (as of Nov 2026) |
 |---|---|
-| `/code-review` | A skill that reviews the current diff, or a PR number, branch or path, "for correctness bugs". Alias `/review`. Runs locally as a background subagent on any subscription plan. It follows `CLAUDE.md` and "doesn't read `REVIEW.md`" |
+| `/code-review` | A skill that reviews the current diff, or a PR number, branch or path, "for correctness bugs". Alias `/review`. Runs locally as a background subagent [on any subscription plan](https://code.claude.com/docs/en/code-review-local). It follows `CLAUDE.md` and "doesn't read `REVIEW.md`" |
 | `--fix`, `--comment` | `--fix` applies the findings; `--comment` posts them on the GitHub PR or GitLab merge request |
-| `/code-review ultra` | A deep multi-agent review in a cloud sandbox (research preview). Needs a claude.ai sign-in. Three one-time free runs on Pro, Max and Ultra, then "typically $5 to $25" per review as usage credits |
-| `/security-review` | "Analyze the changes on your current branch for security vulnerabilities". It reviews the diff between your branch and origin's default branch and needs an `origin` remote. No flags are documented |
-| `/simplify [target]` | Reviews changed code for cleanup and applies the fixes. "The review doesn't look for correctness bugs" |
+| `/code-review ultra` | A deep multi-agent review in a cloud sandbox (research preview). Needs a claude.ai sign-in. Three one-time free runs on Pro, Max and Ultra, then ["typically $5 to $25"](https://code.claude.com/docs/en/ultrareview#pricing-and-free-runs) per review as usage credits |
+| `/security-review` | ["Analyze the changes on your current branch for security vulnerabilities"](https://code.claude.com/docs/en/commands). It reviews the diff between your branch and origin's default branch and needs an `origin` remote. No flags are documented |
+| `/simplify [target]` | Reviews changed code for cleanup and applies the fixes. ["The review doesn't look for correctness bugs"](https://code.claude.com/docs/en/commands) |
 
-`/code-review` is useful because of where it runs: "in a fresh subagent that never saw your conversation". The docs explain why that matters: "A fresh reviewer does help, because it hasn't seen your reasoning".
+`/code-review` is useful because of where it runs: ["in a fresh subagent that never saw your conversation"](https://code.claude.com/docs/en/best-practices). The docs explain why that matters: "A fresh reviewer does help, because it hasn't seen your reasoning".
 
-> **Warning:** Do not fix everything a reviewer finds. The docs: "A reviewer that's asked to find problems will always find *something*. If you fix every finding, you end up with extra abstraction layers and tests for cases that can't happen." Fix what affects correctness and decide the rest yourself.
+> **Warning:** Do not fix everything a reviewer finds. [The docs](https://code.claude.com/docs/en/best-practices): "A reviewer that's asked to find problems will always find *something*. If you fix every finding, you end up with extra abstraction layers and tests for cases that can't happen." Fix what affects correctness and decide the rest yourself.
 
 ## Automated reviewers in CI: advise or gate?
 
 | Reviewer | Where it runs | What it does to the merge |
 |---|---|---|
-| Claude Code Review (managed; Team and Enterprise plans; GitHub only) | Anthropic infrastructure, in four stages: find, verify, rank, post | Posts inline comments and a check run named **Claude Code Review** that "doesn't conclude as a failure". "By itself, a review doesn't approve or block the pull request." |
-| `anthropics/claude-code-action@v1` with the code-review plugin | A GitHub Actions job in your repo | Comments on the PR; gating is whatever you build around the job |
-| GitHub Copilot code review | GitHub | "By default, Copilot's reviews do not count toward required approvals for the pull request." |
+| Claude Code Review (managed; Team and Enterprise plans; GitHub only) | Anthropic infrastructure, in four stages: find, verify, rank, post | Posts inline comments and a check run named **Claude Code Review** that ["doesn't conclude as a failure"](https://code.claude.com/docs/en/code-review). "By itself, a review doesn't approve or block the pull request." |
+| `anthropics/claude-code-action@v1` with the code-review plugin | [A GitHub Actions job in your repo](https://code.claude.com/docs/en/github-actions) | Comments on the PR; gating is whatever you build around the job |
+| GitHub Copilot code review | GitHub | ["By default, Copilot's reviews do not count toward required approvals for the pull request."](https://docs.github.com/en/copilot/concepts/agent-capabilities/agent-powered-workflows-and-operations/code-review) |
 
-The managed review is tuned with a `REVIEW.md` file that is read from the base branch, never from the PR's own changes, so a PR cannot rewrite its own review instructions. A comment `@claude review` starts a review on demand.
+The managed review is tuned with a `REVIEW.md` file that is [read from the base branch](https://code.claude.com/docs/en/code-review), never from the PR's own changes, so a PR cannot rewrite its own review instructions. A comment `@claude review` starts a review on demand.
 
-The self-hosted version, as the GitHub Actions page gives it:
+The self-hosted version, [as the GitHub Actions page gives it](https://code.claude.com/docs/en/github-actions):
 
 ```yaml
 name: Code Review
@@ -158,9 +158,9 @@ jobs:
           claude_args: '--allowedTools "mcp__github_inline_comment__create_inline_comment"'
 ```
 
-`--comment` makes Claude post the review; without it the findings stay in the run log. The `claude_args` line is required, because the action starts the inline-comment server only when `--allowedTools` names it. On public repos, PRs from forks get no secrets, so the review does not run for them. Setup and cost controls are in [chapter 27](27-headless-ci-and-the-agent-sdk.md).
+`--comment` makes Claude post the review; without it the findings stay in the run log. The `claude_args` line is required, [because the action starts the inline-comment server](https://code.claude.com/docs/en/github-actions) only when `--allowedTools` names it. On public repos, PRs from forks get no secrets, so the review does not run for them. Setup and cost controls are in [chapter 27](27-headless-ci-and-the-agent-sdk.md).
 
-**Deterministic checks gate; model reviews advise.** A model reviewer is non-deterministic and always finds something, so a gating one turns into a flaky gate that people learn to bypass. One of the author's repos writes it as an invariant: "No release gate depends on a non-deterministic agent decision." The docs add the other half: "A review with no findings doesn't mean your code is error-free or secure."
+**Deterministic checks gate; model reviews advise.** A model reviewer is non-deterministic and always finds something, so a gating one turns into a flaky gate that people learn to bypass. One of the author's repos writes it as an invariant: "No release gate depends on a non-deterministic agent decision." [The docs add the other half](https://code.claude.com/docs/en/code-review): "A review with no findings doesn't mean your code is error-free or secure."
 
 > **Field note:** A product workspace runs its own AI reviewer as a workflow, deliberately non-gating. It reviews when a PR opens, and again on new commits only when the PR carries a `re-review` label. Its design note is "NON-GATING, BUT NOT SILENT": a run that produced no review posts a comment and a `neutral` check, because otherwise a green check was indistinguishable from "did not review".
 
@@ -180,11 +180,11 @@ Agents make writing cheap. The published data suggests that the cost moves to re
 
 | Finding | Source | Caveat |
 |---|---|---|
-| High-AI-adoption teams: PRs merged +98%, PR review time +91%, PR size +154%, bugs per developer +9%; no significant link to company-level throughput or quality | Faros AI report, Jul 2025 | Vendor telemetry (10,000+ developers); correlations; data to June 2025 |
-| AI-co-authored PRs: 10.83 issues per PR against 6.45 for human-only | CodeRabbit report, Dec 2025 | The vendor sells AI review; 470 open-source PRs; authorship was inferred |
-| AI adoption relates positively to throughput, and still negatively to delivery stability | DORA 2025 report | Survey of about 5,000 people; self-reported; correlational |
-| Experienced open-source developers took 19% longer with AI, and still believed they had been about 20% faster | METR trial, Jul 2025 | 16 developers, early-2025 tools; METR now marks it out of date. Its value is the perception gap |
-| "100 lines is usually a reasonable size for a CL, and 1000 lines is usually too large." | Google engineering practices | Written before agents; the baseline the other rows are measured against |
+| High-AI-adoption teams: PRs merged +98%, PR review time +91%, PR size +154%, bugs per developer +9%; no significant link to company-level throughput or quality | [Faros AI report, Jul 2025](https://www.faros.ai/blog/ai-software-engineering) | Vendor telemetry (10,000+ developers); correlations; data to June 2025 |
+| AI-co-authored PRs: 10.83 issues per PR against 6.45 for human-only | [CodeRabbit report, Dec 2025](https://www.coderabbit.ai/blog/state-of-ai-vs-human-code-generation-report) | The vendor sells AI review; 470 open-source PRs; authorship was inferred |
+| AI adoption relates positively to throughput, and still negatively to delivery stability | [DORA 2025 report](https://dora.dev/research/2025/dora-report/) | Survey of about 5,000 people; self-reported; correlational |
+| Experienced open-source developers took 19% longer with AI, and still believed they had been about 20% faster | [METR trial, Jul 2025](https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/) | 16 developers, early-2025 tools; METR now marks it out of date. Its value is the perception gap |
+| "100 lines is usually a reasonable size for a CL, and 1000 lines is usually too large." | [Google engineering practices](https://google.github.io/eng-practices/review/developer/small-cls.html) | Written before agents; the baseline the other rows are measured against |
 
 None of these is a controlled 2026 measurement. Read them together as a direction: individual output rises, and review time and stability are where the cost lands. The response is the oldest advice in code review: keep each PR small enough to be read properly, and split work that is not.
 
@@ -274,7 +274,7 @@ gh pr checks 482 --watch --fail-fast     # run as a background command
 gh run view "$RUN_ID" --log-failed       # after a failure; RUN_ID comes from `gh run list`
 ```
 
-Claude Code also ships skills for this loop (check `/help` in your version): `/ship [level] [pr] [+bot]` commits, pushes, opens a PR, reviews it and then watches it; `/steward [pr] [+bot]` watches your open PR and pushes fixes; `/autofix-pr [prompt]` starts a cloud session that does the same for the branch's PR.
+[Claude Code also ships skills for this loop](https://code.claude.com/docs/en/commands) (check `/help` in your version): `/ship [level] [pr] [+bot]` commits, pushes, opens a PR, reviews it and then watches it; `/steward [pr] [+bot]` watches your open PR and pushes fixes; `/autofix-pr [prompt]` starts a cloud session that does the same for the branch's PR.
 
 - A subagent should finish its work and return after opening the PR. The main session watches CI. Subagents that wait on long gates tend to end mid-task ([chapter 26](26-multi-agent-orchestration.md)).
 - Background commands are not restored when you resume a session. Start the watcher again.

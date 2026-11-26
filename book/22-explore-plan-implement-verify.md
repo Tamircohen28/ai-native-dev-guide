@@ -30,16 +30,16 @@ flowchart TD
 | Verify | The check runs and its output is read | A proof command, `/goal`, a `Stop` hook, `/verify` | Command plus output |
 | Commit | The step is recorded | Git | A commit, later a pull request ([chapter 24](24-git-prs-and-code-review.md)) |
 
-> **Note:** The loop is for non-trivial work. The official docs say that "in most cases, your first plain prompt in a fresh session already does the right thing, without any setup on your part." A typo fix needs a prompt, not a process. The decision table later in this chapter tells you when to step up.
+> **Note:** The loop is for non-trivial work. [The official docs say](https://code.claude.com/docs/en/best-practices) that "in most cases, your first plain prompt in a fresh session already does the right thing, without any setup on your part." A typo fix needs a prompt, not a process. The decision table later in this chapter tells you when to step up.
 
 ## What the official guidance says now
 
-The official best-practices page has been rewritten, so advice from older tutorials may no longer match it (this book read it on 2026-11-25). Its subtitle is the whole message: "tell Claude what it can't see, give it a check to run, and enforce the rules that can't have exceptions." It lists four ways a session goes wrong and one remedy for each:
+[The official best-practices page](https://code.claude.com/docs/en/best-practices) has been rewritten, so advice from older tutorials may no longer match it (this book read it on 2026-11-25). Its subtitle is the whole message: "tell Claude what it can't see, give it a check to run, and enforce the rules that can't have exceptions." It lists four ways a session goes wrong and one remedy for each:
 
 | What went wrong (quoted from the page) | Remedy |
 |---|---|
 | "Claude built something different from what you had in mind, or it has to rediscover the same fact at the start of every session" | Tell Claude what it can't see |
-| "Claude said it was done and it wasn't quite" | Give Claude a check to run |
+| ["Claude said it was done and it wasn't quite"](https://code.claude.com/docs/en/best-practices) | Give Claude a check to run |
 | "Claude did something that must never happen in this repo, or skipped a step that must always happen" | Enforce the rules that can't have exceptions |
 | "Claude got it right, but it took more time, tokens, or permission prompts than the task was worth" | Change a default |
 
@@ -49,37 +49,37 @@ This chapter covers the first two rows. Rows three and four are [chapter 16](16-
 
 The page explains why verification is the centre of the loop:
 
-> "Claude stops when the work looks done. If it has nothing to run that tells it whether the work actually *is* done, "looks done" is all it has to go on. In practice that makes you the test suite, and every mistake sits there until you happen to notice it."
+> "[Claude stops when the work looks done.](https://code.claude.com/docs/en/best-practices) If it has nothing to run that tells it whether the work actually *is* done, "looks done" is all it has to go on. In practice that makes you the test suite, and every mistake sits there until you happen to notice it."
 
-A check is anything that "comes back pass or fail": a test file, a build's exit code, a linter, a script that diffs output against a fixture, or "A browser screenshot next to the mockup". The page adds: "If your repo already has one of these, the single most useful line in your `CLAUDE.md` is the command that runs it."
+A check is anything that ["comes back pass or fail"](https://code.claude.com/docs/en/best-practices): a test file, a build's exit code, a linter, a script that diffs output against a fixture, or "A browser screenshot next to the mockup". The page adds: "If your repo already has one of these, the single most useful line in your `CLAUDE.md` is the command that runs it."
 
 There are four strictness levels, from "Claude decides" to "someone else decides":
 
 | Level | How you set it | Who enforces it |
 |---|---|---|
 | 1. In the prompt | "run the auth tests after, and keep going until they pass" | Claude, by choice |
-| 2. `/goal <condition>` | Claude keeps working across turns; "a separate model checks against the conversation after every turn" | An evaluator model |
-| 3. A `Stop` hook | A script runs when Claude tries to stop; exit code 2 sends Claude back | "enforced by Claude Code (the harness)" |
-| 4. "By someone who didn't write the code" | `/code-review`, which runs in "a fresh subagent that never saw your conversation" | An independent reviewer |
+| 2. `/goal <condition>` | Claude keeps working across turns; ["a separate model checks against the conversation after every turn"](https://code.claude.com/docs/en/best-practices) | An evaluator model |
+| 3. A `Stop` hook | A script runs when Claude tries to stop; exit code 2 sends Claude back | ["enforced by Claude Code (the harness)"](https://code.claude.com/docs/en/best-practices) |
+| 4. "By someone who didn't write the code" | `/code-review`, which runs in ["a fresh subagent that never saw your conversation"](https://code.claude.com/docs/en/best-practices) | An independent reviewer |
 
-Two more tools sit beside the ladder: ask for *evidence* ("the command it ran and its output, or the screenshot"), and `/verify`, a skill that builds and runs the app and looks at the result. [Chapter 23](23-testing-and-verification-loops.md) goes deep on checks, evidence and `Stop` hooks; `/code-review` is in [chapter 24](24-git-prs-and-code-review.md).
+Two more tools sit beside the ladder: [ask for *evidence*](https://code.claude.com/docs/en/best-practices) ("the command it ran and its output, or the screenshot"), and `/verify`, [a skill that builds and runs the app](https://code.claude.com/docs/en/commands) and looks at the result. [Chapter 23](23-testing-and-verification-loops.md) goes deep on checks, evidence and `Stop` hooks; `/code-review` is in [chapter 24](24-git-prs-and-code-review.md).
 
 ### What you can stop doing
 
-The same page retires advice you will still find in older tutorials. Its words: "Every one of these was good advice when it was written. Most were workarounds for something the model couldn't reliably do yet, and the models have since caught up."
+[The same page retires advice](https://code.claude.com/docs/en/best-practices) you will still find in older tutorials. Its words: "Every one of these was good advice when it was written. Most were workarounds for something the model couldn't reliably do yet, and the models have since caught up."
 
 | "The old advice" | "Why it's gone" |
 |---|---|
-| "The context window is your main constraint, manage it aggressively" | "Most current models have a 1M-token window and compaction happens on its own, so running out is rare. `/clear` between tasks is still worth doing, because a focused context gets you better answers and costs less." |
+| "The context window is your main constraint, manage it aggressively" | "[Most current models have a 1M-token window](https://code.claude.com/docs/en/best-practices) and compaction happens on its own, so running out is rare. `/clear` between tasks is still worth doing, because a focused context gets you better answers and costs less." |
 | "Add IMPORTANT or ALL CAPS to instructions Claude keeps missing" | "Current ones follow a plainly worded line, and piling on emphasis mostly makes Claude over-apply the rule. If it's a rule that can't bend, turn it into a hook or a deny rule." |
-| "`think hard`, `think harder`, `be thorough` in the prompt" | "Effort is the control for that." Use `/effort`; the keyword `ultrathink` still works |
-| "Tell Claude to keep going, loop until done, don't be lazy" | "lines like that are more likely to cause over-work than fix a stall"; for unattended runs, "`/goal` or a `Stop` hook enforces it" |
+| "`think hard`, `think harder`, `be thorough` in the prompt" | ["Effort is the control for that."](https://code.claude.com/docs/en/best-practices) Use `/effort`; the keyword `ultrathink` still works |
+| "Tell Claude to keep going, loop until done, don't be lazy" | ["lines like that are more likely to cause over-work than fix a stall"](https://code.claude.com/docs/en/best-practices); for unattended runs, "`/goal` or a `Stop` hook enforces it" |
 | "Describe your architecture and file layout in `CLAUDE.md`" | "Claude reads the repo itself. Only write down what isn't in there." |
-| "Delegate to a subagent for a better answer" | "Handing the same task to a subagent doesn't make the answer any better. A fresh reviewer does help, because it hasn't seen your reasoning" |
+| "Delegate to a subagent for a better answer" | "[Handing the same task to a subagent doesn't make the answer any better.](https://code.claude.com/docs/en/best-practices) A fresh reviewer does help, because it hasn't seen your reasoning" |
 
 ## Explore before you change anything
 
-Exploring means asking questions and reading code with no edits. The common-workflows page gives these starter prompts:
+Exploring means asking questions and reading code with no edits. [The common-workflows page](https://code.claude.com/docs/en/common-workflows) gives these starter prompts:
 
 ```text
 give me an overview of this codebase
@@ -87,7 +87,7 @@ find the files that handle user authentication
 trace the login process from front-end to database
 ```
 
-For anything larger than a small fix, explore in **plan mode**. In plan mode, "Claude reads files, runs shell commands to explore, and writes a plan, but does not edit your source." Enter it in one of three ways:
+For anything larger than a small fix, explore in **plan mode**. In plan mode, ["Claude reads files, runs shell commands to explore, and writes a plan, but does not edit your source."](https://code.claude.com/docs/en/permission-modes) Enter it in one of three ways:
 
 ```bash
 claude --permission-mode plan      # start a session in plan mode
@@ -97,7 +97,7 @@ claude --permission-mode plan      # start a session in plan mode
 /plan fix the auth bug
 ```
 
-The third way is `Shift+Tab` until the status bar shows plan mode on. When the plan is ready Claude presents it and asks how to proceed:
+The third way is `Shift+Tab` until the status bar shows plan mode on. When the plan is ready [Claude presents it and asks how to proceed](https://code.claude.com/docs/en/permission-modes):
 
 | Option | Effect |
 |---|---|
@@ -105,9 +105,9 @@ The third way is `Shift+Tab` until the status bar shows plan mode on. When the p
 | **Yes, manually approve edits** | Approves; you review each edit |
 | **No, keep planning** | Stays in plan mode; tell Claude what to change |
 
-Press `Ctrl+G` to open the plan in your text editor and change it directly. To leave plan mode without approving, press `Esc` first: at the approval prompt `Shift+Tab` approves the plan. The setting `showClearContextOnPlanAccept` (default `false`) adds an option that approves the plan, clears the conversation and implements "from the plan alone". Details are in [chapter 10](10-plan-mode-checkpoints-and-context-management.md).
+Press `Ctrl+G` to [open the plan in your text editor](https://code.claude.com/docs/en/permission-modes) and change it directly. To leave plan mode without approving, press `Esc` first: at the approval prompt `Shift+Tab` approves the plan. The setting `showClearContextOnPlanAccept` (default `false`) adds an option that approves the plan, clears the conversation and implements "from the plan alone". Details are in [chapter 10](10-plan-mode-checkpoints-and-context-management.md).
 
-> **Warning:** Plan mode is not a security boundary in every setup. The docs say: "In interactive terminal sessions with bypass permissions available, don't rely on plan mode's blocks."
+> **Warning:** Plan mode is not a security boundary in every setup. The docs say: ["In interactive terminal sessions with bypass permissions available, don't rely on plan mode's blocks."](https://code.claude.com/docs/en/permission-modes)
 
 A useful exploration prompt asks for the things a plan needs, not for a tour:
 
@@ -119,13 +119,13 @@ Do not edit anything yet. For "limit failed logins", list:
 4. questions only I can answer
 ```
 
-For a noisy investigation, hand it to a subagent: "use a subagent to investigate how our auth system handles token refresh". The docs are clear about what that buys: "You get parallelism or a fresh pair of eyes out of it, but not a smarter answer." See [chapter 14](14-subagents.md).
+For a noisy investigation, hand it to a subagent: ["use a subagent to investigate how our auth system handles token refresh"](https://code.claude.com/docs/en/common-workflows). The docs are clear about what that buys: ["You get parallelism or a fresh pair of eyes out of it, but not a smarter answer."](https://code.claude.com/docs/en/best-practices) See [chapter 14](14-subagents.md).
 
-Why plan at all? The costs page gives the reason in one line: plan mode helps by "preventing expensive re-work when the initial direction is wrong."
+Why plan at all? The costs page gives the reason in one line: plan mode helps by ["preventing expensive re-work when the initial direction is wrong."](https://code.claude.com/docs/en/costs)
 
 ## Write the task brief
 
-A task brief is the prompt for a non-trivial task. It has four required parts: the goal, the constraints, the definition of done and the proof command (the command that exits 0 only when the work is done). Two more are worth adding when they apply: context the repo does not show, and a budget. The docs put it briefly: "name the file, describe the symptom, and say what "fixed" looks like up front".
+A task brief is the prompt for a non-trivial task. It has four required parts: the goal, the constraints, the definition of done and the proof command (the command that exits 0 only when the work is done). Two more are worth adding when they apply: context the repo does not show, and a budget. [The docs put it briefly](https://code.claude.com/docs/en/best-practices): "name the file, describe the symptom, and say what "fixed" looks like up front".
 
 ```markdown
 ## Goal
@@ -181,7 +181,7 @@ flowchart LR
     C -->|"yes, next task"| T
 ```
 
-The worked reference is **GitHub Spec Kit**, an open-source toolkit that describes SDD as: "Define what to build and why, then turn the specification into a plan, tasks, and working code." The blog post that introduced it names four phases:
+The worked reference is **GitHub Spec Kit**, [an open-source toolkit](https://github.com/github/spec-kit) that describes SDD as: "Define what to build and why, then turn the specification into a plan, tasks, and working code." [The blog post that introduced it](https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/) names four phases:
 
 | Phase | Content | Review question |
 |---|---|---|
@@ -190,14 +190,14 @@ The worked reference is **GitHub Spec Kit**, an open-source toolkit that describ
 | Tasks | Units small enough to implement and test in isolation | Can each be checked on its own? |
 | Implement | One task at a time | Does this focused change do its task? |
 
-Install and initialise (as the README showed it on 2026-11-25):
+Install and initialise ([as the README showed it](https://github.com/github/spec-kit) on 2026-11-25):
 
 ```bash
 uv tool install specify-cli
 specify init my-project --integration copilot
 ```
 
-Then run the steps in your agent's chat, "one at a time, reviewing each result before continuing":
+Then run the steps in your agent's chat, ["one at a time, reviewing each result before continuing"](https://github.com/github/spec-kit):
 
 | Step | Command (Copilot skills syntax) | Purpose |
 |---|---|---|
@@ -206,21 +206,21 @@ Then run the steps in your agent's chat, "one at a time, reviewing each result b
 | 3 | `/speckit-plan` | Stack and architecture choices |
 | 4 | `/speckit-tasks` | Task breakdown |
 | 5 | `/speckit-implement` | Build the tasks |
-| 6 | `/speckit-converge` | "Repeat implement and converge until convergence reports `Converged`." |
+| 6 | `/speckit-converge` | ["Repeat implement and converge until convergence reports](https://github.com/github/spec-kit) `Converged`." |
 
 > **Note:** Command spelling differs per agent and from 2025 write-ups. Check the Spec Kit command reference for your agent before you copy these.
 
-Claude Code needs no toolkit for the lightweight version. The best-practices page suggests asking Claude to interview you:
+Claude Code needs no toolkit for the lightweight version. [The best-practices page suggests](https://code.claude.com/docs/en/best-practices) asking Claude to interview you:
 
 ```text
 Interview me until you could write the spec, then write it to SPEC.md.
 ```
 
-Then "start a fresh session to build from it, so the build begins with a clean context and a written definition of done." When the work is finished, review against the spec in a fresh context: "use a subagent to review the rate limiter diff against SPEC.md ... report gaps that affect correctness and skip style" (abridged). The page warns: "Don't drop the `skip style` part of that prompt."
+Then ["start a fresh session to build from it, so the build begins with a clean context and a written definition of done."](https://code.claude.com/docs/en/best-practices) When the work is finished, review against the spec in a fresh context: "use a subagent to review the rate limiter diff against SPEC.md ... report gaps that affect correctness and skip style" (abridged). The page warns: "Don't drop the `skip style` part of that prompt."
 
-A taxonomy from a martinfowler.com article is useful for deciding how far to go: **spec-first** (the spec is written first and used for this task), **spec-anchored** (the spec is kept and maintained afterwards) and **spec-as-source** (humans edit only the spec). The tools that article tried were all spec-first; few commit to the other two.
+[A taxonomy from a martinfowler.com article](https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html) is useful for deciding how far to go: **spec-first** (the spec is written first and used for this task), **spec-anchored** (the spec is kept and maintained afterwards) and **spec-as-source** (humans edit only the spec). The tools that article tried were all spec-first; few commit to the other two.
 
-> **Warning:** The evidence for SDD is reasoning and anecdote. No source this book read offers a controlled comparison of spec-first work against direct prompting. Practitioner critiques are specific: one tool turned a small bug into four user stories with sixteen acceptance criteria, and long generated specs can take more effort to review than the code would. Treat a spec as a review target, not a guarantee, and keep it short enough that you actually read it.
+> **Warning:** The evidence for SDD is reasoning and anecdote. No source this book read offers a controlled comparison of spec-first work against direct prompting. Practitioner critiques are specific: one tool turned a small bug into [four user stories with sixteen acceptance criteria](https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html), and long generated specs can take more effort to review than the code would. Treat a spec as a review target, not a guarantee, and keep it short enough that you actually read it.
 
 ## Scale the ceremony to the task
 
@@ -242,7 +242,7 @@ Step **up** a level when you cannot state "done" in one sentence, when the chang
 4. Commit when it passes.
 5. Repeat. Run the full gate once at the end, before the pull request.
 
-The common-workflows page gives the same advice for refactoring: "Do refactoring in small, testable increments".
+The common-workflows page gives the same advice for refactoring: ["Do refactoring in small, testable increments"](https://code.claude.com/docs/en/common-workflows).
 
 Commit after every green step because Git is your only durable undo. Checkpoints are session-level and have gaps (see the next section). A commit per step also gives the reviewer a readable history.
 
@@ -253,15 +253,15 @@ npm test -- auth          # narrow check for the next step
 
 ## When the agent goes off course
 
-The official rule is short: "Watch the first minute, press `Esc` the moment Claude drifts, and after two failed corrections run `/clear` and write a better prompt instead of a third."
+[The official rule is short](https://code.claude.com/docs/en/best-practices): "Watch the first minute, press `Esc` the moment Claude drifts, and after two failed corrections run `/clear` and write a better prompt instead of a third."
 
 1. **Stop.** Press `Esc`. A wrong direction does not improve with more turns.
-2. **Rewind.** Run `/rewind` (aliases `/checkpoint`, `/undo`), or press `Esc` twice on an empty prompt. The menu offers **Restore code and conversation**, **Restore conversation**, **Restore code**, **Summarize from here**, **Summarize up to here** and **Never mind**.
+2. **Rewind.** Run `/rewind` ([aliases](https://code.claude.com/docs/en/commands) `/checkpoint`, `/undo`), or press `Esc` twice on an empty prompt. [The menu offers](https://code.claude.com/docs/en/checkpointing) **Restore code and conversation**, **Restore conversation**, **Restore code**, **Summarize from here**, **Summarize up to here** and **Never mind**.
 3. **Check what rewind missed.** Run `git status` and `git diff`.
 4. **Diagnose.** Which of the four rows in the official table was it: missing information, no check, a rule that needed enforcing, or a default?
 5. **Re-brief.** Run `/clear` and write a better prompt that carries what you learned: what was tried, why it failed, and the constraint that was missing.
 
-> **Warning:** `/rewind` does not restore everything. "A file that only Bash commands changed isn't tracked and stays as it is. To revert it, use version control, such as Git." Edits made by subagents are usually not captured, and "Actions that affect remote systems (databases, APIs, deployments) can't be checkpointed."
+> **Warning:** `/rewind` does not restore everything. "[A file that only Bash commands changed isn't tracked and stays as it is.](https://code.claude.com/docs/en/checkpointing) To revert it, use version control, such as Git." Edits made by subagents are usually not captured, and "Actions that affect remote systems (databases, APIs, deployments) can't be checkpointed."
 
 ### Two failed attempts, then root-cause
 
@@ -278,7 +278,7 @@ and fix it so it won't happen again unless necessary.
 
 Precise questions get better answers than frustrated ones. In the field data, "How did you determine that number?" produced a real root cause (the figure came from a code comment, not a measurement), while "why is it slow?" produced apologies first.
 
-Three warning signs, from an essay on augmented coding: the agent is looping, it is adding functionality nobody asked for, or it is disabling or deleting tests.
+Three warning signs, from [an essay on augmented coding](https://newsletter.kentbeck.com/p/augmented-coding-beyond-the-vibes): the agent is looping, it is adding functionality nobody asked for, or it is disabling or deleting tests.
 
 ## From the field
 

@@ -9,7 +9,7 @@ Claude starts every session knowing nothing about your project. Two mechanisms f
 - **Instructions you write**: `CLAUDE.md` files and the rule files in `.claude/rules/`. Plain Markdown that Claude Code loads for you.
 - **Notes Claude writes**: *auto memory*, a folder of small Markdown files Claude keeps for itself between sessions.
 
-Both are **context, not configuration**. Claude Code pastes the text into the conversation and the model reads it like anything else you say. The memory docs are direct about it: "Claude treats CLAUDE.md files and auto memory as context. They aren't enforced configuration." They also say how it arrives: "CLAUDE.md content is delivered as a user message after the system prompt, not as part of the system prompt itself." Think of a note handed to a capable colleague, not a rule compiled into the tool.
+Both are **context, not configuration**. Claude Code pastes the text into the conversation and the model reads it like anything else you say. The memory docs are direct about it: "[Claude treats CLAUDE.md files and auto memory as context. They aren't enforced configuration.](https://code.claude.com/docs/en/memory)" They also say how it arrives: "CLAUDE.md content is delivered as a user message after the system prompt, not as part of the system prompt itself." Think of a note handed to a capable colleague, not a rule compiled into the tool.
 
 ```mermaid
 flowchart TD
@@ -50,17 +50,17 @@ The top box loads when the session starts and costs tokens on every turn. The bo
 
 The table is also the load order, broadest first. The mechanics that follow from it:
 
-- **Ancestors load at launch.** Claude Code loads `CLAUDE.md` and `CLAUDE.local.md` "from your current working directory and every directory above it".
-- **Files are added together, never overridden.** "All discovered files are concatenated into context rather than overriding each other", ordered from the filesystem root down to your working directory. Inside one directory, `CLAUDE.local.md` comes after `CLAUDE.md`. If two files disagree there is no winner: "Claude may pick one arbitrarily."
-- **Subdirectory files are lazy.** Claude Code loads each one "once Claude reads, writes, or edits another file in that subdirectory". A Bash `cat` or `head` on a single file counts as a read.
+- **Ancestors load at launch.** Claude Code loads `CLAUDE.md` and `CLAUDE.local.md` "[from your current working directory and every directory above it](https://code.claude.com/docs/en/memory)".
+- **Files are added together, never overridden.** "[All discovered files are concatenated into context rather than overriding each other](https://code.claude.com/docs/en/memory)", ordered from the filesystem root down to your working directory. Inside one directory, `CLAUDE.local.md` comes after `CLAUDE.md`. If two files disagree there is no winner: "Claude may pick one arbitrarily."
+- **Subdirectory files are lazy.** Claude Code loads each one "[once Claude reads, writes, or edits another file in that subdirectory](https://code.claude.com/docs/en/memory)". A Bash `cat` or `head` on a single file counts as a read.
 - **HTML comments are free.** Block-level comments such as `<!-- maintainer notes -->` are stripped before the text reaches the model.
-- **Extra directories are opt-in.** A directory added with `--add-dir` does not contribute its `CLAUDE.md` unless you set `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1`.
+- **Extra directories are opt-in.** A directory added with `--add-dir` [does not contribute its](https://code.claude.com/docs/en/memory) `CLAUDE.md` unless you set `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1`.
 - **Monorepos can exclude files.** The `claudeMdExcludes` setting takes glob patterns matched against absolute paths (settings are covered in [chapter 09](09-settings-and-permissions.md)).
-- **Size limits.** Aim for under 200 lines per file. A launch-loaded file over 4 MiB is skipped entirely. On-demand files are cut at 40,000 characters on a 200K window, and at 150,000 or 200,000 on a 1M window depending on the model (as of Nov 2026).
+- **Size limits.** Aim for under 200 lines per file. [A launch-loaded file over 4 MiB is skipped entirely](https://code.claude.com/docs/en/memory). On-demand files are cut at 40,000 characters on a 200K window, and at 150,000 or 200,000 on a 1M window depending on the model (as of Nov 2026).
 
 To see what loaded, run `/context all` and read the **Memory files** list, or run `/memory`.
 
-> **Note:** A subagent starts with a fresh context window (unless it is a *fork*, which inherits your whole conversation) but still loads the same `CLAUDE.md` hierarchy as the main conversation; the built-in Explore, Plan and `web-fetch` agents skip it ([chapter 14](14-subagents.md)). A headless run with `claude -p --bare` skips `CLAUDE.md` and auto memory ([chapter 27](27-headless-ci-and-the-agent-sdk.md)).
+> **Note:** A subagent starts with a fresh context window (unless it is a *fork*, which inherits your whole conversation) but [still loads the same](https://code.claude.com/docs/en/sub-agents) `CLAUDE.md` hierarchy as the main conversation; the built-in Explore, Plan and `web-fetch` agents skip it ([chapter 14](14-subagents.md)). [A headless run with](https://code.claude.com/docs/en/headless) `claude -p --bare` skips `CLAUDE.md` and auto memory ([chapter 27](27-headless-ci-and-the-agent-sdk.md)).
 
 ## Imports with `@path`
 
@@ -74,11 +74,11 @@ Branch and commit rules: @docs/git-workflow.md
 @~/.claude/my-project-instructions.md
 ```
 
-- Relative paths resolve "relative to the file containing the import, not the working directory".
-- Imported files can import others, "with a maximum depth of four hops".
-- Imports are **not** lazy. They "don't reduce its context cost, because imported files load together with the CLAUDE.md that imports them." Use them to organise, not to save tokens.
+- Relative paths resolve "[relative to the file containing the import, not the working directory](https://code.claude.com/docs/en/memory)".
+- Imported files can import others, "[with a maximum depth of four hops](https://code.claude.com/docs/en/memory)".
+- Imports are **not** lazy. They "[don't reduce its context cost, because imported files load together with the CLAUDE.md that imports them.](https://code.claude.com/docs/en/memory)" Use them to organise, not to save tokens.
 - A path outside the working directory triggers a one-time approval dialog. If you decline, the import stays disabled and the dialog does not come back.
-- An `@path` inside a code span or fenced block is not parsed, and a quoted path "isn't imported at all". Put a backslash before each space in a path.
+- An `@path` inside a code span or fenced block is not parsed, and a quoted path "[isn't imported at all](https://code.claude.com/docs/en/memory)". Put a backslash before each space in a path.
 
 ## `.claude/rules/` and path scoping
 
@@ -92,7 +92,7 @@ Rules are extra instruction files, one topic each. Claude Code finds every `.md`
     └── api-handlers.md   # has paths: loads when a matching file is touched
 ```
 
-*Frontmatter* is a block of YAML between two `---` lines at the top of a Markdown file. A rule without frontmatter loads at launch "with the same priority as `.claude/CLAUDE.md`". Add frontmatter with a `paths:` list and it becomes *path-scoped*: it stays out of the context until Claude works on a matching file.
+*Frontmatter* is a block of YAML between two `---` lines at the top of a Markdown file. A rule without frontmatter loads at launch "[with the same priority as](https://code.claude.com/docs/en/memory) `.claude/CLAUDE.md`". Add frontmatter with a `paths:` list and it becomes *path-scoped*: it stays out of the context until Claude works on a matching file.
 
 ```markdown
 ---
@@ -106,16 +106,16 @@ paths:
 ```
 
 - `paths` is a YAML list or a comma-separated string of globs, for example `"src/**/*.{ts,tsx}"`.
-- "`paths` is the only field Claude Code reads from a rule; any other field is ignored without an error." A misspelt key fails silently.
-- A scoped rule loads "when Claude uses the Read, Write, or Edit tool on a matching file", or a Bash read such as `cat`.
+- "`paths` [is the only field Claude Code reads from a rule; any other field is ignored without an error.](https://code.claude.com/docs/en/memory)" A misspelt key fails silently.
+- A scoped rule loads "[when Claude uses the Read, Write, or Edit tool on a matching file](https://code.claude.com/docs/en/memory)", or a Bash read such as `cat`.
 - Glob trap: `*.md` matches `.md` files anywhere under the base directory; `/*.md` matches only the base directory itself.
 - `~/.claude/rules/` holds your personal rules for every project. They load before project rules, and neither set overrides the other.
 
 ## How `AGENTS.md` is handled
 
-`AGENTS.md` is the tool-neutral instruction file that other coding agents read ([chapter 28](28-cross-tool-agents-md-cursor-codex-gemini.md)). Older tutorials say Claude Code ignores it. That is no longer true.
+`AGENTS.md` is [the tool-neutral instruction file](https://agents.md/) that other coding agents read ([chapter 28](28-cross-tool-agents-md-cursor-codex-gemini.md)). Older tutorials say Claude Code ignores it. That is no longer true.
 
-- From v2.1.277, Claude Code reads `AGENTS.md` natively, but by default "only when you have no `CLAUDE.md` in your working directory or above it".
+- [From v2.1.277, Claude Code reads](https://code.claude.com/docs/en/memory) `AGENTS.md` natively, but by default "only when you have no `CLAUDE.md` in your working directory or above it".
 - A `CLAUDE.md`, `.claude/CLAUDE.md` or `CLAUDE.local.md` on the path suppresses it. Your `~/.claude/CLAUDE.md`, the managed file and `.claude/rules/` keep loading alongside it.
 - The trap: adding a personal `CLAUDE.local.md` to a repo that only has `AGENTS.md` stops Claude from reading `AGENTS.md`.
 - Change the behaviour in `/config` under **Project instructions**: `claude-md-or-agents-md` (default), `claude-md-and-agents-md`, `claude-md`, `managed-only`.
@@ -136,16 +136,16 @@ A symlink (`ln -s AGENTS.md CLAUDE.md`) also works, but the Edit and Write tools
 
 | Command | What it does |
 |---|---|
-| `/init` | Generates a starting `CLAUDE.md`. If one exists it "suggests improvements rather than overwriting it". It reads `.cursor/rules/`, `.cursorrules` and `.github/copilot-instructions.md`. `CLAUDE_CODE_NEW_INIT=1` switches to an interactive multi-phase flow. |
+| `/init` | Generates a starting `CLAUDE.md`. If one exists it "[suggests improvements rather than overwriting it](https://code.claude.com/docs/en/memory)". It reads `.cursor/rules/`, `.cursorrules` and `.github/copilot-instructions.md`. `CLAUDE_CODE_NEW_INIT=1` switches to an interactive multi-phase flow. |
 | `/memory` | Lists your `CLAUDE.md`, `CLAUDE.local.md` and other memory file locations, toggles auto memory, and opens the auto memory folder. |
 | `/context all` | Shows what is in the context window item by item, including the **Memory files** list. |
-| `/doctor prompt-audit` | Checks instruction files "for outdated or conflicting content". Requires v2.1.283 or later. |
+| `/doctor prompt-audit` | Checks instruction files "for outdated or conflicting content". [Requires v2.1.283 or later](https://code.claude.com/docs/en/commands). |
 
 Treat the `/init` output as a draft, and apply the leave-out test from "Writing instructions that work" to every line of it.
 
 ## Auto memory
 
-Auto memory is the part Claude writes. During a session it saves notes it expects to need again, typed `user`, `feedback`, `project` or `reference`, and it "skips anything it can derive from the codebase".
+Auto memory is the part Claude writes. During a session it saves notes it expects to need again, typed `user`, `feedback`, `project` or `reference`, and it "[skips anything it can derive from the codebase](https://code.claude.com/docs/en/memory)".
 
 ```text
 ~/.claude/projects/<project>/memory/
@@ -157,8 +157,8 @@ Auto memory is the part Claude writes. During a session it saves notes it expect
 | Aspect | Behaviour (as of Nov 2026) |
 |---|---|
 | Location | `~/.claude/projects/<project>/memory/`. `<project>` comes from the git repository, so worktrees and subdirectories of one repo share a directory. Override with `autoMemoryDirectory`. |
-| What loads | "the first 200 lines or 25KB of `MEMORY.md`, whichever comes first, load at session start." Topic files load on demand only. |
-| Sharing | None. "Auto memory is machine-local." It is not in your repo and your teammates do not get it. |
+| What loads | "the first 200 lines or 25KB of `MEMORY.md`, [whichever comes first, load at session start.](https://code.claude.com/docs/en/memory)" Topic files load on demand only. |
+| Sharing | None. "[Auto memory is machine-local.](https://code.claude.com/docs/en/memory)" It is not in your repo and your teammates do not get it. |
 | Lifetime | Files stay until you or Claude edit or delete them; the transcript clean-up does not touch them. |
 | Switching it off | Toggle in `/memory` (saves `autoMemoryEnabled`), or set `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`. |
 | Subagents | The main conversation's auto memory is not loaded into subagents; a fork is the exception. |
@@ -173,17 +173,17 @@ The index is the part with a budget. Keep it one line per memory, such as `- [No
 
 | Where the instruction lives | After compaction |
 |---|---|
-| Project-root `CLAUDE.md`, rules without `paths:` | "Re-injected from disk" |
+| Project-root `CLAUDE.md`, rules without `paths:` | "[Re-injected from disk](https://code.claude.com/docs/en/context-window)" |
 | Auto memory | "Re-injected from disk" |
 | Rules with `paths:`, subdirectory `CLAUDE.md` | Gone until Claude touches a matching file again |
-| Something you typed in the chat | Summarised; "detailed instructions from early in the conversation may be lost" |
-| Text a hook added earlier | "Summarized with the rest of the conversation" |
+| Something you typed in the chat | Summarised; "[detailed instructions from early in the conversation may be lost](https://code.claude.com/docs/en/how-claude-code-works)" |
+| Text a hook added earlier | "[Summarized with the rest of the conversation](https://code.claude.com/docs/en/context-window)" |
 
-So a rule that must persist through a long session belongs in the project-root file, not in the chat and not behind a `paths:` filter. You can also steer the summary itself with a `# Compact instructions` section in `CLAUDE.md` (shown in the example below) or with `/compact <focus>`.
+So a rule that must persist through a long session belongs in the project-root file, not in the chat and not behind a `paths:` filter. You can also [steer the summary itself](https://code.claude.com/docs/en/how-claude-code-works) with a `# Compact instructions` section in `CLAUDE.md` (shown in the example below) or with `/compact <focus>`.
 
 ## Writing instructions that work
 
-The docs give one test for every line. Ask "Could it find this by reading the code?" and "Would it actually go and look?" Then: "If both are yes, leave it out." This is the leave-out test. What survives it:
+[The docs give one test for every line](https://code.claude.com/docs/en/best-practices). Ask "Could it find this by reading the code?" and "Would it actually go and look?" Then: "If both are yes, leave it out." This is the leave-out test. What survives it:
 
 - How to confirm work: the exact test, typecheck and lint commands, and how to run a single test file.
 - Places where the code is misleading.
@@ -192,10 +192,10 @@ The docs give one test for every line. Ask "Could it find this by reading the co
 
 Five habits make the lines land:
 
-1. **Short.** "Every line in it takes a little of Claude's attention on *every* task." Stay under 200 lines; "longer files consume more context and reduce adherence."
-2. **Specific.** "Write instructions that are concrete enough to verify."
+1. **Short.** "[Every line in it takes a little of Claude's attention on](https://code.claude.com/docs/en/best-practices) *every* task." Stay under 200 lines; "[longer files consume more context and reduce adherence.](https://code.claude.com/docs/en/memory)"
+2. **Specific.** "[Write instructions that are concrete enough to verify.](https://code.claude.com/docs/en/memory)"
 3. **With the reason.** A rule that carries its reason lets Claude judge the edge cases and lets a teammate judge whether the rule is still needed. The field examples below all date their rules and name the incident.
-4. **Plain.** The current best-practices page lists "Add IMPORTANT or ALL CAPS" as old advice: "piling on emphasis mostly makes Claude over-apply the rule."
+4. **Plain.** The current best-practices page lists "Add IMPORTANT or ALL CAPS" as old advice: "[piling on emphasis mostly makes Claude over-apply the rule.](https://code.claude.com/docs/en/best-practices)"
 5. **Consistent.** Group related lines under headings, and delete duplicates. Contradictions are resolved arbitrarily.
 
 | Weak line | Better line |
@@ -203,7 +203,7 @@ Five habits make the lines land:
 | Format code properly | Use 2-space indentation |
 | Be careful with the database | Never edit an applied migration; add a new file in `migrations/`. Production replays them in order. |
 | IMPORTANT: ALWAYS RUN THE TESTS | Run `make check` before every commit. CI runs the same target, so a local pass predicts a green build. |
-| The project is organised into controllers, services and models | (delete it: "Claude reads the repo itself. Only write down what isn't in there.") |
+| The project is organised into controllers, services and models | (delete it: "[Claude reads the repo itself. Only write down what isn't in there.](https://code.claude.com/docs/en/best-practices)") |
 
 Add a line when Claude makes the same mistake a second time, when a code review catches something Claude should have known, or when a new teammate would need the same context. Send everything else to a better home: a multi-step procedure becomes a skill ([chapter 15](15-skills.md)), a rule for one part of the codebase becomes a path-scoped rule, and a personal preference goes in `CLAUDE.local.md`.
 
@@ -249,7 +249,7 @@ What is missing on purpose: no directory tree, no architecture tour, no "write c
 
 ## The limit of instructions
 
-Everything above is advisory. The best-practices page draws the line between instructions "Claude (the model) reads" and instructions "Claude Code (the harness) *has* to execute", and it is blunt about which is which: "If something has to happen every time, make it a hook, a deny rule, or a managed setting. `CLAUDE.md` is for guidelines, and Claude is allowed to decide a guideline doesn't apply." It also gives the warning sign: "If you keep adding emphasis to a `CLAUDE.md` line and Claude still misses it, that's a sign the line belongs in a hook."
+Everything above is advisory. [The best-practices page draws the line](https://code.claude.com/docs/en/best-practices) between instructions "Claude (the model) reads" and instructions "Claude Code (the harness) *has* to execute", and it is blunt about which is which: "If something has to happen every time, make it a hook, a deny rule, or a managed setting. `CLAUDE.md` is for guidelines, and Claude is allowed to decide a guideline doesn't apply." It also gives the warning sign: "If you keep adding emphasis to a `CLAUDE.md` line and Claude still misses it, that's a sign the line belongs in a hook."
 
 ```mermaid
 flowchart TD

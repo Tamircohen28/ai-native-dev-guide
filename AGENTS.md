@@ -84,6 +84,9 @@ Copy the exact heading text and footer form from a neighbouring chapter.
 - Anything you could not confirm is left out, or marked "check in your version".
 - Version-sensitive facts carry a date, and the version when the source gives one.
 - Every source a chapter relies on is listed in its `## Sources` section.
+- Cite inline: link the key phrase of each sourced claim (quotes, numbers, versions, documented
+  behaviour) to its URL, using the URL exactly as written in `## Sources`. The PDF build turns
+  each link into a numbered `[n]` that matches the chapter's Sources list.
 - When a chapter's Sources list changes, update the sources appendix,
   `book/D-sources.md`, in the same change. It is maintained by hand: no generator for it
   lives in this repo.

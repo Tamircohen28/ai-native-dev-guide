@@ -37,7 +37,7 @@ flowchart LR
 
 ### The instruction file
 
-Keep policy in one file and make everything else point at it. Claude Code reads `AGENTS.md` natively (v2.1.277 or later) only when no `CLAUDE.md` applies, so a repository that has both needs the import. Details are in [CLAUDE.md and memory](08-claude-md-and-memory.md) and [One repo, many agents](28-cross-tool-agents-md-cursor-codex-gemini.md).
+Keep policy in one file and make everything else point at it. Claude Code reads `AGENTS.md` natively (v2.1.277 or later) [only when no](https://code.claude.com/docs/en/memory) `CLAUDE.md` applies, so a repository that has both needs the import. Details are in [CLAUDE.md and memory](08-claude-md-and-memory.md) and [One repo, many agents](28-cross-tool-agents-md-cursor-codex-gemini.md).
 
 ```markdown
 @AGENTS.md
@@ -47,7 +47,7 @@ Keep policy in one file and make everything else point at it. Claude Code reads 
 - Run `make agent-check` before every commit and cite its output.
 ```
 
-What belongs in the file, in the words of the official best-practices page (it speaks of `CLAUDE.md`; the same test fits the `AGENTS.md` it imports): "How to confirm work in this repo: the exact test, typecheck, and lint commands, and how to run a single test file"; "Places where the code is misleading"; "Decisions that aren't in the repo"; "Anything you've had to correct twice already". The same page's test for leaving something out: could the agent find this by reading the code, and would it actually go and look? If both are yes, leave it out. The memory guide recommends staying under 200 lines per `CLAUDE.md` file, and an import does not shrink that: imported files load together with the file that imports them.
+What belongs in the file, in the words of [the official best-practices page](https://code.claude.com/docs/en/best-practices) (it speaks of `CLAUDE.md`; the same test fits the `AGENTS.md` it imports): "How to confirm work in this repo: the exact test, typecheck, and lint commands, and how to run a single test file"; "Places where the code is misleading"; "Decisions that aren't in the repo"; "Anything you've had to correct twice already". The same page's test for leaving something out: could the agent find this by reading the code, and would it actually go and look? If both are yes, leave it out. [The memory guide recommends](https://code.claude.com/docs/en/memory) staying under 200 lines per `CLAUDE.md` file, and an import does not shrink that: imported files load together with the file that imports them.
 
 ### Tests the agent can trust
 
@@ -176,7 +176,7 @@ Other pairs worth a check: version pins against the docs that quote them, genera
 
 ## Branch protection and required checks
 
-The official best-practices page lists who has the last word. The non-deterministic answer is "Claude's summary of what it did". The deterministic one is "Branch protection, a person who approves the merge". Set it up so the second always wins.
+[The official best-practices page](https://code.claude.com/docs/en/best-practices) lists who has the last word. The non-deterministic answer is "Claude's summary of what it did". The deterministic one is "Branch protection, a person who approves the merge". Set it up so the second always wins.
 
 1. **Protect the default branch.** No direct pushes; changes arrive by pull request.
 2. **Require one check that always reports.** Use a single fan-in job that depends on every other job, and require only that job. A field repo recorded what happens otherwise: a ruleset (GitHub's newer form of branch rules) "required a context named `CI` that no workflow reported", a failure that by its own record "has already cost this repo months".
@@ -210,7 +210,7 @@ jobs:
           done
 ```
 
-AI review is advice, not a gate. The managed Code Review docs say: "By itself, a review doesn't approve or block the pull request." See [Git, pull requests and code review](24-git-prs-and-code-review.md).
+AI review is advice, not a gate. [The managed Code Review docs](https://code.claude.com/docs/en/code-review) say: "By itself, a review doesn't approve or block the pull request." See [Git, pull requests and code review](24-git-prs-and-code-review.md).
 
 > **Note:** Green is not the same as watched. The product workspace added two watchdog workflows after a required gate sat red on the default branch for about 14.5 hours unnoticed, and another went four days without running: one asks "is the default branch red right now?", the other "has each required gate run recently?".
 
@@ -230,7 +230,7 @@ Agents push in bursts, and every push costs CI time. In the field window of abou
 
 ## Managed settings and shared plugins
 
-Settings have four scopes: user, shared project (`.claude/settings.json`, committed), project local, and **managed**, which an organisation deploys and users cannot override. The best-practices page adds: "keep the enforced set small".
+[Settings have four scopes](https://code.claude.com/docs/en/settings): user, shared project (`.claude/settings.json`, committed), project local, and **managed**, [which an organisation deploys](https://code.claude.com/docs/en/security) and users cannot override. The best-practices page adds: ["keep the enforced set small"](https://code.claude.com/docs/en/best-practices).
 
 | Managed settings file | Path |
 |---|---|
@@ -238,7 +238,7 @@ Settings have four scopes: user, shared project (`.claude/settings.json`, commit
 | Linux and WSL | `/etc/claude-code/managed-settings.json` |
 | Windows | `C:\Program Files\ClaudeCode\managed-settings.json` |
 
-Other delivery channels are server-managed settings from the claude.ai admin console and device management (MDM). The docs' example, reformatted:
+[Other delivery channels](https://code.claude.com/docs/en/managed-settings) are server-managed settings from the claude.ai admin console and device management (MDM). The docs' example, reformatted:
 
 ```json
 {
@@ -250,9 +250,9 @@ Other delivery channels are server-managed settings from the claude.ai admin con
 }
 ```
 
-Confirm it applied with `/status`, which shows `Enterprise managed settings (file)`. Keys that only a managed source can set include `allowManagedPermissionRulesOnly`, `allowManagedHooksOnly`, `allowManagedMcpServersOnly`, `strictKnownMarketplaces`, `blockedMarketplaces` and `sandbox.network.allowManagedDomainsOnly`. Scopes and precedence are in [Settings and permissions](09-settings-and-permissions.md); the security reasoning is in [Security and guardrails](29-security-and-guardrails.md).
+[Confirm it applied](https://code.claude.com/docs/en/managed-settings) with `/status`, which shows `Enterprise managed settings (file)`. Keys that only a managed source can set include `allowManagedPermissionRulesOnly`, `allowManagedHooksOnly`, `allowManagedMcpServersOnly`, `strictKnownMarketplaces`, `blockedMarketplaces` and `sandbox.network.allowManagedDomainsOnly`. Scopes and precedence are in [Settings and permissions](09-settings-and-permissions.md); the security reasoning is in [Security and guardrails](29-security-and-guardrails.md).
 
-**Shared plugins.** Package the team's skills, agents and hooks as a plugin in a marketplace repository, then name both in the project's `.claude/settings.json`:
+**Shared plugins.** Package the team's skills, agents and hooks as a plugin in [a marketplace repository](https://code.claude.com/docs/en/plugins/marketplace-reference), then [name both](https://code.claude.com/docs/en/plugins/org) in the project's `.claude/settings.json`:
 
 ```json
 {
@@ -265,7 +265,7 @@ Confirm it applied with `/status`, which shows `Enterprise managed settings (fil
 }
 ```
 
-Three facts decide whether this works in practice. Committing the file enables the plugin for collaborators "but doesn't download it": each person still runs `claude plugin install <name>@<marketplace> --scope project`. Auto-update is off by default for every marketplace except Anthropic's official ones. And a manifest that pins a `version` string keeps every user on the cached copy until the author changes that string, however many commits are pushed. The author's plugin repo states the consequence in its release rule: "Pushing commits without bumping `version` does not deliver changes to installed users." More in [Plugins and marketplaces](17-plugins-and-marketplaces.md).
+Three facts decide whether this works in practice. Committing the file enables the plugin for collaborators ["but doesn't download it"](https://code.claude.com/docs/en/plugins/install): each person still runs `claude plugin install <name>@<marketplace> --scope project`. Auto-update is off by default for every marketplace except Anthropic's official ones. And a manifest that pins a `version` string [keeps every user on the cached copy](https://code.claude.com/docs/en/plugins/loading) until the author changes that string, however many commits are pushed. The author's plugin repo states the consequence in its release rule: "Pushing commits without bumping `version` does not deliver changes to installed users." More in [Plugins and marketplaces](17-plugins-and-marketplaces.md).
 
 ## A staged rollout
 
@@ -290,14 +290,14 @@ flowchart LR
 
 | Problem | What the evidence says | Its limits | What helps |
 |---|---|---|---|
-| Review bottleneck | Telemetry from 10,000+ developers on 1,255 teams: high-adoption teams merged 98% more pull requests while review time rose 91% and pull request size 154%. No significant link to company-level results | Vendor-published telemetry; correlations, not experiments; data to June 2025 | Machine checks before human review; small pull requests (Google's guidance: about 100 lines is reasonable, 1,000 is usually too large); a fresh-context AI pass scoped to correctness |
-| More defects per pull request | 470 open-source pull requests (320 AI-co-authored, 150 human-only): the AI-co-authored ones carried about 1.7 times more findings | The vendor sells AI review; authorship was inferred, and the authors "cannot guarantee" the human set is human-only | Linters, formatters and required tests in CI |
-| Felt speed versus measured speed | A randomised trial by the research group METR, published in July 2025: 16 experienced open-source developers took 19% longer on 246 issues when AI tools were allowed, after predicting a 24% speed-up | Small (n=16), early-2025 tools, large mature repositories; the authors now call it out of date, and could not produce a clean follow-up | Measure your own cycle time; do not rely on impressions |
-| Inconsistent conventions | Support for `AGENTS.md` is the most-reacted issue on the Claude Code tracker (about 6,700 reactions on 2026-11-25) | A tracker count, not a study | One canonical file; `/doctor prompt-audit` flags contradictions; managed settings |
-| Skill atrophy | A randomised trial run by Anthropic with 52 mostly junior engineers: the AI group scored 50% against 67% on a comprehension quiz, with no significant speed gain. The largest gap was on debugging questions | One study, by an AI vendor; 52 participants, mostly junior | Ask for explanations, not only code; keep humans on review of critical paths; roll out deliberately |
-| Licensing and IP | Under Anthropic's Commercial Terms the customer "owns its Outputs", and Anthropic "will defend Customer" against third-party IP claims on paid use, with exclusions. Free, Pro, Max and Ultra fall under the Consumer Terms instead | Not legal advice. The US Copyright Office's report on AI outputs exists; its conclusions were not read for this book | Use a commercial plan for company code; ask counsel about the exclusions |
+| Review bottleneck | [Telemetry from 10,000+ developers on 1,255 teams](https://www.faros.ai/blog/ai-software-engineering): high-adoption teams merged 98% more pull requests while review time rose 91% and pull request size 154%. No significant link to company-level results | Vendor-published telemetry; correlations, not experiments; data to June 2025 | Machine checks before human review; small pull requests ([Google's guidance](https://google.github.io/eng-practices/review/developer/small-cls.html): about 100 lines is reasonable, 1,000 is usually too large); a fresh-context AI pass scoped to correctness |
+| More defects per pull request | [470 open-source pull requests](https://www.coderabbit.ai/blog/state-of-ai-vs-human-code-generation-report) (320 AI-co-authored, 150 human-only): the AI-co-authored ones carried about 1.7 times more findings | The vendor sells AI review; authorship was inferred, and the authors "cannot guarantee" the human set is human-only | Linters, formatters and required tests in CI |
+| Felt speed versus measured speed | [A randomised trial by the research group METR](https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/), published in July 2025: 16 experienced open-source developers took 19% longer on 246 issues when AI tools were allowed, after predicting a 24% speed-up | Small (n=16), early-2025 tools, large mature repositories; the authors now call it out of date, and could not produce a clean follow-up | Measure your own cycle time; do not rely on impressions |
+| Inconsistent conventions | Support for `AGENTS.md` is [the most-reacted issue on the Claude Code tracker](https://github.com/anthropics/claude-code/issues/6235) (about 6,700 reactions on 2026-11-25) | A tracker count, not a study | One canonical file; `/doctor prompt-audit` flags contradictions; managed settings |
+| Skill atrophy | [A randomised trial run by Anthropic](https://www.anthropic.com/research/AI-assistance-coding-skills) with 52 mostly junior engineers: the AI group scored 50% against 67% on a comprehension quiz, with no significant speed gain. The largest gap was on debugging questions | One study, by an AI vendor; 52 participants, mostly junior | Ask for explanations, not only code; keep humans on review of critical paths; roll out deliberately |
+| Licensing and IP | Under [Anthropic's Commercial Terms](https://www.anthropic.com/legal/commercial-terms) the customer "owns its Outputs", and Anthropic "will defend Customer" against third-party IP claims on paid use, with exclusions. Free, Pro, Max and Ultra [fall under the Consumer Terms](https://code.claude.com/docs/en/legal-and-compliance) instead | Not legal advice. [The US Copyright Office's report](https://www.copyright.gov/ai/) on AI outputs exists; its conclusions were not read for this book | Use a commercial plan for company code; ask counsel about the exclusions |
 
-The 2025 DORA survey of nearly 5,000 respondents, published by Google Cloud, says AI can act as a "mirror and a multiplier": "In cohesive organizations, AI boosts efficiency. In fragmented ones, it highlights weaknesses." Survey answers are self-reported and the links are correlations. With that limit, it is the case for doing stage 2 before stage 4.
+[The 2025 DORA survey](https://blog.google/innovation-and-ai/technology/developers-tools/dora-report-2025/) of nearly 5,000 respondents, published by Google Cloud, says AI can act as a "mirror and a multiplier": "In cohesive organizations, AI boosts efficiency. In fragmented ones, it highlights weaknesses." Survey answers are self-reported and the links are correlations. With that limit, it is the case for doing stage 2 before stage 4.
 
 ## The learning loop
 

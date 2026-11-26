@@ -4,9 +4,9 @@ After this chapter you can read a plugin's directory and say what it will add to
 
 ## Mental model
 
-The last five chapters covered four kinds of extension: MCP servers, subagents, skills and hooks, each configured in its own place. A **plugin** is the unit that packages them for sharing. The docs define it as "a directory of components, usually with a manifest": one folder that holds skills, agents, hooks, MCP server configuration and more, plus a small JSON file (the manifest) that names and versions it.
+The last five chapters covered four kinds of extension: MCP servers, subagents, skills and hooks, each configured in its own place. A **plugin** is the unit that packages them for sharing. The docs define it as ["a directory of components, usually with a manifest"](https://code.claude.com/docs/en/plugins/manifest-reference): one folder that holds skills, agents, hooks, MCP server configuration and more, plus a small JSON file (the manifest) that names and versions it.
 
-A **marketplace** is how a plugin reaches other people. It is "a repository or directory with a `.claude-plugin/marketplace.json` file", and the docs add: "It's a catalog, not a hosted store". The catalogue lists plugins and says where to fetch each one. Installing a plugin copies it from that source into a cache on your machine.
+A **marketplace** is how a plugin reaches other people. It is "a repository or directory with a `.claude-plugin/marketplace.json` file", and the docs add: ["It's a catalog, not a hosted store"](https://code.claude.com/docs/en/plugins/overview). The catalogue lists plugins and says where to fetch each one. Installing a plugin copies it from that source into a cache on your machine.
 
 ```mermaid
 flowchart LR
@@ -20,13 +20,13 @@ flowchart LR
 
 Three consequences follow from this design:
 
-- **Names are namespaced.** A skill `review` in a plugin named `my-plugin` is invoked as `/my-plugin:review`, and an agent is addressed as `deploy-tools:reviewer`. Two plugins cannot collide.
-- **An enabled plugin has a footprint.** The name and description of each skill, agent and command that the model can invoke are "in Claude's context on every turn". The plugin's MCP servers run alongside every session.
-- **A plugin is code.** In the docs' words, "what the plugin runs, it runs as you". The trust section near the end of this chapter is not optional reading.
+- **[Names are namespaced.](https://code.claude.com/docs/en/plugins/manifest-reference)** A skill `review` in a plugin named `my-plugin` is invoked as `/my-plugin:review`, and an agent is addressed as `deploy-tools:reviewer`. Two plugins cannot collide.
+- **An enabled plugin has a footprint.** The name and description of each skill, agent and command that the model can invoke are ["in Claude's context on every turn"](https://code.claude.com/docs/en/plugins/overview). The plugin's MCP servers run alongside every session.
+- **A plugin is code.** In the docs' words, ["what the plugin runs, it runs as you"](https://code.claude.com/docs/en/plugins/overview). The trust section near the end of this chapter is not optional reading.
 
 ## Anatomy of a plugin
 
-Every component has a default location. Claude Code scans these folders, so a plugin can work with no manifest at all (the name then comes from the marketplace entry or the directory name).
+[Every component has a default location](https://code.claude.com/docs/en/plugins/manifest-reference). Claude Code scans these folders, so a plugin can work with no manifest at all (the name then comes from the marketplace entry or the directory name).
 
 ```text
 my-plugin/
@@ -47,16 +47,16 @@ my-plugin/
 
 Four rules catch most first-time mistakes:
 
-- "Only `plugin.json` goes inside `.claude-plugin/`. Components saved there don't load." A `skills/` folder inside `.claude-plugin/` is ignored without an error.
-- "A `CLAUDE.md` at the plugin root isn't loaded as context". Put standing guidance in a skill.
+- "Only `plugin.json` goes inside `.claude-plugin/`. [Components saved there don't load.](https://code.claude.com/docs/en/plugins/create)" A `skills/` folder inside `.claude-plugin/` is ignored without an error.
+- "A `CLAUDE.md` at the plugin root isn't loaded as context". [Put standing guidance in a skill](https://code.claude.com/docs/en/plugins/components).
 - Plugin subagents ignore the `permissionMode`, `mcpServers` and `hooks` frontmatter fields ([chapter 14](14-subagents.md)).
-- Monitors are not started in `claude -p` runs.
+- [Monitors are not started](https://code.claude.com/docs/en/plugins/components) in `claude -p` runs.
 
-A plugin can also ship a hooks module (a "mod": JavaScript or TypeScript handlers that draw panes and add commands) and channels. This chapter stays with the four components you already know.
+A plugin can also ship [a hooks module](https://code.claude.com/docs/en/plugins/components) (a "mod": JavaScript or TypeScript handlers that draw panes and add commands) and channels. This chapter stays with the four components you already know.
 
 ## The manifest
 
-`name` is the only required key. This is the manifest of the plugin you will build below:
+`name` [is the only required key](https://code.claude.com/docs/en/plugins/manifest-reference). This is the manifest of the plugin you will build below:
 
 ```json
 {
@@ -76,9 +76,9 @@ A plugin can also ship a hooks module (a "mod": JavaScript or TypeScript handler
 | Behaviour | `defaultEnabled` (default `true`), `engines`, `dependencies`, `network`, `userConfig` | Example: `"engines": { "claude-code": ">=2.1.400" }` (v2.1.323+) |
 | Component paths | `skills`, `commands`, `agents`, `outputStyles`, `workflows`, `hooks`, `mcpServers`, `lspServers` | Only needed when you leave the default layout |
 
-The component keys behave in three different ways. `skills` adds to the default scan. `commands`, `agents`, `outputStyles` and `workflows` each replace their default scan. `hooks`, `mcpServers` and `lspServers` merge with the default file. Paths must be relative to the plugin root and start with `./`; a path that escapes the root or does not exist does not load. Unknown top-level keys are stripped with a warning, while an unknown key inside a `userConfig` entry is an error.
+[The component keys behave in three different ways](https://code.claude.com/docs/en/plugins/manifest-reference). `skills` adds to the default scan. `commands`, `agents`, `outputStyles` and `workflows` each replace their default scan. `hooks`, `mcpServers` and `lspServers` merge with the default file. Paths must be relative to the plugin root and start with `./`; a path that escapes the root or does not exist does not load. Unknown top-level keys are stripped with a warning, while an unknown key inside a `userConfig` entry is an error.
 
-`userConfig` declares options the user fills in at install time. Each option needs `type` (`string`, `number`, `boolean`, `directory` or `file`), `title` and `description`, and can add `required`, `default`, `options`, `multiple`, `sensitive`, `min` and `max`. Non-sensitive values are stored under `pluginConfigs` in `settings.json`. Values marked `sensitive` go to the operating system's credential store, which is where a plugin's API token belongs.
+`userConfig` [declares options the user fills in at install time](https://code.claude.com/docs/en/plugins/manifest-reference). Each option needs `type` (`string`, `number`, `boolean`, `directory` or `file`), `title` and `description`, and can add `required`, `default`, `options`, `multiple`, `sensitive`, `min` and `max`. Non-sensitive values are stored under `pluginConfigs` in `settings.json`. Values marked `sensitive` go to the operating system's credential store, which is where a plugin's API token belongs.
 
 ### Path variables
 
@@ -90,11 +90,11 @@ The component keys behave in three different ways. `skills` adds to the default 
 | `${user_config.KEY}` | The value of a `userConfig` option | Configuration files such as `.mcp.json` |
 | `CLAUDE_PLUGIN_OPTION_<KEY>` | The same value, as an environment variable | Hook scripts |
 
-> **Warning:** These variables are not in the environment of commands that Claude runs through the Bash tool, so a shell command cannot count on `$CLAUDE_PLUGIN_ROOT` being set. To give Claude an executable, put it in `bin/`, which is on the Bash tool's `PATH`.
+> **Warning:** [These variables are not in the environment](https://code.claude.com/docs/en/plugins/manifest-reference) of commands that Claude runs through the Bash tool, so a shell command cannot count on `$CLAUDE_PLUGIN_ROOT` being set. To give Claude an executable, put it in `bin/`, which is on the Bash tool's `PATH`.
 
 ## Marketplaces
 
-A marketplace is one JSON file. Required top-level keys are `name`, `owner` (with a `name`) and `plugins`. Each entry needs `name` and `source`, and can add `description`, `version`, `category`, `tags` and more. Unknown keys are ignored without a warning, so check spelling.
+A marketplace is one JSON file. [Required top-level keys](https://code.claude.com/docs/en/plugins/marketplace-reference) are `name`, `owner` (with a `name`) and `plugins`. Each entry needs `name` and `source`, and can add `description`, `version`, `category`, `tags` and more. Unknown keys are ignored without a warning, so check spelling.
 
 ```json
 {
@@ -116,7 +116,7 @@ A marketplace is one JSON file. Required top-level keys are `name`, `owner` (wit
 }
 ```
 
-`source` is either a relative path inside the marketplace repository (`./...`) or an object. The object's `source` field picks the kind: `github` (with `repo`, `ref`, `sha`), `url`, `git-subdir`, `npm`, `archive` or `command`. Some names are reserved, among them `claude-plugins-official`, `anthropic-marketplace`, `inline`, `builtin` and `skills-dir`. `claude plugin validate` also rejects plugin names that start with `claude-`, `anthropic-`, `anthropics-` or `cc-plugin-`.
+`source` is either a relative path inside the marketplace repository (`./...`) or an object. The object's `source` field picks the kind: `github` (with `repo`, `ref`, `sha`), `url`, `git-subdir`, `npm`, `archive` or `command`. [Some names are reserved](https://code.claude.com/docs/en/plugins/marketplace-reference), among them `claude-plugins-official`, `anthropic-marketplace`, `inline`, `builtin` and `skills-dir`. `claude plugin validate` [also rejects plugin names](https://code.claude.com/docs/en/plugins/manifest-reference) that start with `claude-`, `anthropic-`, `anthropics-` or `cc-plugin-`.
 
 ### Add, install, enable
 
@@ -127,23 +127,23 @@ claude plugin list
 claude plugin disable team-kit@team-plugins           # keep it installed, switch it off
 ```
 
-Inside a session, `/plugin` opens a panel with Discover, Installed, Marketplaces and Errors tabs, and `/plugin marketplace add [source]` and `/plugin install <plugin>` do the same jobs as the shell commands. `/reload-plugins` applies changes without a restart.
+Inside a session, `/plugin` [opens a panel with Discover, Installed, Marketplaces and Errors tabs](https://code.claude.com/docs/en/plugins/cli-reference), and `/plugin marketplace add [source]` and `/plugin install <plugin>` do the same jobs as the shell commands. `/reload-plugins` applies changes without a restart.
 
-Where do plugins come from? Anthropic's official marketplace, `claude-plugins-official`, is added on your first interactive start. Anthropic also publishes a community marketplace, `claude-community`, as a read-only mirror, and reference skills in the `anthropics/skills` repository. The older `claude-code-plugins` marketplace is deprecated. Community indexes such as `awesome-claude-code` have no Anthropic affiliation and are not security-audited.
+Where do plugins come from? [Anthropic's official marketplace](https://github.com/anthropics/claude-plugins-official), `claude-plugins-official`, [is added on your first interactive start](https://code.claude.com/docs/en/plugins/overview). Anthropic also publishes [a community marketplace](https://github.com/anthropics/claude-plugins-community), `claude-community`, as a read-only mirror, and reference skills in the `anthropics/skills` repository. The older `claude-code-plugins` marketplace is deprecated. Community indexes such as `awesome-claude-code` have no Anthropic affiliation and are not security-audited.
 
-Installing writes an entry to `enabledPlugins` in a settings file. The scope (`-s, --scope`) picks which one:
+[Installing writes an entry](https://code.claude.com/docs/en/plugins/install) to `enabledPlugins` in a settings file. The scope (`-s, --scope`) picks which one:
 
 | Scope | Written to | Effect |
 |---|---|---|
 | `user` (default) | `~/.claude/settings.json` | You, in every project |
-| `project` | `.claude/settings.json` | Committing it enables the plugin for collaborators "but doesn't download it" |
+| `project` | `.claude/settings.json` | Committing it enables the plugin for collaborators ["but doesn't download it"](https://code.claude.com/docs/en/plugins/install) |
 | `local` | `.claude/settings.local.json` | You, in this project only |
 
-Local overrides project, and project overrides user. In managed settings, `true` force-enables a plugin and `false` blocks it.
+[Local overrides project, and project overrides user](https://code.claude.com/docs/en/plugins/install). In managed settings, `true` force-enables a plugin and `false` blocks it.
 
 ## Versions and updates
 
-Claude Code resolves a plugin's version in a fixed order, and an installed copy is replaced only when that version changes.
+Claude Code [resolves a plugin's version in a fixed order](https://code.claude.com/docs/en/plugins/loading), and an installed copy is replaced only when that version changes.
 
 ```mermaid
 flowchart TD
@@ -155,13 +155,13 @@ flowchart TD
     D --> F
 ```
 
-> **Warning:** This is the pinned-version trap. The docs: "a manifest that pins `"version": "1.0.0"` keeps every user on the cached copy until its author changes the string, however many commits they push." Either bump `version` with every release, or leave it out of both files so that a git-sourced plugin is versioned by its commit SHA (12 characters).
+> **Warning:** This is the pinned-version trap. The docs: "a manifest that pins `"version": "1.0.0"` [keeps every user on the cached copy](https://code.claude.com/docs/en/plugins/loading) until its author changes the string, however many commits they push." Either bump `version` with every release, or leave it out of both files so that a git-sourced plugin is versioned by its commit SHA (12 characters).
 
 Three more facts about updates, as of Nov 2026:
 
-- **Auto-update is on only for Anthropic's official marketplaces.** The docs: "Off by default: every other marketplace". When it runs, it starts after your first message plus a random delay of up to ten minutes and prints `Plugin updated: <name> · Run /reload-plugins to apply`.
-- **Manual updates are per plugin.** "There's no command that updates every plugin at once." Run `claude plugin marketplace update` to refresh the catalogues, then `claude plugin update <plugin>` for each plugin.
-- **Versions live side by side on disk.** The cache is `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/`, and a previous version is removed 14 days after an update. This is why `${CLAUDE_PLUGIN_ROOT}` changes on every update and why a hard-coded cache path breaks.
+- **Auto-update is on only for Anthropic's official marketplaces.** The docs: ["Off by default: every other marketplace"](https://code.claude.com/docs/en/plugins/install). When it runs, it starts after your first message plus a random delay of up to ten minutes and prints `Plugin updated: <name> · Run /reload-plugins to apply`.
+- **Manual updates are per plugin.** ["There's no command that updates every plugin at once."](https://code.claude.com/docs/en/plugins/install) Run `claude plugin marketplace update` to refresh the catalogues, then `claude plugin update <plugin>` for each plugin.
+- **Versions live side by side on disk.** The cache is `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/`, and [a previous version is removed 14 days after an update](https://code.claude.com/docs/en/plugins/loading). This is why `${CLAUDE_PLUGIN_ROOT}` changes on every update and why a hard-coded cache path breaks.
 
 ## Build a small plugin, step by step
 
@@ -240,7 +240,7 @@ Provides:
 ✔ Validation passed
 ```
 
-The same run also lists "plugin directory checks", here a missing `README.md` and a missing icon. They do not change the result, even under `--strict`, unless you add `--profile directory`; add a README anyway. In CI use `claude plugin validate --strict`, which fails on warnings such as unrecognised fields.
+The same run also lists "plugin directory checks", here a missing `README.md` and a missing icon. They do not change the result, even under `--strict`, unless you add `--profile directory`; add a README anyway. In CI use `claude plugin validate --strict`, which [fails on warnings such as unrecognised fields](https://code.claude.com/docs/en/plugins/cli-reference).
 
 **6. Test it in place.** No marketplace is needed for development:
 
@@ -248,9 +248,9 @@ The same run also lists "plugin directory checks", here a missing `README.md` an
 claude --plugin-dir ./plugins/team-kit    # loads as team-kit@inline; the flag is repeatable
 ```
 
-In the session, run `/team-kit:changelog-entry`, check that `/hooks` lists the guard, and ask Claude to use the `team-kit:diff-reviewer` agent. After each edit, `/reload-plugins` picks up the change. If something is missing, debug in the documented order: `claude plugin validate`, `/reload-plugins`, the Errors tab of `/plugin`, `claude plugin list`, then `/mcp` for servers.
+In the session, run `/team-kit:changelog-entry`, check that `/hooks` lists the guard, and ask Claude to use the `team-kit:diff-reviewer` agent. After each edit, `/reload-plugins` picks up the change. If something is missing, [debug in the documented order](https://code.claude.com/docs/en/plugins/create): `claude plugin validate`, `/reload-plugins`, the Errors tab of `/plugin`, `claude plugin list`, then `/mcp` for servers.
 
-**7. Publish.** Save the marketplace file from the previous section as `.claude-plugin/marketplace.json` at the repository root (keep only the `team-kit` entry). Then:
+**7. Publish.** [Save the marketplace file](https://code.claude.com/docs/en/plugins/create-marketplace) from the previous section as `.claude-plugin/marketplace.json` at the repository root (keep only the `team-kit` entry). Then:
 
 ```bash
 claude plugin validate .                                # validates the marketplace manifest
@@ -261,7 +261,7 @@ claude plugin install team-kit@team-plugins
 
 For every later release, change `version` in `plugin.json` first. `claude plugin tag` creates a `{name}--v{version}` git tag and checks that the manifest and the marketplace entry agree (run it with `--dry-run` to see what it would do).
 
-**8. Measure it (optional).** `claude plugin eval` (v2.1.269+) runs a suite from the plugin's `evals/` folder: each case is a prompt plus graders. Each case runs three times by default and again without the plugin, because "A high score on its own doesn't tell you the plugin helped". `claude plugin eval init` drafts a suite, `--threshold` (default 1.0) turns it into a gate with exit code 1 on failure, and the run writes a self-contained `report.html`. [Chapter 23](23-testing-and-verification-loops.md) places evals among the other verification loops.
+**8. Measure it (optional).** `claude plugin eval` (v2.1.269+) runs a suite from the plugin's `evals/` folder: each case is a prompt plus graders. Each case runs three times by default and again without the plugin, because ["A high score on its own doesn't tell you the plugin helped"](https://code.claude.com/docs/en/plugin-evals). `claude plugin eval init` drafts a suite, `--threshold` (default 1.0) turns it into a gate with exit code 1 on failure, and the run writes a self-contained `report.html`. [Chapter 23](23-testing-and-verification-loops.md) places evals among the other verification loops.
 
 ## Team distribution
 
@@ -278,23 +278,23 @@ For a team, commit the marketplace and the plugin choice to the repository's `.c
 }
 ```
 
-Enabling does not download. Each collaborator still runs `claude plugin install team-kit@team-plugins --scope project` once. An organisation can go further in managed settings: `strictKnownMarketplaces` and `blockedMarketplaces` control which marketplaces may be added, and a managed `enabledPlugins` entry forces a plugin on or off. [Chapter 31](31-repo-standards-and-team-adoption.md) covers rollout.
+[Enabling does not download](https://code.claude.com/docs/en/plugins/install). Each collaborator still runs `claude plugin install team-kit@team-plugins --scope project` once. An organisation can go further in managed settings: `strictKnownMarketplaces` and `blockedMarketplaces` [control which marketplaces may be added](https://code.claude.com/docs/en/plugins/marketplace-reference), and a managed `enabledPlugins` entry [forces a plugin on or off](https://code.claude.com/docs/en/plugins/org). [Chapter 31](31-repo-standards-and-team-adoption.md) covers rollout.
 
-Keep the shared set small. Every enabled plugin adds descriptions to every turn, so a plugin that only one person needs belongs in that person's user scope. `claude plugin details <name>` shows a plugin's component inventory and projected token cost.
+Keep the shared set small. Every enabled plugin adds descriptions to every turn, so a plugin that only one person needs belongs in that person's user scope. `claude plugin details <name>` [shows a plugin's component inventory and projected token cost](https://code.claude.com/docs/en/plugins/cli-reference).
 
 ## Trust: what to review before installing
 
-The plugin security page is blunt: "A Claude Code plugin you install can execute arbitrary code on your machine with your user privileges." A marketplace does not change that. The validator's own output says that it does not run the safety scan and policy review that the plugin directory applies to submissions, and the help text of `claude plugin eval` says that a passing suite is not a security vetting. Read these before you install:
+The plugin security page is blunt: ["A Claude Code plugin you install can execute arbitrary code on your machine with your user privileges."](https://code.claude.com/docs/en/plugins/security) A marketplace does not change that. The validator's own output says that it does not run the safety scan and policy review that the plugin directory applies to submissions, and the help text of `claude plugin eval` says that a passing suite is not a security vetting. Read these before you install:
 
 | Read | Because |
 |---|---|
 | `hooks/hooks.json` and every script it calls | They run as you on every matching event, without asking |
-| `.mcp.json` | Its servers start with every session. Anthropic "does not security-audit or manage any MCP server" |
-| `bin/` | These executables are on the Bash tool's `PATH` |
+| `.mcp.json` | Its servers start with every session. Anthropic ["does not security-audit or manage any MCP server"](https://code.claude.com/docs/en/security) |
+| `bin/` | [These executables are](https://code.claude.com/docs/en/plugins/components) on the Bash tool's `PATH` |
 | `skills/` and `agents/` | The model follows these instructions. Look for steps that fetch or run remote content |
 | The marketplace entry's `source` | A branch `ref` means the content can change after your review |
 
-The risk is measured. A Snyk scan of 3,984 agent skills reported that "36.82% (1,467 skills) have at least one security flaw". Pinning has had bugs too: CVE-2026-86063 let a branch named like a commit SHA bypass a plugin's pinned SHA until v2.1.179, which is one more reason to keep Claude Code updated. For a quick scan of skills, the Snyk write-up gives `uvx mcp-scan@latest --skills`. Community collections are useful to learn from, but nobody audits them for you. [Chapter 29](29-security-and-guardrails.md) covers the wider supply-chain picture.
+The risk is measured. A Snyk scan of 3,984 agent skills reported that ["36.82% (1,467 skills) have at least one security flaw"](https://snyk.io/blog/toxicskills-malicious-ai-agent-skills-clawhub/). Pinning has had bugs too: [CVE-2026-86063](https://github.com/anthropics/claude-code/security/advisories/GHSA-pq7j-f95f-qfcv) let a branch named like a commit SHA bypass a plugin's pinned SHA until v2.1.179, which is one more reason to keep Claude Code updated. For a quick scan of skills, the Snyk write-up gives `uvx mcp-scan@latest --skills`. Community collections are useful to learn from, but nobody audits them for you. [Chapter 29](29-security-and-guardrails.md) covers the wider supply-chain picture.
 
 ## From the field
 

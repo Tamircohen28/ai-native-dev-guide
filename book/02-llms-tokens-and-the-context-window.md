@@ -8,7 +8,7 @@ A **large language model (LLM)** does one thing: given a sequence of tokens, it 
 
 Three consequences follow, and they explain most of what you will see in a coding session:
 
-1. **The model remembers nothing between requests.** The API is *stateless*: each request must contain everything the model should know. The docs describe the input of each turn as "all previous conversation history plus the current user message".
+1. **The model remembers nothing between requests.** The API is *stateless*: each request must contain everything the model should know. The docs describe the input of each turn as ["all previous conversation history plus the current user message"](https://platform.claude.com/docs/en/build-with-claude/context-windows).
 2. **A conversation is a document that is sent again in full, and grows.** Every file the agent reads and every command output is appended, then re-sent with the next request.
 3. **The document has a maximum size, the context window,** and answer quality starts to fall well before you reach it.
 
@@ -51,7 +51,7 @@ At the API level, the second turn of a chat looks like this (trimmed). The first
 
 ## Tokens
 
-A **token** is the unit the model reads and writes. The docs: "Tokens are the smallest individual units of a language model, and can correspond to words, subwords, characters, or even bytes (in the case of Unicode)." Prices, rate limits and the context window are all measured in tokens.
+A **token** is the unit the model reads and writes. The docs: "[Tokens are the smallest individual units of a language model](https://platform.claude.com/docs/en/about-claude/glossary), and can correspond to words, subwords, characters, or even bytes (in the case of Unicode)." Prices, rate limits and the context window are all measured in tokens.
 
 ### Estimating
 
@@ -59,16 +59,16 @@ Rules of thumb for current models, as of Nov 2026:
 
 | What | Rough size | Basis |
 |---|---|---|
-| English prose | 100 words ≈ 180 tokens; 1,000 characters ≈ 400 tokens | Docs: "1M tokens is roughly 555k words or 2.5M Unicode characters on the current tokenizer" (our arithmetic) |
-| The same text on models before Opus 4.7 | Noticeably fewer tokens | Docs: the newer tokenizer "produces approximately 30% more tokens for the same text" |
-| Average web page (10 kB) | ~2,500 tokens | Pricing page example |
+| English prose | 100 words ≈ 180 tokens; 1,000 characters ≈ 400 tokens | Docs: "[1M tokens is roughly 555k words](https://platform.claude.com/docs/en/models/overview) or 2.5M Unicode characters on the current tokenizer" (our arithmetic) |
+| The same text on models before Opus 4.7 | Noticeably fewer tokens | Docs: the newer tokenizer "[produces approximately 30% more tokens for the same text](https://platform.claude.com/docs/en/about-claude/pricing)" |
+| Average web page (10 kB) | ~2,500 tokens | [Pricing page example](https://platform.claude.com/docs/en/about-claude/pricing) |
 | Large documentation page (100 kB) | ~25,000 tokens | Pricing page example |
 | Research paper PDF (500 kB) | ~125,000 tokens | Pricing page example |
-| Image, 1000x1000 | 1,296 tokens | Vision docs |
+| Image, 1000x1000 | 1,296 tokens | [Vision docs](https://platform.claude.com/docs/en/build-with-claude/vision) |
 | Screenshot, 1920x1080 | 1,560 tokens on standard-resolution models; 2,691 on high-resolution models (Claude 4.7 and later) | Vision docs |
-| One small tool definition | A few hundred tokens: the docs' one-tool request counts 403 tokens, against 14 for a bare greeting | Token counting docs |
+| One small tool definition | A few hundred tokens: the docs' one-tool request counts 403 tokens, against 14 for a bare greeting | [Token counting docs](https://platform.claude.com/docs/en/build-with-claude/token-counting) |
 
-> **Warning:** These rules disagree with each other because the docs do. The models overview implies about 2.5 characters per token, the glossary's figures imply about 2.7, and the pricing page's examples imply 4 bytes per token. The docs give no ratio for source code at all. Plan with a range and count anything that matters. A count taken from a tutorial written before Opus 4.7 will be too low.
+> **Warning:** These rules disagree with each other because the docs do. [The models overview implies](https://platform.claude.com/docs/en/models/overview) about 2.5 characters per token, [the glossary's figures](https://platform.claude.com/docs/en/about-claude/glossary) imply about 2.7, and [the pricing page's examples](https://platform.claude.com/docs/en/about-claude/pricing) imply 4 bytes per token. The docs give no ratio for source code at all. Plan with a range and count anything that matters. A count taken from a tutorial written before Opus 4.7 will be too low.
 
 A quick range for any file, using 4 and 2.5 characters per token as the bounds:
 
@@ -78,11 +78,11 @@ wc -c < README.md | awk '{printf "%d to %d tokens\n", $1/4, $1/2.5}'
 
 On a 7,075-byte Markdown file this prints `1768 to 2830 tokens`.
 
-Images are priced by area, not file size. "Each patch is a 28×28-pixel block of the image, referred to as a visual token", so an image costs `⌈width / 28⌉ × ⌈height / 28⌉` tokens, with a ceiling because oversized images are downscaled.
+Images are priced by area, not file size. "[Each patch is a 28×28-pixel block of the image](https://platform.claude.com/docs/en/build-with-claude/vision), referred to as a visual token", so an image costs `⌈width / 28⌉ × ⌈height / 28⌉` tokens, with a ceiling because oversized images are downscaled.
 
 ### Counting
 
-The API has an endpoint that counts instead of guessing. This example is from the docs:
+The API has [an endpoint that counts instead of guessing](https://platform.claude.com/docs/en/build-with-claude/token-counting). This example is from the docs:
 
 ```python
 import anthropic
@@ -96,27 +96,27 @@ response = client.messages.count_tokens(
 print(response.json())  # docs output: { "input_tokens": 14 }
 ```
 
-Three facts about it: "The token count is an **estimate**"; it is "**free to use**", with its own rate limit; and it accepts the same input as a real request, "including support for system prompts, tools, images, and PDFs". Count against the model you will call: "Recount prompts against the model you plan to use rather than reusing counts measured against earlier models."
+Three facts about it: ["The token count is an **estimate**"](https://platform.claude.com/docs/en/build-with-claude/token-counting); it is "**free to use**", with its own rate limit; and it accepts the same input as a real request, "including support for system prompts, tools, images, and PDFs". Count against the model you will call: "Recount prompts against the model you plan to use rather than reusing counts measured against earlier models."
 
 Inside Claude Code you do not call this yourself. `/context` shows what is using the window and `/usage` shows what the session has cost.
 
 ## The context window
 
-The docs' definition: "The “context window” refers to all the text a language model can reference when generating a response, including the response itself." It is working memory, not training data.
+[The docs' definition](https://platform.claude.com/docs/en/build-with-claude/context-windows): "The “context window” refers to all the text a language model can reference when generating a response, including the response itself." It is working memory, not training data.
 
-What counts toward it: "Everything in the request counts toward the context window: the system prompt, every message in `messages` (including tool results, images, and documents), and your tool definitions. The output Claude generates for the turn, including its extended thinking, counts too."
+What counts toward it: "[Everything in the request counts toward the context window](https://platform.claude.com/docs/en/build-with-claude/context-windows): the system prompt, every message in `messages` (including tool results, images, and documents), and your tool definitions. The output Claude generates for the turn, including its extended thinking, counts too."
 
 ### Sizes (as of Nov 2026)
 
 | Models | Context window | Max output per request |
 |---|---|---|
-| Fable 5.2, Opus 5.5, Sonnet 5.5, Haiku 5.5 (the current lineup) | 1M tokens | 128K tokens |
+| Fable 5.2, Opus 5.5, Sonnet 5.5, Haiku 5.5 ([the current lineup](https://platform.claude.com/docs/en/build-with-claude/context-windows)) | 1M tokens | 128K tokens |
 | Fable 5.1 and 5; Opus 5, 4.8, 4.7 and 4.6; Sonnet 5 and 4.6 | 1M tokens | 128K tokens |
 | Opus 4.5, Sonnet 4.5, Haiku 4.5 | 200K tokens | 64K tokens |
 
-The large window needs no switch: "For every model with a 1M-token context window, 1M is the default: you don’t need a beta header, and long-context requests are billed at standard pricing, except on Claude Haiku 5.5, where prompts over 100,000 tokens cost more." One Claude Code exception: there, "Opus 4.6 and Sonnet 4.6 reach 1M only through their `[1m]` variant".
+The large window needs no switch: "[For every model with a 1M-token context window, 1M is the default](https://platform.claude.com/docs/en/build-with-claude/context-windows): you don’t need a beta header, and long-context requests are billed at standard pricing, except on Claude Haiku 5.5, where prompts over 100,000 tokens cost more." [One Claude Code exception](https://code.claude.com/docs/en/model-config): there, "Opus 4.6 and Sonnet 4.6 reach 1M only through their `[1m]` variant".
 
-Caching does not make the window bigger. "Cached prompt prefixes still occupy the context window: prompt caching changes what you pay for those tokens, not whether they count."
+Caching does not make the window bigger. "[Cached prompt prefixes still occupy the context window](https://platform.claude.com/docs/en/build-with-claude/context-windows): prompt caching changes what you pay for those tokens, not whether they count."
 
 ### What fills it in a Claude Code session
 
@@ -124,13 +124,13 @@ Caching does not make the window bigger. "Cached prompt prefixes still occupy th
 |---|---|---|
 | System prompt and output style | Every request | A fixed cost you pay on each request |
 | Tool definitions | Session start | For MCP servers, tool search (full definitions fetched only when needed) is on by default, so "Only tool names and server instructions load at session start" |
-| `CLAUDE.md` files | Session start | Loaded from the working directory "and every directory above it" and concatenated; files in subdirectories load when Claude touches a file there. Target "under 200 lines per CLAUDE.md file" |
-| Auto memory | Session start | "the first 200 lines or 25KB of `MEMORY.md`, whichever comes first" |
+| `CLAUDE.md` files | Session start | Loaded from the working directory ["and every directory above it"](https://code.claude.com/docs/en/memory) and concatenated; files in subdirectories load when Claude touches a file there. Target "under 200 lines per CLAUDE.md file" |
+| Auto memory | Session start | "[the first 200 lines or 25KB](https://code.claude.com/docs/en/memory) of `MEMORY.md`, whichever comes first" |
 | Skill descriptions | Session start | A skill's body is added only when the skill is invoked |
 | Your prompts, `@file` mentions, images | As you type | A file you mention with `@` is included "when it fits the Read tool's token limit, 25,000 tokens by default" |
-| Claude's replies and thinking | Each response | Per the API docs, current models keep earlier thinking in the history, and it counts as input |
+| Claude's replies and thinking | Each response | [Per the API docs](https://platform.claude.com/docs/en/build-with-claude/context-windows), current models keep earlier thinking in the history, and it counts as input |
 | Tool results | Each tool call | Read returns "at most 25,000 tokens" per call; Bash output stays inline "up to roughly 30,000 characters"; MCP results warn at 10,000 tokens and are capped at 25,000 by default |
-| Subagent results | When a subagent finishes | "Only the summary and a small metadata trailer come back" |
+| Subagent results | When a subagent finishes | ["Only the summary and a small metadata trailer come back"](https://code.claude.com/docs/en/sub-agents) |
 
 Run `/context` to see this for your own session ("Visualize current context usage as a colored grid"), or `/context all` for a per-item breakdown. Tool results add up quickly: one large file read can add up to 25,000 tokens, and it stays in the document for every later request until a compaction or a `/clear`.
 
@@ -138,16 +138,16 @@ Run `/context` to see this for your own session ("Visualize current context usag
 
 At the API level there are two cases:
 
-- **The input alone is too big.** "the API returns a 400 `invalid_request_error` (“prompt is too long”) on every model."
-- **The input fits but the output runs out of room.** On Claude 4.5 models and newer the request is accepted, and if generation then reaches the limit it stops with `stop_reason: "model_context_window_exceeded"`.
+- **The input alone is too big.** "[the API returns a 400](https://platform.claude.com/docs/en/build-with-claude/context-windows) `invalid_request_error` (“prompt is too long”) on every model."
+- **The input fits but the output runs out of room.** [On Claude 4.5 models and newer](https://platform.claude.com/docs/en/build-with-claude/context-windows) the request is accepted, and if generation then reaches the limit it stops with `stop_reason: "model_context_window_exceeded"`.
 
-Claude Code does not let you get that far. "Claude Code compacts automatically as you approach the limit, so a full context window doesn't end your session." **Compaction** replaces the older part of the conversation with a summary. On a native 1M-token model it fires "at about 967K tokens by default"; `/autocompact 500k` moves the trigger (v2.1.221 or later), and `/compact focus on the auth bug fix` compacts now, with a focus you choose.
+Claude Code does not let you get that far. "[Claude Code compacts automatically as you approach the limit](https://code.claude.com/docs/en/context-window), so a full context window doesn't end your session." **Compaction** replaces the older part of the conversation with a summary. On a native 1M-token model it fires ["at about 967K tokens by default"](https://code.claude.com/docs/en/model-config); `/autocompact 500k` moves the trigger (v2.1.221 or later), and `/compact focus on the auth bug fix` compacts now, with a focus you choose.
 
-Compaction is lossy, and the docs say exactly where: "The summary keeps your requests and key code snippets, but detailed instructions from early in the conversation may be lost. Put persistent rules in CLAUDE.md."
+Compaction is lossy, and the docs say exactly where: "[The summary keeps your requests and key code snippets](https://code.claude.com/docs/en/how-claude-code-works), but detailed instructions from early in the conversation may be lost. Put persistent rules in CLAUDE.md."
 
 | What | After compaction |
 |---|---|
-| System prompt and output style | "Both still apply" |
+| System prompt and output style | ["Both still apply"](https://code.claude.com/docs/en/context-window) |
 | Project-root `CLAUDE.md`, unscoped rules, auto memory, the plan from plan mode | "Re-injected from disk" |
 | Nested `CLAUDE.md` files and rules with a `paths:` filter | Reloaded on demand, so gone until a matching file is touched again |
 | Files Claude read or edited | "Claude Code re-reads up to five, most recently modified first" |
@@ -157,43 +157,43 @@ Chapter [04](04-prompt-caching-compaction-and-cost.md) covers compaction and its
 
 ## Models and prices (as of Nov 2026)
 
-Prices are US dollars per million tokens (MTok), as published on 2026-11-25. Check the pricing page before you budget.
+Prices are US dollars per million tokens (MTok), as published on 2026-11-25. [Check the pricing page](https://platform.claude.com/docs/en/about-claude/pricing) before you budget.
 
 | Model | API ID | Input | Output | Cache read | Latency | Docs' description |
 |---|---|---|---|---|---|---|
-| Claude Fable 5.2 | `claude-fable-5-2` | $8 | $40 | $0.20 | Moderate | "For demanding reasoning and long-horizon agentic work" |
+| Claude Fable 5.2 | `claude-fable-5-2` | $8 | $40 | $0.20 | Moderate | ["For demanding reasoning and long-horizon agentic work"](https://platform.claude.com/docs/en/models/overview) |
 | Claude Opus 5.5 | `claude-opus-5-5` | $4 | $20 | $0.20 | Moderate | "For long-running agentic coding and knowledge work" |
 | Claude Sonnet 5.5 | `claude-sonnet-5-5` | $2 | $10 | $0.10 | Fast | "The best combination of speed and intelligence" |
 | Claude Haiku 5.5, prompt up to 100,000 tokens | `claude-haiku-5-5` | $0.10 | $0.50 | $0.01 | Fastest | "For high-volume, latency-sensitive tasks such as classification, extraction, and routing" |
 | Claude Haiku 5.5, prompt over 100,000 tokens | `claude-haiku-5-5` | $0.50 | $2.50 | $0.05 | | |
 
-All four have a 1M-token window, 128K max output and a June 2026 knowledge cutoff. Things worth noticing:
+All four have a 1M-token window, 128K max output and [a June 2026 knowledge cutoff](https://platform.claude.com/docs/en/models/overview). Things worth noticing:
 
-- **Output costs five times as much as input** on every model, and thinking is billed as output.
+- **Output costs five times as much as input** on every model, and [thinking is billed as output](https://platform.claude.com/docs/en/build-with-claude/thinking).
 - **A cache read costs 2.5% to 10% of the input price.** A cache read is input the API already processed for an earlier request and can reuse ([chapter 04](04-prompt-caching-compaction-and-cost.md)). That is what makes the re-sending in the mental model affordable.
-- **Haiku 5.5 has two price tiers,** and the prompt length that decides the tier "counts all of its input tokens, including cache reads and cache writes".
-- **A model ID is a snapshot, not a pointer.** `claude-sonnet-5-5` will not quietly become a newer model: "it is not an alias. It is the snapshot."
+- **Haiku 5.5 has two price tiers,** and the prompt length that decides the tier ["counts all of its input tokens, including cache reads and cache writes"](https://platform.claude.com/docs/en/about-claude/pricing).
+- **A model ID is a snapshot, not a pointer.** `claude-sonnet-5-5` will not quietly become a newer model: ["it is not an alias. It is the snapshot."](https://platform.claude.com/docs/en/about-claude/models/model-ids-and-versions)
 
 ### Which one to pick
 
 | Situation | Model | Docs' wording |
 |---|---|---|
-| Not sure; most work | Opus 5.5 | "If you’re unsure which model to use, start with Claude Opus 5.5 for most workloads." |
+| Not sure; most work | Opus 5.5 | ["If you’re unsure which model to use, start with Claude Opus 5.5 for most workloads."](https://platform.claude.com/docs/en/models/overview) |
 | Agent sessions that run for hours, deep multistep research, or Opus at higher effort still falls short | Fable 5.2 | "Use Claude Fable 5.2 for demanding reasoning and long-horizon agentic work" |
-| Everyday coding where speed matters | Sonnet 5.5 | "Speed and capability for everyday coding, agent, and enterprise workloads" |
-| High-volume, simple or latency-sensitive steps, including subagent tasks | Haiku 5.5 | "The lowest latency and price" |
+| Everyday coding where speed matters | Sonnet 5.5 | ["Speed and capability for everyday coding, agent, and enterprise workloads"](https://platform.claude.com/docs/en/about-claude/models/choosing-a-model) |
+| High-volume, simple or latency-sensitive steps, including subagent tasks | Haiku 5.5 | ["The lowest latency and price"](https://platform.claude.com/docs/en/about-claude/models/choosing-a-model) |
 
-The docs are not fully consistent: the pricing page's cost tips still say "Choose Haiku for simple tasks, Sonnet for most production workloads, and Opus for the most complex reasoning." A workable reading is to start on Opus 5.5, move down for cost or speed and up for difficulty. Before you switch model, try the other dial, effort (covered in the next section): "Tuning effort is often a better lever than switching models."
+The docs are not fully consistent: [the pricing page's cost tips](https://platform.claude.com/docs/en/about-claude/pricing) still say "Choose Haiku for simple tasks, Sonnet for most production workloads, and Opus for the most complex reasoning." A workable reading is to start on Opus 5.5, move down for cost or speed and up for difficulty. Before you switch model, try the other dial, effort (covered in the next section): ["Tuning effort is often a better lever than switching models."](https://platform.claude.com/docs/en/about-claude/models/choosing-a-model)
 
 In Claude Code:
 
 | Command | Effect |
 |---|---|
 | `/model` | Opens the picker. `Enter` switches and saves the choice as your default; `s` switches for this session only |
-| `/model sonnet` | Switches by alias and saves it as the default for new sessions. Aliases include `opus`, `sonnet`, `haiku` and `fable`. The value `default` is not an alias: it "clears any model override and reverts to the runtime default for your account" |
+| `/model sonnet` | Switches by alias and saves it as the default for new sessions. Aliases include `opus`, `sonnet`, `haiku` and `fable`. The value `default` is not an alias: it ["clears any model override and reverts to the runtime default for your account"](https://code.claude.com/docs/en/model-config) |
 | `claude --model sonnet` | Picks the model at launch |
 
-As of Nov 2026, `default` resolves to Opus 5.5 on Pro, Max, Ultra, Team, Enterprise and Anthropic API accounts, and "No Fable model is the account-type default on any plan or provider." On some cloud providers an alias resolves to an older model, so look at the picker in your own setup.
+As of Nov 2026, `default` resolves to Opus 5.5 on Pro, Max, Ultra, Team, Enterprise and Anthropic API accounts, and ["No Fable model is the account-type default on any plan or provider."](https://code.claude.com/docs/en/model-config) On some cloud providers an alias resolves to an older model, so look at the picker in your own setup.
 
 ### What one request costs
 
@@ -210,20 +210,20 @@ A task with 40 tool calls is about 40 such requests: roughly $33 without caching
 
 **Thinking** is the model working through the problem in its own words before it answers. Two facts matter to you:
 
-- **It is output.** "the tokens Claude spends reasoning are billed as output tokens, even when the thinking text isn’t returned to you".
-- **On current models it is adaptive, and mostly not optional.** The model decides how much to think, "steered by effort". In Claude Code, "You can't turn thinking off on Opus 5.5, Sonnet 5.5, Haiku 5.5, or the Fable models." The thinking is collapsed by default; `Ctrl+O` shows it.
+- **It is output.** "[the tokens Claude spends reasoning are billed as output tokens](https://platform.claude.com/docs/en/build-with-claude/thinking), even when the thinking text isn’t returned to you".
+- **On current models it is adaptive, and mostly not optional.** The model decides how much to think, ["steered by effort"](https://platform.claude.com/docs/en/models/overview). In Claude Code, ["You can't turn thinking off on Opus 5.5, Sonnet 5.5, Haiku 5.5, or the Fable models."](https://code.claude.com/docs/en/model-config) The thinking is collapsed by default; `Ctrl+O` shows it.
 
-**Effort** is the dial. "The effort parameter lets you control how many tokens Claude spends when responding to requests", and it "affects **all tokens** in the response": text, tool calls and thinking. "Lower effort also means fewer and terser tool calls."
+**Effort** is the dial. ["The effort parameter lets you control how many tokens Claude spends when responding to requests"](https://platform.claude.com/docs/en/build-with-claude/effort), and it "affects **all tokens** in the response": text, tool calls and thinking. "Lower effort also means fewer and terser tool calls."
 
 | Level | When (docs' wording where quoted) |
 |---|---|
-| `low` | "Simpler tasks that need the best speed and lowest costs, such as subagents" |
-| `medium` | The Claude Code default for all four current models |
+| `low` | ["Simpler tasks that need the best speed and lowest costs, such as subagents"](https://platform.claude.com/docs/en/build-with-claude/effort) |
+| `medium` | [The Claude Code default for all four current models](https://code.claude.com/docs/en/model-config) |
 | `high` | The docs' starting point for Fable 5.2: "Most of the gain in capability is already present at `high`" |
-| `xhigh` | "Long-running agentic and coding tasks (over 30 minutes) with token budgets in the millions" |
-| `max` | "Absolute maximum capability with no constraints on token spending." In Claude Code: "Save `max` for a hard problem you want Claude to work through without you" |
+| `xhigh` | ["Long-running agentic and coding tasks (over 30 minutes) with token budgets in the millions"](https://platform.claude.com/docs/en/build-with-claude/effort) |
+| `max` | "Absolute maximum capability with no constraints on token spending." [In Claude Code](https://code.claude.com/docs/en/best-practices): "Save `max` for a hard problem you want Claude to work through without you" |
 
-Defaults depend on where you run, as of Nov 2026. Through the API, "Most Claude models default to high effort ...; Claude Opus 5.5 and Claude Haiku 5.5 default to medium." In Claude Code, "Fable 5.2, Opus 5.5, Sonnet 5.5, and Haiku 5.5 default to `medium`".
+Defaults depend on where you run, as of Nov 2026. [Through the API](https://platform.claude.com/docs/en/build-with-claude/effort), "Most Claude models default to high effort ...; Claude Opus 5.5 and Claude Haiku 5.5 default to medium." [In Claude Code](https://code.claude.com/docs/en/model-config), "Fable 5.2, Opus 5.5, Sonnet 5.5, and Haiku 5.5 default to `medium`".
 
 ```text
 /effort            open the slider
@@ -238,28 +238,28 @@ claude --model sonnet --effort low
 
 Three cautions:
 
-- **Effort is a signal, not a cap.** "Effort is a behavioral signal, not a strict token budget."
-- **Words in the prompt are not the dial.** Claude Code passes "think", "think hard" and "think more" through "as ordinary prompt text". The one keyword it recognises is `ultrathink`, which asks for deeper reasoning on that turn only.
-- **Changing effort can cost you the cache.** The API docs warn that "Changing the top-level effort value between requests can invalidate all or part of the prompt cache", so do not flip it back and forth inside one long session.
+- **Effort is a signal, not a cap.** ["Effort is a behavioral signal, not a strict token budget."](https://platform.claude.com/docs/en/build-with-claude/effort)
+- **Words in the prompt are not the dial.** Claude Code passes "think", "think hard" and "think more" through ["as ordinary prompt text"](https://code.claude.com/docs/en/model-config). The one keyword it recognises is `ultrathink`, which asks for deeper reasoning on that turn only.
+- **Changing effort can cost you the cache.** [The API docs warn that](https://platform.claude.com/docs/en/build-with-claude/effort) "Changing the top-level effort value between requests can invalidate all or part of the prompt cache", so do not flip it back and forth inside one long session.
 
 ## Context rot and context engineering
 
-A bigger window does not make the model read better. The API docs: "more context isn’t automatically better. As token count grows, accuracy and recall degrade, a phenomenon known as *context rot*."
+A bigger window does not make the model read better. The API docs: "[more context isn’t automatically better](https://platform.claude.com/docs/en/build-with-claude/context-windows). As token count grows, accuracy and recall degrade, a phenomenon known as *context rot*."
 
-Anthropic's context engineering post gives the mechanism. The model has an "attention budget"; every token relates to every other ("n² pairwise relationships for n tokens"); and the result is "a performance gradient rather than a hard cliff". An independent study of 18 models found the same thing: "models do not use their context uniformly; instead, their performance grows increasingly unreliable as input length grows". In one of its tests a focused prompt of about 300 tokens beat the full 113k-token version on every model.
+[Anthropic's context engineering post](https://www.anthropic.com/research/effective-context-engineering-for-ai-agents) gives the mechanism. The model has an "attention budget"; every token relates to every other ("n² pairwise relationships for n tokens"); and the result is "a performance gradient rather than a hard cliff". [An independent study of 18 models](https://www.trychroma.com/research/context-rot) found the same thing: "models do not use their context uniformly; instead, their performance grows increasingly unreliable as input length grows". In one of its tests a focused prompt of about 300 tokens beat the full 113k-token version on every model.
 
-**Context engineering** is the response: "the set of strategies for curating and maintaining the optimal set of tokens (information) during LLM inference". Its guiding principle is worth memorising: "good context engineering means finding the smallest possible set of high-signal tokens that maximize the likelihood of some desired outcome."
+**Context engineering** is the response: ["the set of strategies for curating and maintaining the optimal set of tokens (information) during LLM inference"](https://www.anthropic.com/research/effective-context-engineering-for-ai-agents). Its guiding principle is worth memorising: "good context engineering means finding the smallest possible set of high-signal tokens that maximize the likelihood of some desired outcome."
 
 The post names four techniques. Claude Code ships all four.
 
 | Technique | In the post's words | In Claude Code | Chapter |
 |---|---|---|---|
-| Just-in-time retrieval | Agents "maintain lightweight identifiers (file paths, stored queries, web links, etc.) and use these references to dynamically load data into context at runtime using tools" | Claude searches and reads files when it needs them instead of relying on a pre-built index | [03](03-the-agentic-loop-and-tool-use.md) |
-| Compaction | "taking a conversation nearing the context window limit, summarizing its contents, and reinitiating a new context window with the summary" | Automatic, or `/compact` with a focus | [04](04-prompt-caching-compaction-and-cost.md) |
-| Structured note-taking | "the agent regularly writes notes persisted to memory outside of the context window" | `CLAUDE.md`, auto memory, a spec or progress file you ask for | [08](08-claude-md-and-memory.md) |
-| Sub-agents | "Each subagent might explore extensively, using tens of thousands of tokens or more, but returns only a condensed, distilled summary of its work (often 1,000-2,000 tokens)." | Subagents and forks | [14](14-subagents.md) |
+| Just-in-time retrieval | Agents "[maintain lightweight identifiers](https://www.anthropic.com/research/effective-context-engineering-for-ai-agents) (file paths, stored queries, web links, etc.) and use these references to dynamically load data into context at runtime using tools" | Claude searches and reads files when it needs them instead of relying on a pre-built index | [03](03-the-agentic-loop-and-tool-use.md) |
+| Compaction | "[taking a conversation nearing the context window limit](https://www.anthropic.com/research/effective-context-engineering-for-ai-agents), summarizing its contents, and reinitiating a new context window with the summary" | Automatic, or `/compact` with a focus | [04](04-prompt-caching-compaction-and-cost.md) |
+| Structured note-taking | ["the agent regularly writes notes persisted to memory outside of the context window"](https://www.anthropic.com/research/effective-context-engineering-for-ai-agents) | `CLAUDE.md`, auto memory, a spec or progress file you ask for | [08](08-claude-md-and-memory.md) |
+| Sub-agents | "Each subagent might explore extensively, using tens of thousands of tokens or more, but [returns only a condensed, distilled summary of its work](https://www.anthropic.com/research/effective-context-engineering-for-ai-agents) (often 1,000-2,000 tokens)." | Subagents and forks | [14](14-subagents.md) |
 
-The post also says which to reach for: "Compaction maintains conversational flow for tasks requiring extensive back-and-forth;" "Note-taking excels for iterative development with clear milestones;" "Multi-agent architectures handle complex research and analysis where parallel exploration pays dividends."
+[The post also says which to reach for](https://www.anthropic.com/research/effective-context-engineering-for-ai-agents): "Compaction maintains conversational flow for tasks requiring extensive back-and-forth;" "Note-taking excels for iterative development with clear milestones;" "Multi-agent architectures handle complex research and analysis where parallel exploration pays dividends."
 
 ```mermaid
 flowchart TB
@@ -271,11 +271,11 @@ flowchart TB
     Q -->|"Tool definitions"| T["Trim MCP servers"]
 ```
 
-> **Note:** Older guides say a subagent "sees nothing" of your session. The current docs are more precise: "A subagent starts fresh unless it's a fork, which starts with a copy of your conversation so far. Either way, the subagent's tool calls stay out of your context, and Claude gets back a summary when the subagent finishes." A fresh subagent is not empty either: it still loads your `CLAUDE.md` files, a git status snapshot and any preloaded skills. Chapter [14](14-subagents.md) has the details.
+> **Note:** Older guides say a subagent "sees nothing" of your session. [The current docs are more precise](https://code.claude.com/docs/en/how-claude-code-works): "A subagent starts fresh unless it's a fork, which starts with a copy of your conversation so far. Either way, the subagent's tool calls stay out of your context, and Claude gets back a summary when the subagent finishes." A fresh subagent is not empty either: it still loads your `CLAUDE.md` files, a git status snapshot and any preloaded skills. Chapter [14](14-subagents.md) has the details.
 
 ## What the 1M window changes, and what it does not
 
-The older standard advice was to guard a 200K window carefully. The official best-practices page now files that under "The old advice":
+The older standard advice was to guard a 200K window carefully. [The official best-practices page](https://code.claude.com/docs/en/best-practices) now files that under "The old advice":
 
 | "The old advice" | "Why it's gone" |
 |---|---|
@@ -288,7 +288,7 @@ Read both rows closely. Each retires a *reason*, not a habit: `/clear` and subag
 |---|---|
 | Running out during a normal task is rare | Context rot: recall still degrades as the window fills |
 | Large files, long logs and screenshots fit without planning | Every request still re-sends everything, so a bigger context is a bigger bill |
-| No beta header and no long-context surcharge: "A 900k-token request is billed at the same per-token rate as a 9k-token request." (Haiku 5.5 above 100,000 tokens is the exception) | Long sessions still compact, and compaction is lossy (field data below) |
+| No beta header and no long-context surcharge: ["A 900k-token request is billed at the same per-token rate as a 9k-token request."](https://platform.claude.com/docs/en/about-claude/pricing) (Haiku 5.5 above 100,000 tokens is the exception) | Long sessions still compact, and compaction is lossy (field data below) |
 | You do not need a subagent just to save space | Rules that must survive belong in project-root `CLAUDE.md` or in a hook, not in the conversation |
 
 ## From the field
@@ -308,23 +308,23 @@ These numbers come from a rolling window of about four weeks of one developer's 
 | Subagent runs that compacted | 173 of 1,249 (281 compactions), at a median of 118k tokens |
 | Peak main-thread context per session | Median 106k, p90 952k, max 967k tokens |
 
-Every logged compaction was triggered automatically. The p90 matches the documented default of about 967K; many fired far below it, and the transcripts do not say why. Both statements in the previous section hold at once: the median session peaked at 106k tokens and never came near the limit, while the long-running sessions compacted again and again, each time dropping from hundreds of thousands of tokens to about 33k.
+Every logged compaction was triggered automatically. The p90 matches [the documented default of about 967K](https://code.claude.com/docs/en/model-config); many fired far below it, and the transcripts do not say why. Both statements in the previous section hold at once: the median session peaked at 106k tokens and never came near the limit, while the long-running sessions compacted again and again, each time dropping from hundreds of thousands of tokens to about 33k.
 
 **3. Model and effort in practice.** Opus 5.5 accounted for 61% of all tokens and Sonnet 5.5 for 35%. Effort per response was `high` 73,217 times, `medium` 26,450, `xhigh` 4,862 and `low` 370. A thinking block was present in 58% of main-thread responses and 63% of subagent responses. These are one developer's choices, not a recommendation.
 
-> **Field note:** The author's notes from July record duplicate agents being launched after a compaction; they give no more detail than that. The current docs describe a guard for this situation: after compaction, background commands and subagents "Keep running. Claude Code reminds Claude which ones are still running so it doesn't start a duplicate". Treat it as a reminder that a summary can lose track of work in progress, and that the harness keeps absorbing such fixes.
+> **Field note:** The author's notes from July record duplicate agents being launched after a compaction; they give no more detail than that. [The current docs describe a guard for this situation](https://code.claude.com/docs/en/context-window): after compaction, background commands and subagents "Keep running. Claude Code reminds Claude which ones are still running so it doesn't start a duplicate". Treat it as a reminder that a summary can lose track of work in progress, and that the harness keeps absorbing such fixes.
 
 ## Common problems
 
 | Symptom | Cause | Fix |
 |---|---|---|
 | A rule is followed early in the session and ignored later | It lived only in the conversation or in a path-scoped file, and compaction summarised it away | Put it in project-root `CLAUDE.md` (under 200 lines); use a hook or deny rule if it cannot bend |
-| `Autocompact is thrashing: the context refilled to the limit...` | One oversized file or tool result refills the window right after each summary | Read the file in chunks, move the work to a subagent, `/compact` with a narrow focus, or `/clear` |
+| `Autocompact is thrashing: the context refilled to the limit...` | [One oversized file or tool result refills the window right after each summary](https://code.claude.com/docs/en/troubleshooting) | Read the file in chunks, move the work to a subagent, `/compact` with a narrow focus, or `/clear` |
 | A large share of the window is used before you type | Many MCP tool definitions or a long `CLAUDE.md` loaded up front | Keep tool search on (the default), disable unused servers in `/mcp`, prefer a CLI such as `gh`, move procedures into skills |
 | Answers get vaguer or repeat themselves deep into a session | Context rot: too many low-signal tokens | `/clear` between unrelated tasks; `/compact` with a focus; restart from a written spec |
 | API error 400, "prompt is too long" | The input alone exceeds the model's window | Count tokens first; trim or summarise the history |
 | Response ends with `model_context_window_exceeded` | Input plus output reached the window during generation | Reduce the input or compact before the next request |
-| Your token estimate is well below the real count | It was made with a pre-Opus-4.7 ratio; the newer tokenizer produces about 30% more tokens | Recount against the model you actually use |
+| Your token estimate is well below the real count | It was made with a pre-Opus-4.7 ratio; [the newer tokenizer produces about 30% more tokens](https://platform.claude.com/docs/en/about-claude/pricing) | Recount against the model you actually use |
 | Output cost is higher than the visible answer suggests | Thinking is billed as output even when it is not shown; effort is set high | Check `/effort status` and `/usage`; lower effort for simple work |
 
 ## Checklist

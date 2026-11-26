@@ -41,7 +41,7 @@ No single layer is complete, which is why they are stacked. The figure widens th
 
 | Precedence | Scope | Location | Who it affects |
 |---|---|---|---|
-| 1 (highest) | Managed | `managed-settings.json` in `/Library/Application Support/ClaudeCode/` (macOS), `/etc/claude-code/` (Linux and WSL) or `C:\Program Files\ClaudeCode\` (Windows); also pushed from the admin console or device management | Everyone your organisation deploys it to |
+| 1 (highest) | Managed | `managed-settings.json` in `/Library/Application Support/ClaudeCode/` (macOS), `/etc/claude-code/` (Linux and WSL) or `C:\Program Files\ClaudeCode\` (Windows); [also pushed from the admin console or device management](https://code.claude.com/docs/en/managed-settings) | Everyone your organisation deploys it to |
 | 2 | Command line | `--settings <file-or-json>` | This run only |
 | 3 | Project local | `.claude/settings.local.json` | You, in this project. Claude Code adds it to your global git excludes on first write |
 | 4 | Shared project | `.claude/settings.json` | Everyone who works in the repo; commit it |
@@ -66,19 +66,19 @@ flowchart TB
 
 How the files combine:
 
-- **Scalars override.** "A key set at a higher level overrides the same key set lower down."
-- **Lists merge.** "When you set the same list key, such as `permissions.allow`, in more than one file, Claude Code combines the lists instead of picking one".
-- **Deny is sticky.** "If a tool is denied at any level, no other level can allow it."
-- **No parent lookup.** `.claude/settings.json` is read from the session's primary working directory "with no parent-directory fallback". This is unlike `CLAUDE.md`, which loads from every directory above you.
+- **Scalars override.** "[A key set at a higher level overrides the same key set lower down.](https://code.claude.com/docs/en/settings)"
+- **Lists merge.** "When you set the same list key, such as `permissions.allow`, in more than one file, Claude Code [combines the lists instead of picking one](https://code.claude.com/docs/en/settings)".
+- **Deny is sticky.** "[If a tool is denied at any level, no other level can allow it.](https://code.claude.com/docs/en/permissions)"
+- **No parent lookup.** `.claude/settings.json` is read from the session's primary working directory "[with no parent-directory fallback](https://code.claude.com/docs/en/permissions)". This is unlike `CLAUDE.md`, which loads from every directory above you.
 - **Edits apply live.** Claude Code watches the files and applies most changes, including `permissions` and `hooks`, to the running session. `model`, `effortLevel` and `modelSettings` are read only at session start.
-- **Strict JSON.** "A `//` comment or a trailing comma is a syntax error". Add the `$schema` line shown in the baseline below so your editor catches mistakes.
+- **Strict JSON.** "A `//` [comment or a trailing comma is a syntax error](https://code.claude.com/docs/en/settings)". Add the `$schema` line shown in the baseline below so your editor catches mistakes.
 - **Environment variables are not a level** in this stack. Set them in your shell or under the `env` key.
 
 One more file, `~/.claude.json`, is not a settings scope: Claude Code writes it for itself (account details, MCP server configurations, per-project trust decisions). You do not need to edit it.
 
 To debug, run `claude doctor` in your shell (it prints settings-file validation errors), `/status` in a session (it shows whether managed settings apply), and `/permissions` for the rules in force, listed by scope.
 
-> **Warning:** A repo's `.claude/settings.json` is code you run. Project `allow` rules apply only after you accept the workspace trust dialog, but a `claude -p` run in a folder you never trusted shows no dialog and still uses the project's hooks and `env` block. Read the file before you run an agent in a repo you cloned ([chapter 29](29-security-and-guardrails.md)).
+> **Warning:** A repo's `.claude/settings.json` is code you run. Project `allow` rules apply only after you accept the workspace trust dialog, but a `claude -p` run in a folder you never trusted [shows no dialog and still uses the project's hooks and](https://code.claude.com/docs/en/security) `env` block. Read the file before you run an agent in a repo you cloned ([chapter 29](29-security-and-guardrails.md)).
 
 ## Keys worth knowing
 
@@ -95,7 +95,7 @@ To debug, run `claude doctor` in your shell (it prints settings-file validation 
 | `enabledMcpjsonServers`, `enableAllProjectMcpServers` | Approve specific MCP servers ([chapter 13](13-mcp-in-practice.md)) from a project `.mcp.json`, or every one without a prompt |
 | `enabledPlugins`, `extraKnownMarketplaces` | Plugins on or off per scope; marketplaces for a repo or organisation |
 | `autoMemoryEnabled`, `claudeMdExcludes` | Auto memory on or off; `CLAUDE.md` files to skip |
-| `cleanupPeriodDays` | Days transcripts are kept (default `30`, minimum `1`) |
+| `cleanupPeriodDays` | [Days transcripts are kept](https://code.claude.com/docs/en/settings-reference) (default `30`, minimum `1`) |
 | `attribution` | The attribution added to commits and pull requests (replaces the deprecated `includeCoAuthoredBy`) |
 | `statusLine` | An object with `type` set to `"command"` and a `command` string, not a bare string |
 
@@ -117,8 +117,8 @@ A rule is `Tool` or `Tool(specifier)`.
 **Bash rules match text.** Five behaviours explain most surprises:
 
 - **The space matters.** `Bash(ls *)` needs a space after `ls`, so it does not match `lsof`. `Bash(ls*)` does.
-- **Compound commands are split.** `Bash(safe-cmd *)` does not allow `safe-cmd && other-cmd`. Claude Code splits on `&&`, `||`, `;`, `|`, `|&`, `&` and newlines, and "every subcommand must be allowed". A deny or ask rule fires when any subcommand matches.
-- **Some wrappers are stripped, others are not.** `timeout`, `time`, `nice`, `nohup` and bare `xargs` are removed before matching, so `Bash(npm test *)` also covers `timeout 30 npm test`. Runners such as `npx`, `docker exec`, `devbox run` and `mise exec` are not, so `Bash(npx *)` allows whatever `npx` can launch.
+- **Compound commands are split.** `Bash(safe-cmd *)` does not allow `safe-cmd && other-cmd`. Claude Code splits on `&&`, `||`, `;`, `|`, `|&`, `&` and newlines, and "[every subcommand must be allowed](https://code.claude.com/docs/en/permissions)". A deny or ask rule fires when any subcommand matches.
+- **Some wrappers are stripped, others are not.** `timeout`, `time`, `nice`, `nohup` and bare `xargs` are removed before matching, so `Bash(npm test *)` also covers `timeout 30 npm test`. [Runners such as](https://code.claude.com/docs/en/permissions) `npx`, `docker exec`, `devbox run` and `mise exec` are not, so `Bash(npx *)` allows whatever `npx` can launch.
 - **Redirects are checked as file access.** The target of `> file` is checked against `Edit` rules and `< file` against `Read` rules.
 - **A Bash rule is not a security boundary.** A deny on `Bash(rm *)` stops `rm -rf build/` but not `/bin/rm -rf build/` or `bash -c 'rm -rf build/'`. Patterns that try to constrain arguments, such as `Bash(curl http://github.com/ *)`, are fragile.
 
@@ -131,13 +131,13 @@ A rule is `Tool` or `Tool(specifier)`.
 | `/path` | The settings file's own root (the project for project settings, `~/.claude` for user settings) | `Edit(/src/**/*.ts)` |
 | `path` or `./path` | Current directory | `Read(*.env)` |
 
-`/Users/alice/file` is therefore *not* an absolute path; write `//Users/alice/file`. `*` stays inside one path segment and `**` crosses directories. A bare filename matches at any depth, so `Read(.env)` equals `Read(**/.env)`. Use `Read` and `Edit` only: rules written as `Write(path)`, `Grep(path)` or `Glob(path)` do not match, and a `.claudeignore` file "has no effect".
+`/Users/alice/file` is therefore *not* an absolute path; write `//Users/alice/file`. `*` stays inside one path segment and `**` crosses directories. A bare filename matches at any depth, so `Read(.env)` equals `Read(**/.env)`. Use `Read` and `Edit` only: rules written as `Write(path)`, `Grep(path)` or `Glob(path)` do not match, and a `.claudeignore` file "[has no effect](https://code.claude.com/docs/en/permissions)".
 
-`Read` deny rules cover Claude's file tools and shell commands Claude Code recognises (`cat`, `head`, `tail`, `sed`, `tee`). They do not cover "a command that reads files without naming them, such as `grep -r pattern .`". The sandbox closes that gap.
+`Read` deny rules cover Claude's file tools and shell commands Claude Code recognises (`cat`, `head`, `tail`, `sed`, `tee`). They do not cover "[a command that reads files without naming them, such as](https://code.claude.com/docs/en/permissions) `grep -r pattern .`". The sandbox closes that gap.
 
 ## Evaluation order: deny, ask, allow
 
-"Rules are evaluated in order: deny, then ask, then allow. The first match in that order determines the outcome, and rule specificity doesn't change the order." The full check per tool call, as the Agent SDK permissions page lists it, is hooks, deny rules, ask rules, the permission mode, then allow rules; in `default` and `dontAsk` "the call goes on to the allow rules", while `bypassPermissions` and `acceptEdits` (for file edits) approve at the mode step. [Chapter 05](05-inside-the-harness.md) shows where this sits in a turn. A narrow allow cannot rescue something a broad deny blocks:
+"[Rules are evaluated in order: deny, then ask, then allow. The first match in that order determines the outcome, and rule specificity doesn't change the order.](https://code.claude.com/docs/en/permissions)" The full check per tool call, as the Agent SDK permissions page lists it, is hooks, deny rules, ask rules, the permission mode, then allow rules; in `default` and `dontAsk` "the call goes on to the allow rules", while `bypassPermissions` and `acceptEdits` (for file edits) approve at the mode step. [Chapter 05](05-inside-the-harness.md) shows where this sits in a turn. A narrow allow cannot rescue something a broad deny blocks:
 
 ```json
 {
@@ -152,12 +152,12 @@ Every push is blocked here, including the one the allow rule names. A broad `ask
 
 | Layer | How it behaves across modes |
 |---|---|
-| `deny` | "Deny rules block in every mode, including `bypassPermissions`." |
+| `deny` | "[Deny rules block in every mode, including](https://code.claude.com/docs/en/permission-modes) `bypassPermissions`." |
 | `ask` | Prompts even in modes that would approve, such as `acceptEdits` or `bypassPermissions`. In `dontAsk` the call is denied instead |
-| `allow` | "Allow rules have no effect in `bypassPermissions`", because everything already runs |
+| `allow` | "[Allow rules have no effect in](https://code.claude.com/docs/en/permission-modes) `bypassPermissions`", because everything already runs |
 | `PreToolUse` hook | Exit code 2 stops the call before any rule is evaluated. A hook that answers "allow" cannot override a deny or ask rule |
 
-> **Warning:** With `claude -p --bare`, settings and permission rules are still read but hooks never run. A rule enforced only by a hook is not enforced there ([chapter 27](27-headless-ci-and-the-agent-sdk.md)).
+> **Warning:** With `claude -p --bare`, [settings and permission rules are still read but hooks never run](https://code.claude.com/docs/en/headless). A rule enforced only by a hook is not enforced there ([chapter 27](27-headless-ci-and-the-agent-sdk.md)).
 
 ## The six permission modes
 
@@ -166,11 +166,11 @@ Every push is blocked here, including the one the allow rule names. A broad `ask
 | `default` (shown as Manual; the CLI accepts `manual`) | File reads in your working directories | Sensitive work; first weeks with the tool |
 | `acceptEdits` | Reads, file edits and common filesystem commands (`mkdir`, `touch`, `mv`, `cp`) inside the working directory | Iterating while you review the diff |
 | `plan` | Reads and exploration; no edits to your source until you approve the plan | Exploring before changing ([chapter 10](10-plan-mode-checkpoints-and-context-management.md)) |
-| `auto` | "Everything, with background safety checks" | Everyday interactive work |
-| `dontAsk` | Reads and pre-approved tools; "anything that would prompt is denied" | CI and scripts |
+| `auto` | "[Everything, with background safety checks](https://code.claude.com/docs/en/permission-modes)" | Everyday interactive work |
+| `dontAsk` | Reads and pre-approved tools; "[anything that would prompt is denied](https://code.claude.com/docs/en/permission-modes)" | CI and scripts |
 | `bypassPermissions` | "Everything", apart from a short list no mode auto-approves | Isolated containers and VMs only |
 
-**Which mode a session starts in** is the first of these that is set: the `--permission-mode` flag (or `--dangerously-skip-permissions`), then `permissions.defaultMode`, then the built-in default. As of Nov 2026 the built-in default is `auto` for interactive terminal and VS Code sessions (v2.1.283 or later) and `default` for `claude -p` and the Agent SDK. Older tutorials that say every session starts by asking are out of date.
+**Which mode a session starts in** is the first of these that is set: the `--permission-mode` flag (or `--dangerously-skip-permissions`), then `permissions.defaultMode`, then the built-in default. As of Nov 2026 [the built-in default is](https://code.claude.com/docs/en/permission-modes) `auto` for interactive terminal and VS Code sessions (v2.1.283 or later) and `default` for `claude -p` and the Agent SDK. Older tutorials that say every session starts by asking are out of date.
 
 Two traps. Setting `auto` or `bypassPermissions` as `defaultMode` in a project's `.claude/settings.json` or `.claude/settings.local.json` has no effect; set it in user or managed settings. And if a project file does set `auto`, the session falls back to the built-in default and ignores your user-level `defaultMode` as well.
 
@@ -185,34 +185,34 @@ flowchart LR
 
 ### Auto mode: what the classifier does and misses
 
-In `auto`, "a separate classifier model reviews actions before they run and blocks the ones it judges risky": actions that go beyond your request, target infrastructure it does not recognise, or follow hostile content Claude read. Blocked by default: download-and-execute (piping `curl` into `bash`), production deploys and migrations, force pushes, and `git reset --hard`. Your `ask` and `deny` rules still apply.
+In `auto`, "[a separate classifier model reviews actions before they run and blocks the ones it judges risky](https://code.claude.com/docs/en/permission-modes)": actions that go beyond your request, target infrastructure it does not recognise, or follow hostile content Claude read. Blocked by default: download-and-execute (piping `curl` into `bash`), production deploys and migrations, force pushes, and `git reset --hard`. Your `ask` and `deny` rules still apply.
 
-After 3 blocks in a row or 20 in a session, auto mode pauses and prompting returns; approving the prompted action resumes it. The thresholds are not configurable. In a `claude -p` run without `--permission-prompt-tool`, an action blocked at the threshold is skipped and Claude keeps working. An organisation can switch auto mode off with `permissions.disableAutoMode` set to `"disable"`.
+[After 3 blocks in a row or 20 in a session](https://code.claude.com/docs/en/permission-modes), auto mode pauses and prompting returns; approving the prompted action resumes it. The thresholds are not configurable. In a `claude -p` run without `--permission-prompt-tool`, an action blocked at the threshold is skipped and Claude keeps working. An organisation can switch auto mode off with `permissions.disableAutoMode` set to `"disable"`.
 
-What it misses, in Anthropic's own published figures: 0.4% false positives on real traffic, but 17% of real over-eager actions and 5.7% of synthetic exfiltration attempts got through. Anthropic's own summary: "Auto mode reduces permission prompts but does not guarantee safety." Treat it as a filter that removes most bad calls, and keep `deny` rules and the sandbox for what must never happen.
+What it misses, [in Anthropic's own published figures](https://www.anthropic.com/research/claude-code-auto-mode): 0.4% false positives on real traffic, but 17% of real over-eager actions and 5.7% of synthetic exfiltration attempts got through. Anthropic's own summary: "[Auto mode reduces permission prompts but does not guarantee safety.](https://code.claude.com/docs/en/permission-modes)" Treat it as a filter that removes most bad calls, and keep `deny` rules and the sandbox for what must never happen.
 
 Tune it in `~/.claude/settings.json` with `autoMode.allow` and `autoMode.environment`, keeping the `"$defaults"` entry. `/auto-mode-setup` drafts `autoMode.environment` entries, `claude auto-mode defaults` prints the built-in rules as JSON, and `claude auto-mode config` shows them with your settings applied.
 
 ### What `bypassPermissions` removes
 
-`bypassPermissions` (the flag `--dangerously-skip-permissions` is equivalent) "disables permission prompts and safety checks so tool calls execute immediately, including writes to protected paths". The classifier is gone and allow rules are irrelevant. The docs' position: it "offers no protection against prompt injection or unintended actions", and "Only use this mode in isolated environments like containers, VMs, or dev containers without internet access".
+`bypassPermissions` (the flag `--dangerously-skip-permissions` is equivalent) "[disables permission prompts and safety checks so tool calls execute immediately, including writes to protected paths](https://code.claude.com/docs/en/permission-modes)". The classifier is gone and allow rules are irrelevant. The docs' position: it "offers no protection against prompt injection or unintended actions", and "Only use this mode in isolated environments like containers, VMs, or dev containers without internet access".
 
 What still holds: `deny` rules, explicit `ask` rules, hooks, prompts for recognised critical-path `rm` and `rmdir` removals, and a refusal to start as root or under `sudo`. Do not rely on plan mode's blocks in a session where bypass is available.
 
 ## The sandbox
 
-The sandbox is "a boundary that the operating system enforces around the shell commands Claude runs". It is off by default; turn it on with `/sandbox` or `sandbox.enabled`. It is not a permission mode; it works alongside whichever mode you are in.
+The sandbox is "[a boundary that the operating system enforces around the shell commands Claude runs](https://code.claude.com/docs/en/sandboxing)". It is off by default; turn it on with `/sandbox` or `sandbox.enabled`. It is not a permission mode; it works alongside whichever mode you are in.
 
 | It covers | It does not cover |
 |---|---|
 | Bash, PowerShell and Monitor commands, and every process they start | Claude's own file tools, WebFetch and WebSearch |
-| Writes: only the working directory, a per-user temp directory and directories you added | Reads: most of the machine stays readable by default, "including credential files such as `~/.ssh` and `~/.aws/credentials`" |
+| Writes: only the working directory, a per-user temp directory and directories you added | Reads: most of the machine stays readable by default, "[including credential files such as](https://code.claude.com/docs/en/sandboxing) `~/.ssh` and `~/.aws/credentials`" |
 | Network: no direct route out; a proxy whose allowed-domain list starts empty | Command hooks, local MCP servers, the status line command, and commands you type at the `!` prompt |
 | macOS (Seatbelt), Linux and WSL2 (bubblewrap, plus `socat`) | Native Windows, where commands run unsandboxed |
 
-- **Two modes.** Auto-allow runs a sandboxed command with no prompt; regular mode still sends every command through permissions. `sandbox.autoAllowBashIfSandboxed` defaults to `false` (before v2.1.324 it was `true`).
+- **Two modes.** Auto-allow runs a sandboxed command with no prompt; regular mode still sends every command through permissions. `sandbox.autoAllowBashIfSandboxed` [defaults to](https://code.claude.com/docs/en/settings-reference) `false` (before v2.1.324 it was `true`).
 - **The escape hatch.** When a command fails inside the sandbox, Claude may retry it with `dangerouslyDisableSandbox`. Set `"allowUnsandboxedCommands": false` to forbid that. Set `sandbox.failIfUnavailable` to `true` as well, because by default commands run unsandboxed when the sandbox cannot start.
-- **Permission rules feed it.** `Read` and `Edit` deny rules block the same paths for sandboxed commands, and `WebFetch(domain:...)` rules join the domain list. The reverse is not true: "A `denyRead` entry doesn't stop the Read tool, and `allowedDomains` doesn't limit WebFetch". So list secrets as `Read(...)` deny rules, which cover both.
+- **Permission rules feed it.** `Read` and `Edit` deny rules block the same paths for sandboxed commands, and `WebFetch(domain:...)` rules join the domain list. [The reverse is not true](https://code.claude.com/docs/en/sandboxing): "A `denyRead` entry doesn't stop the Read tool, and `allowedDomains` doesn't limit WebFetch". So list secrets as `Read(...)` deny rules, which cover both.
 - **Limits.** The proxy does not inspect TLS, so allowing a broad domain such as `github.com` still leaves a route for data to leave. Tools that are not proxy-aware (plain `ssh`, most database drivers) get no network at all. Commands in `sandbox.excludedCommands` run with your full access.
 
 ## A baseline `settings.json` for a team repo
@@ -273,12 +273,12 @@ Personal additions go in `.claude/settings.local.json`. Rules that need logic, s
 
 ## Cutting permission prompts safely
 
-Prompts stop protecting you once you stop reading them. Anthropic reports that "in practice users accept 93% of them anyway". Reduce the volume so the remaining prompts mean something:
+Prompts stop protecting you once you stop reading them. Anthropic reports that "[in practice users accept 93% of them anyway](https://www.anthropic.com/research/claude-code-auto-mode)". Reduce the volume so the remaining prompts mean something:
 
 1. Run `/permissions` and look at what is already allowed and which calls auto mode recently denied.
-2. Run `/fewer-permission-prompts`. This bundled skill builds an allowlist for the project's `.claude/settings.json` from the read-only calls in your transcripts. Review the diff before you commit it.
+2. Run `/fewer-permission-prompts`. [This bundled skill builds an allowlist](https://code.claude.com/docs/en/best-practices) for the project's `.claude/settings.json` from the read-only calls in your transcripts. Review the diff before you commit it.
 3. Allow exact check commands and narrow prefixes. Never allow a runner or a shell (`npx *`, `bash *`).
-4. Turn on the sandbox with auto-allow, so commands that cannot leave the repo stop prompting. Anthropic reports 84% fewer prompts in its internal usage (no method is given).
+4. Turn on the sandbox with auto-allow, so commands that cannot leave the repo stop prompting. [Anthropic reports 84% fewer prompts in its internal usage](https://www.anthropic.com/research/claude-code-sandboxing) (no method is given).
 5. Use `auto` mode for the rest, and keep `ask` rules on the few actions you always want to see.
 6. Prune `.claude/settings.local.json` now and then. Each permanent "don't ask again" answer adds a rule to it.
 7. Keep `bypassPermissions` for containers and VMs.

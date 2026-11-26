@@ -2,7 +2,7 @@
 
 In this last workshop guide you package the `diff-reviewer` subagent from [chapter 19](19-guide-write-a-subagent.md) and the `pr-description` skill from [chapter 20](20-guide-write-a-skill.md), plus a guard hook that blocks force-pushes to the default branch, into one plugin called `pr-helper`. You then validate it, write an eval suite for it, tag a release and ship it to a team through a marketplace. Allow about 90 minutes.
 
-**Prerequisites:** the demo repo from chapters 19 and 20 (`~/scratch/pr-helper-demo`, with `.claude/agents/diff-reviewer.md`, `.claude/skills/pr-description/` and `evals/` committed on `main`), Claude Code v2.1.269 or later (`claude plugin eval` needs it; this guide was run on v2.1.332, as of Nov 2026), `git`, `bash`, `python3` and `jq`, and the concepts from [Hooks](16-hooks.md) and [Plugins and marketplaces](17-plugins-and-marketplaces.md). This guide uses the built-in tooling wherever it exists and links to those chapters for the theory.
+**Prerequisites:** the demo repo from chapters 19 and 20 (`~/scratch/pr-helper-demo`, with `.claude/agents/diff-reviewer.md`, `.claude/skills/pr-description/` and `evals/` committed on `main`), [Claude Code v2.1.269 or later](https://code.claude.com/docs/en/plugin-evals) (`claude plugin eval` needs it; this guide was run on v2.1.332, as of Nov 2026), `git`, `bash`, `python3` and `jq`, and the concepts from [Hooks](16-hooks.md) and [Plugins and marketplaces](17-plugins-and-marketplaces.md). This guide uses the built-in tooling wherever it exists and links to those chapters for the theory.
 
 ## Mental model
 
@@ -25,7 +25,7 @@ flowchart LR
 
 ## Step 1 — Scaffold with `claude plugin init`
 
-`claude plugin init <name>` scaffolds a plugin, and `--with` adds component folders (`skills`, `agents`, `hooks`, `mcp`, `lsp`, `output-style`, `channel`). Its help says it writes to `~/.claude/skills/<name>/`, a skills-directory plugin that "auto-loads next session as `<name>@skills-dir`", and the command has no flag for another location. That is a change to your real configuration, so redirect it first. In the run for this guide, setting `CLAUDE_CONFIG_DIR` to a scratch folder moved the output there:
+`claude plugin init <name>` [scaffolds a plugin](https://code.claude.com/docs/en/plugins/create), and `--with` [adds component folders](https://code.claude.com/docs/en/plugins/cli-reference) (`skills`, `agents`, `hooks`, `mcp`, `lsp`, `output-style`, `channel`). Its help says it writes to `~/.claude/skills/<name>/`, a skills-directory plugin that "auto-loads next session as `<name>@skills-dir`", and the command has no flag for another location. That is a change to your real configuration, so redirect it first. In the run for this guide, setting `CLAUDE_CONFIG_DIR` to a scratch folder moved the output there:
 
 ```text
 $ mkdir -p ~/scratch/pr-helper-work && cd ~/scratch/pr-helper-work
@@ -84,14 +84,14 @@ Replace `.claude-plugin/plugin.json`, dropping `"skills": ["./"]` now that the s
 }
 ```
 
-Now the hook. A plugin's hooks live in `hooks/hooks.json`, under a top-level `"hooks"` key shaped like `hooks` in a settings file. `${CLAUDE_PLUGIN_ROOT}` points at the installed copy, which changes on every update, so never hard-code a cache path:
+Now the hook. [A plugin's hooks live in](https://code.claude.com/docs/en/plugins/create) `hooks/hooks.json`, under a top-level `"hooks"` key shaped like `hooks` in a settings file. `${CLAUDE_PLUGIN_ROOT}` points at the installed copy, which changes on every update, so never hard-code a cache path:
 
 ```json
 { "hooks": { "PreToolUse": [ { "matcher": "Bash", "hooks": [
   { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/guard-force-push.sh\"" } ] } ] } }
 ```
 
-The script blocks with `exit 2` and writes the reason to stderr, which becomes the block message ([chapter 16](16-hooks.md#output-the-exit-code-comes-first) explains why `exit 1` would not block). The named override variable, `PR_HELPER_ALLOW_FORCE_PUSH`, is a consent channel: the message tells Claude to stop and ask you first. A `+` in front of a refspec forces that one ref ("The `+` is optional and does the same thing as `--force`", says the git push reference), so `git push origin +HEAD:main` counts as a force-push too.
+The script blocks with `exit 2` and [writes the reason to stderr](https://code.claude.com/docs/en/hooks-guide), which becomes the block message ([chapter 16](16-hooks.md#output-the-exit-code-comes-first) explains why `exit 1` would not block). The named override variable, `PR_HELPER_ALLOW_FORCE_PUSH`, is a consent channel: the message tells Claude to stop and ask you first. A `+` in front of a refspec forces that one ref ("The `+` is optional and does the same thing as `--force`", [says the git push reference](https://git-scm.com/docs/git-push)), so `git push origin +HEAD:main` counts as a force-push too.
 
 ```bash
 #!/usr/bin/env bash
@@ -137,26 +137,26 @@ echo '{"tool_name":"Bash","tool_input":{"command":"git push --force origin main"
 | `PR_HELPER_ALLOW_FORCE_PUSH=1 git push --force origin main` | `exit=0` (override) |
 | `{not json` (malformed payload) | stderr `pr-helper: unreadable hook payload, blocking`, `exit=2` |
 
-**Check:** every block case exits 2 and every allow case exits 0. Keep the payloads as a test file next to the script. A crashed or timed-out `PreToolUse` hook does not block, so add `onFailure: "block"` (v2.1.295+) if this guard must fail closed ([chapter 16](16-hooks.md#the-configuration-shape)). `find . -type f | sort` now lists the manifest, `agents/diff-reviewer.md`, the three skill files, the eval files, `hooks/hooks.json` and `hooks/guard-force-push.sh`.
+**Check:** every block case exits 2 and every allow case exits 0. Keep the payloads as a test file next to the script. A crashed or timed-out `PreToolUse` hook [does not block](https://code.claude.com/docs/en/hooks), so add `onFailure: "block"` (v2.1.295+) if this guard must fail closed ([chapter 16](16-hooks.md#the-configuration-shape)). `find . -type f | sort` now lists the manifest, `agents/diff-reviewer.md`, the three skill files, the eval files, `hooks/hooks.json` and `hooks/guard-force-push.sh`.
 
 ## Step 3 — Load it locally and iterate
 
-`--plugin-dir` loads a plugin from a folder (or a `.zip`) for one session only, as `pr-helper@inline`. Shell subcommands see it only when the flag comes first: `cd ~/scratch/pr-helper-work/repo && claude --plugin-dir ./pr-helper plugin list` printed `Session-only plugins (--plugin-dir / --plugin-url):`, then `pr-helper@inline`, `Version: 0.1.0` and `Status: ✔ loaded`.
+`--plugin-dir` loads a plugin from a folder (or a `.zip`) [for one session only](https://code.claude.com/docs/en/plugins/cli-reference), as `pr-helper@inline`. Shell subcommands see it only when the flag comes first: `cd ~/scratch/pr-helper-work/repo && claude --plugin-dir ./pr-helper plugin list` printed `Session-only plugins (--plugin-dir / --plugin-url):`, then `pr-helper@inline`, `Version: 0.1.0` and `Status: ✔ loaded`.
 
 Then start a session in the demo repo, which now has no project copies, with `cd ~/scratch/pr-helper-demo && claude --plugin-dir ~/scratch/pr-helper-work/repo/pr-helper`, and use this loop:
 
 1. Edit a file under `pr-helper/`.
-2. Run `/reload-plugins`. It prints a line in this format (illustrative counts, which include your other plugins): `Reloaded: 3 plugins · 12 skills · 4 agents · 5 hooks · 0 plugin MCP servers · 0 plugin LSP servers`. If a reload would change MCP tools and invalidate the prompt cache, it warns and skips unless you pass `--force`.
+2. Run `/reload-plugins`. [It prints a line in this format](https://code.claude.com/docs/en/plugins/create) (illustrative counts, which include your other plugins): `Reloaded: 3 plugins · 12 skills · 4 agents · 5 hooks · 0 plugin MCP servers · 0 plugin LSP servers`. If a reload would change MCP tools and invalidate the prompt cache, it warns and skips unless you pass `--force`.
 3. Confirm what loaded. `/plugin` has **Installed** and **Errors** tabs. `/context` lists custom subagents with the source each loaded from, and the skills. `/hooks` is a read-only browser that labels each hook with where it comes from; select the `PreToolUse` entry to see the command it runs.
 4. Try it: type `/pr-helper:pr-description` or ask "write a PR description for this branch"; expect the chapter 20 body with the `pricing.py:14` finding. Then ask Claude to force-push to `main`; the demo repo has no remote, and the guard blocks the command before it runs.
 
-The docs say "run `/reload-plugins`" after editing a plugin's files; only plain `SKILL.md` text in a skills-directory plugin is documented as picked up live. A `claude plugin update` needs a restart.
+[The docs say](https://code.claude.com/docs/en/plugins/create) "run `/reload-plugins`" after editing a plugin's files; only plain `SKILL.md` text in a skills-directory plugin is documented as picked up live. A `claude plugin update` needs a restart.
 
 **Check:** `/hooks` shows the `PreToolUse` hook from `pr-helper`, and `/context` lists `diff-reviewer`.
 
 ## Step 4 — Validate
 
-`claude plugin validate <path>` checks a plugin or marketplace manifest and the components it finds. `--strict` turns warnings into exit 1 (use it in CI), and `--json` prints the same report as JSON. Exit codes: `0` passed, `1` failed, `2` the validator itself failed. Real output (abridged) for the plugin before it had a README, run from `~/scratch/pr-helper-work/repo`:
+`claude plugin validate <path>` [checks a plugin or marketplace manifest](https://code.claude.com/docs/en/plugins/cli-reference) and the components it finds. `--strict` turns warnings into exit 1 (use it in CI), and `--json` prints the same report as JSON. Exit codes: `0` passed, `1` failed, `2` the validator itself failed. Real output (abridged) for the plugin before it had a README, run from `~/scratch/pr-helper-work/repo`:
 
 ```text
 $ claude plugin validate --strict ./pr-helper
@@ -180,7 +180,7 @@ Read `Provides:` first: it proves the skill, agent and hook were found under the
 
 ## Step 5 — Evaluate with `claude plugin eval`
 
-A validator proves the files parse, not that the skill fires or helps; `claude plugin eval` runs each case with and without the plugin and scores the difference. A case is a folder under `evals/` with a `prompt.md` (frontmatter plus the prompt) and `graders/*.md`; a `case.yaml` beside it can add setup. You already have one case, `writes-pr-body`, from [chapter 20](20-guide-write-a-skill.md). The recommended way to add more is `claude plugin eval init`, an interview that designs graders (it needs a terminal); `--bare <name>` writes a blank template offline, which is what was run here:
+A validator proves the files parse, not that the skill fires or helps; `claude plugin eval` [runs each case with and without the plugin](https://code.claude.com/docs/en/plugin-evals) and scores the difference. A case is a folder under `evals/` with a `prompt.md` (frontmatter plus the prompt) and `graders/*.md`; a `case.yaml` beside it can add setup. You already have one case, `writes-pr-body`, from [chapter 20](20-guide-write-a-skill.md). The recommended way to add more is `claude plugin eval init`, [an interview that designs graders](https://code.claude.com/docs/en/plugins/cli-reference) (it needs a terminal); `--bare <name>` writes a blank template offline, which is what was run here:
 
 ```text
 $ cd ~/scratch/pr-helper-work/repo/pr-helper && claude plugin eval init --bare triggers-on-pr-request
@@ -254,19 +254,19 @@ sed 's/writes-pr-body/triggers-on-pr-request/' evals/writes-pr-body/case.yaml > 
 t=$(mktemp -d) && (cd "$t" && "$OLDPWD/evals/writes-pr-body/fixture.sh" && git log --oneline && python3 -m unittest -q)
 ```
 
-You should see two commits and `OK`. The script runs only when you pass `--scaffold`, as you and outside the sandbox, so pass it only for suites you wrote. Free graders are `regex`, `tool_used`, `tool_order` and `file_exists`; `llm` and `baseline` are judge-scored. There are no custom-code graders. Under the default two arms, a `tool_used: Skill` grader is a "plugin-fired indicator", not part of the score, which is why the trigger case also has an `llm` grader.
+You should see two commits and `OK`. The script runs only when you pass `--scaffold`, as you and outside the sandbox, so pass it only for suites you wrote. Free graders are `regex`, `tool_used`, `tool_order` and `file_exists`; `llm` and `baseline` are judge-scored. [There are no custom-code graders](https://code.claude.com/docs/en/plugin-evals). Under the default two arms, a `tool_used: Skill` grader is a "plugin-fired indicator", not part of the score, which is why the trigger case also has an `llm` grader.
 
-`claude plugin eval` calls the model and costs money, so it was not run for this guide. Runs never stop to ask permission, and `Bash` is removed unless you grant it with `--allow-tools`; a granted `Bash` runs in Claude Code's OS sandbox (on Linux, install `bubblewrap` and `socat` first). The other options you will use: `--ablation <none|with-without>` (default `with-without`), `--runs <n>` (default `case.runs ?? 3`), `--judge-model <model>` (CLI help says default `haiku`; the docs say the background-task model), `--threshold <0..1>` (default 1.0; exit 1 if any case scores below it), `--max-cost-usd <usd>` (exit 2 with partial results), `--json [path]` and `--case <glob>`. Put the target (`.`) before the list-taking flags. For fast iteration on one case: `claude plugin eval . --scaffold --allow-tools Bash --case triggers-on-pr-request --runs 1 --ablation none`. A full run looks like `claude plugin eval . --scaffold --allow-tools Bash --runs 3 --threshold 0.8 --max-cost-usd 5 --json results.json`.
+`claude plugin eval` calls the model and costs money, so it was not run for this guide. Runs never stop to ask permission, and `Bash` is removed unless you grant it with `--allow-tools`; a granted `Bash` [runs in Claude Code's OS sandbox](https://code.claude.com/docs/en/plugin-evals) (on Linux, install `bubblewrap` and `socat` first). [The other options you will use](https://code.claude.com/docs/en/plugins/cli-reference): `--ablation <none|with-without>` (default `with-without`), `--runs <n>` (default `case.runs ?? 3`), `--judge-model <model>` (CLI help says default `haiku`; the docs say the background-task model), `--threshold <0..1>` (default 1.0; exit 1 if any case scores below it), `--max-cost-usd <usd>` (exit 2 with partial results), `--json [path]` and `--case <glob>`. Put the target (`.`) before the list-taking flags. For fast iteration on one case: `claude plugin eval . --scaffold --allow-tools Bash --case triggers-on-pr-request --runs 1 --ablation none`. A full run looks like `claude plugin eval . --scaffold --allow-tools Bash --runs 3 --threshold 0.8 --max-cost-usd 5 --json results.json`.
 
-**Reading the report.** A run's score is the fraction of graders it passed; Δ is WITH minus WITHOUT. Results go to `evals/results/<timestamp>/aggregate-result.json` plus a self-contained `report.html` (also published as a private claude.ai artifact when your account allows; `--no-publish` keeps it local). A row such as `writes-pr-body  WITH 1.00  W/OUT 0.33  Δ +0.67` (illustrative, not a real run) means the plugin earns its place; a Δ near zero means the model already does this without it. **Check:** `find evals -type f | sort` lists, for each case, `case.yaml`, `fixture.sh`, `prompt.md` and two graders.
+**Reading the report.** A run's score is the fraction of graders it passed; Δ is WITH minus WITHOUT. [Results go to](https://code.claude.com/docs/en/plugin-evals) `evals/results/<timestamp>/aggregate-result.json` plus a self-contained `report.html` (also published as a private claude.ai artifact when your account allows; `--no-publish` keeps it local). A row such as `writes-pr-body  WITH 1.00  W/OUT 0.33  Δ +0.67` (illustrative, not a real run) means the plugin earns its place; a Δ near zero means the model already does this without it. **Check:** `find evals -type f | sort` lists, for each case, `case.yaml`, `fixture.sh`, `prompt.md` and two graders.
 
 ## Step 6 — Version, tag and inspect
 
-`version` in `plugin.json` controls delivery. Bump it on every release, or leave it out so a git-hosted plugin is versioned by commit SHA; never set it in both `plugin.json` and the marketplace entry. Forgetting to bump it is the pinned-version trap from [chapter 17](17-plugins-and-marketplaces.md#versions-and-updates): users stay on the cached copy. Set `"version": "0.2.0"` for the next release.
+`version` in `plugin.json` controls delivery. Bump it on every release, or leave it out so a git-hosted plugin is versioned by commit SHA; [never set it in both](https://code.claude.com/docs/en/plugins/host-marketplace) `plugin.json` and the marketplace entry. Forgetting to bump it is the pinned-version trap from [chapter 17](17-plugins-and-marketplaces.md#versions-and-updates): users stay on the cached copy. Set `"version": "0.2.0"` for the next release.
 
-`claude plugin tag` creates a `{name}--v{version}` git tag and checks that `plugin.json` and any enclosing marketplace entry agree. Always try it with `--dry-run` first, and leave `--push` out of this guide entirely. In `repo/` before it was a git repository, `claude plugin tag --dry-run ./pr-helper` refused: "is not inside a git repository. Dependency tags are resolved via git ls-remote, so the plugin must live in a git repo." After `git init -b main && git add . && git commit -m "pr-helper 0.1.0"` in `repo/`, the same dry run printed `Tag:     pr-helper--v0.1.0` and `✔ Dry run — would create tag pr-helper--v0.1.0 at HEAD`, plus the `git tag -a` and `git push origin` commands it would run. Tag after the release commit lands on the default branch, and push the tag yourself once you have reviewed it. Tags matter when other plugins declare a version range on yours.
+`claude plugin tag` creates a `{name}--v{version}` git tag and checks that `plugin.json` and any enclosing marketplace entry agree. Always try it with `--dry-run` first, and leave `--push` out of this guide entirely. In `repo/` before it was a git repository, `claude plugin tag --dry-run ./pr-helper` refused: "is not inside a git repository. Dependency tags are resolved via git ls-remote, so the plugin must live in a git repo." After `git init -b main && git add . && git commit -m "pr-helper 0.1.0"` in `repo/`, the same dry run printed `Tag:     pr-helper--v0.1.0` and `✔ Dry run — would create tag pr-helper--v0.1.0 at HEAD`, plus the `git tag -a` and `git push origin` commands it would run. Tag after the release commit lands on the default branch, and push the tag yourself once you have reviewed it. Tags matter when other plugins [declare a version range on yours](https://code.claude.com/docs/en/plugins/publish).
 
-`claude plugin details` shows the component inventory and projected token cost; the plugin must be loaded. Real output (abridged), run from `repo/` (`cd ..` after Step 5):
+`claude plugin details` [shows the component inventory and projected token cost](https://code.claude.com/docs/en/plugins/cli-reference); the plugin must be loaded. Real output (abridged), run from `repo/` (`cd ..` after Step 5):
 
 ```text
 $ claude --plugin-dir ./pr-helper plugin details pr-helper
@@ -283,7 +283,7 @@ Per-component (rounded): pr-description ~70 always-on, ~280 on-invoke; diff-revi
 
 ## Step 7 — Publish through a marketplace
 
-A marketplace is one JSON file, `.claude-plugin/marketplace.json`, at the root of a repo. This repo holds the plugin in a subfolder:
+[A marketplace is one JSON file](https://code.claude.com/docs/en/plugins/create-marketplace), `.claude-plugin/marketplace.json`, at the root of a repo. This repo holds the plugin in a subfolder:
 
 ```json
 {
@@ -303,17 +303,17 @@ $ claude plugin install pr-helper@team-tools
 Installing plugin "pr-helper@team-tools"...✔ Successfully installed plugin: pr-helper@team-tools (scope: user)
 ```
 
-A directory marketplace is read from its folder: `claude plugin update` replied "nothing to update. Edits there take effect at the next session start or /reload-plugins." Then push the repo to GitHub and install from there with `claude plugin marketplace add your-org/team-tools` followed by `claude plugin install pr-helper@team-tools`, or in one step (v2.1.292+) with `claude plugin install pr-helper --marketplace your-org/team-tools`.
+[A directory marketplace is read from its folder](https://code.claude.com/docs/en/plugins/host-marketplace): `claude plugin update` replied "nothing to update. Edits there take effect at the next session start or /reload-plugins." Then push the repo to GitHub and install from there with `claude plugin marketplace add your-org/team-tools` followed by `claude plugin install pr-helper@team-tools`, or [in one step (v2.1.292+)](https://code.claude.com/docs/en/plugins/publish) with `claude plugin install pr-helper --marketplace your-org/team-tools`.
 
 **Check:** `claude plugin list` shows `pr-helper@team-tools`, and a new session shows its hook in `/hooks`.
 
 ## Step 8 — Optional helpers from the official marketplace
 
-Anthropic's `plugin-dev` plugin is not built in; install it with `/plugin install plugin-dev@claude-plugins-official` (its own README names an older marketplace that the docs call deprecated). `/plugin-dev:create-plugin [description]` runs an 8-phase guided build (discovery to documentation); its skills cover plugin structure, skills, agents, hooks, commands, MCP and settings; its agents `agent-creator`, `plugin-validator` and `skill-reviewer` draft and review; `hook-development/scripts/test-hook.sh` tests hooks. `claude plugin validate` and `claude plugin eval` stay the source of truth.
+Anthropic's `plugin-dev` plugin is not built in; install it with `/plugin install plugin-dev@claude-plugins-official` (its own README names an older marketplace that [the docs call deprecated](https://code.claude.com/docs/en/plugins/anthropic-marketplaces)). `/plugin-dev:create-plugin [description]` [runs an 8-phase guided build](https://github.com/anthropics/claude-plugins-official) (discovery to documentation); its skills cover plugin structure, skills, agents, hooks, commands, MCP and settings; its agents `agent-creator`, `plugin-validator` and `skill-reviewer` draft and review; `hook-development/scripts/test-hook.sh` tests hooks. `claude plugin validate` and `claude plugin eval` stay the source of truth.
 
 ## Ship it to a team
 
-Commit the marketplace and the plugin choice to the team repo's `.claude/settings.json` (it applies only after folder trust):
+Commit the marketplace and the plugin choice to the team repo's `.claude/settings.json` ([it applies only after folder trust](https://code.claude.com/docs/en/plugins/host-marketplace)):
 
 ```json
 {
@@ -324,7 +324,7 @@ Commit the marketplace and the plugin choice to the team repo's `.claude/setting
 }
 ```
 
-`claude plugin marketplace add your-org/team-tools --scope project`, run once in the repo, writes that file for you. Check what it wrote before committing: from a local path, the real run wrote `"source": "directory"` with an absolute path that exists only on your machine. Enabling does not install. Each contributor runs, once (in the real run it also added the `enabledPlugins` entry if missing): `claude plugin install pr-helper@team-tools --scope project`. Auto-update is off by default for your own marketplace; `autoUpdate: true` turns it on.
+`claude plugin marketplace add your-org/team-tools --scope project`, run once in the repo, writes that file for you. Check what it wrote before committing: from a local path, the real run wrote `"source": "directory"` with an absolute path that exists only on your machine. [Enabling does not install](https://code.claude.com/docs/en/plugins/org). Each contributor runs, once (in the real run it also added the `enabledPlugins` entry if missing): `claude plugin install pr-helper@team-tools --scope project`. [Auto-update is off by default](https://code.claude.com/docs/en/plugins/publish) for your own marketplace; `autoUpdate: true` turns it on.
 
 Gate the plugin repo in CI. Validation is free; the eval costs money, so cap it. A GitHub Actions job (action pinned by SHA, as in [chapter 27](27-headless-ci-and-the-agent-sdk.md)):
 
@@ -345,7 +345,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
 
-Eval exit codes: `0` pass, `1` below threshold or error, `2` partial (cost ceiling or auth). In CI, `claude plugin eval init` needs a terminal, so author cases locally or with `--bare`.
+[Eval exit codes](https://code.claude.com/docs/en/plugins/cli-reference): `0` pass, `1` below threshold or error, `2` partial (cost ceiling or auth). In CI, `claude plugin eval init` needs a terminal, so author cases locally or with `--bare`.
 
 ## From the field
 

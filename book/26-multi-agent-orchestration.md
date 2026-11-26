@@ -4,7 +4,7 @@ After this chapter you can decide whether a task needs more than one agent, pick
 
 ## Mental model
 
-*Orchestration* means splitting one objective across several agent contexts and combining the results. Each extra context buys one of three things: parallelism, a fresh pair of eyes, or more total context than one window holds. Each one also costs tokens and coordination. The Claude Code docs put it plainly: "You get parallelism or a fresh pair of eyes out of it, but not a smarter answer."
+*Orchestration* means splitting one objective across several agent contexts and combining the results. Each extra context buys one of three things: parallelism, a fresh pair of eyes, or more total context than one window holds. Each one also costs tokens and coordination. The Claude Code docs put it plainly: "[You get parallelism or a fresh pair of eyes out of it, but not a smarter answer.](https://code.claude.com/docs/en/best-practices)"
 
 The rule the evidence supports: parallel *readers* and independent *reviewers* are cheap to add safely; parallel *writers* on shared code are where failures concentrate. So keep writes single-threaded per file, and keep the knowledge of who owns what in files on disk, not in any agent's conversation.
 
@@ -28,40 +28,40 @@ This chapter builds on [subagents](14-subagents.md) and on worktrees and backgro
 
 | Pattern | Shape | Use when | In Claude Code |
 |---|---|---|---|
-| Pipeline (prompt chaining) | Each step consumes the previous step's output | "the task can be easily and cleanly decomposed into fixed subtasks" | A chain of skills; `pipeline()` in a workflow |
+| Pipeline (prompt chaining) | Each step consumes the previous step's output | "[the task can be easily and cleanly decomposed into fixed subtasks](https://www.anthropic.com/research/building-effective-agents)" | A chain of skills; `pipeline()` in a workflow |
 | Parallel fan-out | Independent subtasks at once (sectioning), or the same task several times (voting) | Subtasks share no files and no decisions | Several subagents in one message; `/batch`; `parallel()` |
 | Orchestrator-workers | A lead decides the subtasks at run time, delegates, then synthesizes | The subtasks cannot be predicted up front, as in multi-file code changes | Main session plus subagents; agent teams |
-| Reviewer / critic | One agent produces, another evaluates, in a loop | "we have clear evaluation criteria" | A read-only reviewer subagent, a second session, `/code-review` |
+| Reviewer / critic | One agent produces, another evaluates, in a loop | "[we have clear evaluation criteria](https://www.anthropic.com/research/building-effective-agents)" | A read-only reviewer subagent, a second session, `/code-review` |
 
-The names come from Anthropic's "Building effective agents" (there: prompt chaining, parallelization, orchestrator-workers, evaluator-optimizer). The same post sets the default: "finding the simplest solution possible, and only increasing complexity when needed."
+The names come from Anthropic's "[Building effective agents](https://www.anthropic.com/research/building-effective-agents)" (there: prompt chaining, parallelization, orchestrator-workers, evaluator-optimizer). The same post sets the default: "finding the simplest solution possible, and only increasing complexity when needed."
 
 ## The evidence, for and against
 
 | Finding | Source | What it means for coding work |
 |---|---|---|
-| A lead agent with parallel subagents beat a single agent by 90.2% | Anthropic's research system, June 2025, "our internal research eval", Opus 4 lead with Sonnet 4 subagents | A research result on 2025 models, not a coding benchmark |
-| "Multi-agent systems work mainly because they help spend enough tokens to solve the problem"; token usage alone explained 80% of the variance on the BrowseComp evaluation | Same post | More agents is mostly more tokens. Ask whether the task is worth them |
-| Agents use about 4× the tokens of chat; multi-agent systems about 15× | Same post | Budget before you fan out |
-| "most coding tasks involve fewer truly parallelizable tasks than research, and LLM agents are not yet great at coordinating and delegating to other agents in real time" | Same post | The authors themselves place most coding outside the sweet spot |
-| "Actions carry implicit decisions, and conflicting decisions carry bad results"; two subagents built mismatched halves of one game | Cognition, "Don't Build Multi-Agents", June 2025 | Workers that cannot see each other's decisions will contradict each other |
-| "A lot has changed since then": it works when "writes stay single-threaded", with clean-context reviewers and a manager that splits work | Cognition's follow-up, April 2026 | Single-threaded writes plus independent review is the stable shape |
-| 14 failure modes in 3 categories: system design, inter-agent misalignment, task verification | Academic study of 1,600+ annotated traces across 7 frameworks | The categories are design, coordination and verification: things your protocol controls |
-| 16 agents, about 2,000 sessions and about $20,000 in API cost for a 100,000-line compiler; "Merge conflicts are frequent" | Anthropic's C-compiler experiment | Possible, expensive, and it stalled when every agent hit the same bug |
-| Agent teams use "approximately 7x more tokens than standard sessions when teammates run in plan mode" | Claude Code costs page | The native team feature has a documented multiplier |
+| A lead agent with parallel subagents [beat a single agent by 90.2%](https://www.anthropic.com/research/multi-agent-research-system) | Anthropic's research system, June 2025, "our internal research eval", Opus 4 lead with Sonnet 4 subagents | A research result on 2025 models, not a coding benchmark |
+| "[Multi-agent systems work mainly because they help spend enough tokens to solve the problem](https://www.anthropic.com/research/multi-agent-research-system)"; token usage alone explained 80% of the variance on the BrowseComp evaluation | Same post | More agents is mostly more tokens. Ask whether the task is worth them |
+| Agents use about 4× the tokens of chat; [multi-agent systems about 15×](https://www.anthropic.com/research/multi-agent-research-system) | Same post | Budget before you fan out |
+| "[most coding tasks involve fewer truly parallelizable tasks than research,](https://www.anthropic.com/research/multi-agent-research-system) and LLM agents are not yet great at coordinating and delegating to other agents in real time" | Same post | The authors themselves place most coding outside the sweet spot |
+| "Actions carry implicit decisions, and conflicting decisions carry bad results"; two subagents built mismatched halves of one game | Cognition, "[Don't Build Multi-Agents](https://cognition.com/blog/dont-build-multi-agents)", June 2025 | Workers that cannot see each other's decisions will contradict each other |
+| "A lot has changed since then": it works when "writes stay single-threaded", with clean-context reviewers and a manager that splits work | [Cognition's follow-up](https://cognition.com/blog/multi-agents-working), April 2026 | Single-threaded writes plus independent review is the stable shape |
+| 14 failure modes in 3 categories: system design, inter-agent misalignment, task verification | [Academic study of 1,600+ annotated traces](https://arxiv.org/abs/2503.13657) across 7 frameworks | The categories are design, coordination and verification: things your protocol controls |
+| 16 agents, about 2,000 sessions and about $20,000 in API cost for a 100,000-line compiler; "Merge conflicts are frequent" | [Anthropic's C-compiler experiment](https://www.anthropic.com/research/building-c-compiler) | Possible, expensive, and it stalled when every agent hit the same bug |
+| Agent teams use "approximately 7x more tokens than standard sessions when teammates run in plan mode" | [Claude Code costs page](https://code.claude.com/docs/en/costs) | The native team feature has a documented multiplier |
 
-Anthropic's post on long-running harnesses still calls the core question open: "it's still unclear whether a single, general-purpose coding agent performs best across contexts, or if better performance can be achieved through a multi-agent architecture."
+Anthropic's post on long-running harnesses still calls the core question open: "[it's still unclear whether a single, general-purpose coding agent performs best across contexts,](https://www.anthropic.com/research/effective-harnesses-for-long-running-agents) or if better performance can be achieved through a multi-agent architecture."
 
 ## What Claude Code offers natively
 
-As of Nov 2026 the docs list five ways to run in parallel: subagents, agent view, agent teams, projects (cloud threads, public beta) and dynamic workflows.
+As of Nov 2026 [the docs list five ways to run in parallel](https://code.claude.com/docs/en/agents): subagents, agent view, agent teams, projects (cloud threads, public beta) and dynamic workflows.
 
 | Mechanism | What it is | Limits and status (Nov 2026) |
 |---|---|---|
-| Subagents | Workers the main session spawns; background by default | 20 concurrent; can nest up to three layers below the main conversation; `isolation: worktree` is opt-in |
+| Subagents | Workers the main session spawns; background by default | 20 concurrent; [can nest up to three layers below the main conversation](https://code.claude.com/docs/en/sub-agents); `isolation: worktree` is opt-in |
 | `/batch <instruction>` | Splits a change into 5 to 30 units, one background subagent per unit in its own worktree | Each unit opens its own PR or reports what happened |
 | Agent view | `claude agents`: monitor and dispatch background sessions | Research preview ([chapter 25](25-parallel-work-worktrees-and-background-tasks.md)) |
-| Agent teams | One lead plus teammates (separate Claude Code instances) with a shared task list and a mailbox | Experimental, off by default; one team per session; no nested teams; not in `-p` or the SDK; teammates are **not** isolated in worktrees |
-| Dynamic workflows | A JavaScript script that orchestrates many subagents; Claude writes it, a runtime executes it in the background | 16 concurrent agents by default; 1,000 agents per run; no mid-run user input |
+| Agent teams | One lead plus teammates (separate Claude Code instances) with a shared task list and a mailbox | Experimental, off by default; one team per session; no nested teams; not in `-p` or the SDK; [teammates are **not** isolated in worktrees](https://code.claude.com/docs/en/agent-teams) |
+| Dynamic workflows | A JavaScript script that orchestrates many subagents; Claude writes it, a runtime executes it in the background | [16 concurrent agents by default; 1,000 agents per run](https://code.claude.com/docs/en/workflows); no mid-run user input |
 
 A worker that is not a fork starts with a fresh context window, but it still loads `CLAUDE.md`, a git status snapshot and any preloaded skills. Everything else it needs must be in the task prompt. A fork inherits the whole conversation.
 
@@ -71,7 +71,7 @@ A worker that is not a fork starts with a fresh context window, but it still loa
 { "env": { "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1" } }
 ```
 
-The docs advise "Start with 3-5 teammates for most workflows" and about "5-6 tasks per teammate", for research and review, separate modules, or debugging with competing hypotheses. Because teammates share one checkout, give each one a different set of files. Known rough edges from the docs: "Task status can lag", and "Sometimes the lead starts implementing tasks itself instead of waiting for teammates". One side effect to know: with teams enabled, "a subagent that Claude names launches as a teammate", so a team can form without you asking for one.
+The docs advise "[Start with 3-5 teammates for most workflows](https://code.claude.com/docs/en/agent-teams)" and about "5-6 tasks per teammate", for research and review, separate modules, or debugging with competing hypotheses. Because teammates share one checkout, give each one a different set of files. Known rough edges from the docs: "Task status can lag", and "Sometimes the lead starts implementing tasks itself instead of waiting for teammates". One side effect to know: with teams enabled, "a subagent that Claude names launches as a teammate", so a team can form without you asking for one.
 
 **Dynamic workflows.** Three ways to start one, and one screen to watch it:
 
@@ -91,7 +91,7 @@ export const meta = {
 }
 ```
 
-To read a complete script, save a run with `s` and open the file it writes. Passing a `schema` on an `agent()` call makes that subagent return JSON in that shape, and an agent that stops or fails resolves to `null`, so the script must handle gaps. Saving with `s` writes to `.claude/workflows/` (project) or `~/.claude/workflows/` (personal), and the workflow then runs as `/<name>` with its input in the global `args`. The script itself has no filesystem or shell access and `import()` fails. A `Large workflow` warning appears above 25 agents or 1.5 million projected tokens, and `workflowSizeGuideline` (`small`, `medium` by default, `large`, `unrestricted`) steers how big Claude plans. Approval: Manual and acceptEdits modes prompt on every run, Auto prompts on first launch only. Turn the feature off with `"disableWorkflows": true`. Dollar costs per workflow or per team are not stated in the docs.
+To read a complete script, save a run with `s` and open the file it writes. Passing a `schema` on an `agent()` call makes that subagent return JSON in that shape, and an agent that stops or fails resolves to `null`, so the script must handle gaps. Saving with `s` writes to `.claude/workflows/` (project) or `~/.claude/workflows/` (personal), and the workflow then runs as `/<name>` with its input in the global `args`. The script itself has no filesystem or shell access and `import()` fails. A `Large workflow` warning appears [above 25 agents or 1.5 million projected tokens](https://code.claude.com/docs/en/workflows), and `workflowSizeGuideline` (`small`, `medium` by default, `large`, `unrestricted`) steers how big Claude plans. Approval: Manual and acceptEdits modes prompt on every run, Auto prompts on first launch only. Turn the feature off with `"disableWorkflows": true`. Dollar costs per workflow or per team are not stated in the docs.
 
 ## A protocol that survives crashes
 
@@ -168,7 +168,7 @@ What the schemas enforce:
 | integrator | Read, Grep, Glob, Bash, Edit, Write | The integration branch | An integrated, validated branch; it never delivers |
 | reviewers | Read, Grep, Glob, Bash | Nothing | Structured findings and a verdict |
 
-The reviewer is the critic pattern in its most useful form: it has not seen the writers' reasoning, and the docs note that "A fresh reviewer does help, because it hasn't seen your reasoning". The example below is condensed for this book, not the plugin's file verbatim: it merges the reviewer agent's own rules with the output contract that all of the plugin's reviewer roles share, and leaves out the plugin's custom `role:` field.
+The reviewer is the critic pattern in its most useful form: it has not seen the writers' reasoning, and the docs note that "[A fresh reviewer does help, because it hasn't seen your reasoning](https://code.claude.com/docs/en/best-practices)". The example below is condensed for this book, not the plugin's file verbatim: it merges the reviewer agent's own rules with the output contract that all of the plugin's reviewer roles share, and leaves out the plugin's custom `role:` field.
 
 ```markdown
 ---
@@ -181,7 +181,7 @@ For each finding return: severity, confidence, files, evidence, recommended_fix,
 An empty finding list with `approve` is a valid outcome. Do not manufacture findings to look thorough.
 ```
 
-Anthropic's research-system post lists what every delegation needs: "an objective, an output format, guidance on the tools and sources to use, and clear task boundaries." A dispatch prompt that carries the protocol:
+Anthropic's research-system post lists what every delegation needs: "[an objective, an output format, guidance on the tools and sources to use, and clear task boundaries.](https://www.anthropic.com/research/multi-agent-research-system)" A dispatch prompt that carries the protocol:
 
 ```text
 You are the implementer for task-002 of objective auth-system.
@@ -194,7 +194,7 @@ End with: commit, handoff file, and a five-line summary. No push, no PR, no wait
 On any rejected tool call, report it and end your turn.
 ```
 
-**Why files.** The state directory is gitignored and can be rebuilt from `objective.json` plus the branch graph, so a new session resumes where the dead one stopped. Anthropic's long-running-harness post reaches the same design from the other side: "each new session begins with no memory of what came before", so its agents keep a progress file and a JSON feature list, chosen because "the model is less likely to inappropriately change or overwrite JSON files compared to Markdown files". Its research-system post adds: "Subagents call tools to store their work in external systems, then pass lightweight references back to the coordinator."
+**Why files.** The state directory is gitignored and can be rebuilt from `objective.json` plus the branch graph, so a new session resumes where the dead one stopped. Anthropic's long-running-harness post reaches the same design from the other side: "[each new session begins with no memory of what came before](https://www.anthropic.com/research/effective-harnesses-for-long-running-agents)", so its agents keep a progress file and a JSON feature list, chosen because "the model is less likely to inappropriately change or overwrite JSON files compared to Markdown files". Its research-system post adds: "[Subagents call tools to store their work in external systems, then pass lightweight references back to the coordinator.](https://www.anthropic.com/research/multi-agent-research-system)"
 
 ## The manager pattern across several repos
 
@@ -231,7 +231,7 @@ Its routing skill, `/route`, requires a delegation table **before** anything is 
 
 | Your situation | Use | Why |
 |---|---|---|
-| One change whose files and decisions interlock | A single session | Continuous context and no coordination cost. The docs: for "sequential tasks, same-file edits, or work with many dependencies, a single session or subagents are more effective" |
+| One change whose files and decisions interlock | A single session | Continuous context and no coordination cost. The docs: for "[sequential tasks, same-file edits, or work with many dependencies, a single session or subagents are more effective](https://code.claude.com/docs/en/agent-teams)" |
 | Noisy exploration, a second opinion, a few independent read-only questions | Subagents | Parallelism and fresh eyes; only summaries come back |
 | The same mechanical change across many independent units | `/batch` or a workflow | A worktree per unit and bounded concurrency |
 | A multi-part feature that must land as one coherent change and may outlive the session | The orchestration protocol with state files | Crash-safe state, one integration, one review, one PR |

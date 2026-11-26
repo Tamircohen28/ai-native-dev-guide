@@ -10,7 +10,7 @@ Every extension answers two questions differently: **who triggers it**, and **wh
 
 - **Always loaded.** `CLAUDE.md` and unscoped rules enter context in full at launch, every session. They are advisory: the model reads them, nothing enforces them.
 - **Model decides, or you invoke.** Skills, subagents and MCP tools put a short listing (names, descriptions) in context; the full content arrives only when Claude, or you, call one.
-- **Harness event.** Hooks run outside the conversation when the harness reaches an event, such as "before a tool call". Only what a hook returns is added to context. Of the extensions, it is the only one that can enforce a rule; permission rules ([chapter 09](09-settings-and-permissions.md)) are the other enforcement tool.
+- **Harness event.** [Hooks run outside the conversation](https://claude.com/resources/articles/steering-claude-code-skills-hooks-rules-subagents-and-more) when the harness reaches an event, such as "before a tool call". Only what a hook returns is added to context. Of the extensions, it is the only one that can enforce a rule; permission rules ([chapter 09](09-settings-and-permissions.md)) are the other enforcement tool.
 - **External process.** An MCP server is a separate program that the harness starts or connects to; Claude decides when to call its tools.
 - **A bundle.** A plugin is packaging. Each skill, agent, hook or server inside it keeps its own trigger.
 
@@ -32,7 +32,7 @@ The harness itself, and how it assembles each request, is covered in [chapter 05
 
 ## CLAUDE.md and rules
 
-**What it is.** Plain Markdown instructions that the harness concatenates into context. Use it for facts that are true in every session: build commands, conventions, things the code will not tell you. Details are in [chapter 08](08-claude-md-and-memory.md).
+**What it is.** Plain Markdown instructions that [the harness concatenates into context](https://code.claude.com/docs/en/memory). Use it for facts that are true in every session: build commands, conventions, things the code will not tell you. Details are in [chapter 08](08-claude-md-and-memory.md).
 
 ```text
 ~/.claude/CLAUDE.md              # you, every project
@@ -54,12 +54,12 @@ paths:
 ```
 
 - **Enters context:** ancestors and unscoped rules at launch, in full; subdirectory files and scoped rules when Claude works on a matching file. Files add up, they never override each other. A managed policy file also exists for organisations.
-- **Can:** shape every answer. **Cannot:** enforce anything. The official guidance says to keep it under 200 lines and move procedures to skills.
-- `@path` imports are eager: they organise the file but do not save tokens.
+- **Can:** shape every answer. **Cannot:** enforce anything. [The official guidance says](https://code.claude.com/docs/en/memory) to keep it under 200 lines and move procedures to skills.
+- `@path` imports are eager: they organise the file but [do not save tokens](https://code.claude.com/docs/en/memory).
 
 ## Skills
 
-**What it is.** A folder with a `SKILL.md`: instructions, reference material or a workflow that loads only when needed. Custom slash commands were merged into skills, so `/deploy` is a skill. Details in [chapter 15](15-skills.md); step-by-step in [chapter 20](20-guide-write-a-skill.md).
+**What it is.** A folder with a `SKILL.md`: instructions, reference material or a workflow that loads only when needed. [Custom slash commands were merged into skills](https://code.claude.com/docs/en/skills), so `/deploy` is a skill. Details in [chapter 15](15-skills.md); step-by-step in [chapter 20](20-guide-write-a-skill.md).
 
 ```text
 ~/.claude/skills/<name>/SKILL.md          # personal, all projects
@@ -82,13 +82,13 @@ context: fork                        # optional: run in a subagent
 Collect the commits since the last tag, group them by type, ...
 ```
 
-- **Enters context:** the `description` (plus `when_to_use`, together cut at 1,536 characters) on every turn; the body only when the skill is invoked.
+- **Enters context:** the `description` (plus `when_to_use`, [together cut at 1,536 characters](https://code.claude.com/docs/en/skills)) on every turn; the body only when the skill is invoked.
 - **Can:** be triggered by the model from its description, or by you as `/name`; restrict tools; run in a subagent. **Cannot:** guarantee it will be triggered, or enforce its own rules.
 - All frontmatter fields are optional. When names collide, managed beats user, and user beats project.
 
 ## Subagents
 
-**What it is.** A worker with its own context window, system prompt, tool set and model. Claude delegates a task to it and gets a summary back, so noisy work stays out of your conversation. Details in [chapter 14](14-subagents.md); step-by-step in [chapter 19](19-guide-write-a-subagent.md).
+**What it is.** [A worker with its own context window](https://code.claude.com/docs/en/sub-agents), system prompt, tool set and model. Claude delegates a task to it and gets a summary back, so noisy work stays out of your conversation. Details in [chapter 14](14-subagents.md); step-by-step in [chapter 19](19-guide-write-a-subagent.md).
 
 ```text
 ~/.claude/agents/<name>.md       # all your projects
@@ -109,8 +109,8 @@ show the current code, and provide an improved version.
 ```
 
 - **Enters context:** the description stays in your context so Claude knows when to delegate. The subagent starts with a fresh window, but still loads `CLAUDE.md`, a git status snapshot and any skills listed in `skills` (the built-in Explore and Plan agents skip `CLAUDE.md` and git status, and `omitClaudeMd: true` drops `CLAUDE.md` for yours). A *fork* starts with a copy of your whole conversation instead. Only its final result returns to you.
-- **Can:** isolate context, run in parallel, use a cheaper model, run read-only. **Cannot:** share its working state with you mid-task. Plugin subagents ignore `hooks`, `mcpServers` and `permissionMode`.
-- Precedence: managed > CLI flag > project > user > plugin. The `/agents` wizard was removed after v2.1.197 (it now prints a reminder); ask Claude to write the file, or write it yourself.
+- **Can:** isolate context, run in parallel, use a cheaper model, run read-only. **Cannot:** share its working state with you mid-task. [Plugin subagents ignore](https://code.claude.com/docs/en/sub-agents) `hooks`, `mcpServers` and `permissionMode`.
+- Precedence: managed > CLI flag > project > user > plugin. The `/agents` [wizard was removed after v2.1.197](https://code.claude.com/docs/en/commands) (it now prints a reminder); ask Claude to write the file, or write it yourself.
 
 ## Hooks
 
@@ -137,15 +137,15 @@ skill or subagent frontmatter    # scoped to that skill or agent
 }
 ```
 
-Three levels: the **event**, a **matcher** (one string, here a tool-name pattern), and the **handlers**. The handler gets the event as JSON on stdin.
+Three levels: the **event**, a **matcher** (one string, here a tool-name pattern), and the **handlers**. [The handler gets the event as JSON on stdin.](https://code.claude.com/docs/en/hooks)
 
-- **Enters context:** nothing, unless the hook returns text for the model (`hookSpecificOutput.additionalContext`). A `systemMessage` goes to the user, not the model.
-- **Can:** block an action (`exit 2`, or a `deny` decision), run a step every time, inject context. `exit 1` does **not** block. **Cannot:** understand intent: a command guard matches text, so test it for false positives.
-- `/hooks` is a read-only browser. Settings edits are picked up live.
+- **Enters context:** nothing, unless the hook returns text for the model (`hookSpecificOutput.additionalContext`). A `systemMessage` [goes to the user, not the model](https://code.claude.com/docs/en/hooks).
+- **Can:** [block an action](https://code.claude.com/docs/en/hooks) (`exit 2`, or a `deny` decision), run a step every time, inject context. `exit 1` does **not** block. **Cannot:** understand intent: a command guard matches text, so test it for false positives.
+- `/hooks` [is a read-only browser](https://code.claude.com/docs/en/hooks). Settings edits are picked up live.
 
 ## MCP servers
 
-**What it is.** A program that speaks the Model Context Protocol and exposes tools (and other primitives) from an outside system: an issue tracker, a database, a browser. How the protocol works is in [chapter 12](12-mcp-how-it-works.md); adding and building servers is in [chapter 13](13-mcp-in-practice.md).
+**What it is.** [A program that speaks the Model Context Protocol](https://code.claude.com/docs/en/mcp) and exposes tools (and other primitives) from an outside system: an issue tracker, a database, a browser. How the protocol works is in [chapter 12](12-mcp-how-it-works.md); adding and building servers is in [chapter 13](13-mcp-in-practice.md).
 
 ```text
 ~/.claude.json                   # local scope (default, per project path) and user scope
@@ -163,13 +163,13 @@ Three levels: the **event**, a **matcher** (one string, here a tool-name pattern
 }
 ```
 
-- **Enters context:** with tool search (on by default), tool names and server instructions at session start, full definitions on demand. Each result enters context when a tool is called.
-- **Can:** give Claude live data and actions it cannot reach with files or Bash. **Cannot:** be cheaper than an existing CLI: the cost docs say to prefer `gh`, `aws` or `gcloud` when one exists.
+- **Enters context:** with [tool search (on by default)](https://code.claude.com/docs/en/mcp), tool names and server instructions at session start, full definitions on demand. Each result enters context when a tool is called.
+- **Can:** give Claude live data and actions it cannot reach with files or Bash. **Cannot:** be cheaper than an existing CLI: [the cost docs say to prefer](https://code.claude.com/docs/en/costs) `gh`, `aws` or `gcloud` when one exists.
 - Add one with `claude mcp add`; check it with `/mcp`. `mcpServers` inside `settings.json` is not read.
 
 ## Plugins
 
-**What it is.** The packaging layer: one installable, versioned unit holding any mix of skills, agents, hooks, MCP servers and more, distributed through a *marketplace* (a catalogue file). Details in [chapter 17](17-plugins-and-marketplaces.md); step-by-step in [chapter 21](21-guide-build-and-ship-a-plugin.md).
+**What it is.** [The packaging layer](https://code.claude.com/docs/en/plugins/overview): one installable, versioned unit holding any mix of skills, agents, hooks, MCP servers and more, distributed through a *marketplace* (a catalogue file). Details in [chapter 17](17-plugins-and-marketplaces.md); step-by-step in [chapter 21](21-guide-build-and-ship-a-plugin.md).
 
 ```text
 team-kit/
@@ -191,13 +191,13 @@ team-kit/
 }
 ```
 
-- `name` is the only required key; it becomes the namespace (`/team-kit:changelog`).
-- **Enters context:** whatever its components put there. "An enabled plugin is part of every session, not only the sessions where you use it": skill and agent descriptions every turn, its MCP servers every session. `claude plugin details <name>` shows the projected token cost.
-- **Can:** share one setup across repositories and people, with versions and updates. **Cannot:** load a root `CLAUDE.md` as context. Scaffold one with `claude plugin init <name>`; check it with `claude plugin validate`.
+- `name` [is the only required key](https://code.claude.com/docs/en/plugins/create); it becomes the namespace (`/team-kit:changelog`).
+- **Enters context:** whatever its components put there. ["An enabled plugin is part of every session, not only the sessions where you use it"](https://code.claude.com/docs/en/plugins/overview): skill and agent descriptions every turn, its MCP servers every session. `claude plugin details <name>` shows the projected token cost.
+- **Can:** share one setup across repositories and people, with versions and updates. **Cannot:** load a root `CLAUDE.md` as context. [Scaffold one with](https://code.claude.com/docs/en/plugins/create) `claude plugin init <name>`; check it with `claude plugin validate`.
 
 ## Output styles, briefly
 
-An output style is one Markdown file (`~/.claude/output-styles/` or `.claude/output-styles/`) that sets Claude's voice and format for the whole session. Frontmatter keys: `name`, `description`, `keep-coding-instructions`, `force-for-plugin`. Without `keep-coding-instructions: true` it replaces the built-in coding instructions. Switch with `/output-style <style>`; see [chapter 18](18-output-styles-statusline-keybindings.md).
+[An output style is one Markdown file](https://code.claude.com/docs/en/output-styles) (`~/.claude/output-styles/` or `.claude/output-styles/`) that sets Claude's voice and format for the whole session. Frontmatter keys: `name`, `description`, `keep-coding-instructions`, `force-for-plugin`. Without `keep-coding-instructions: true` it replaces the built-in coding instructions. Switch with `/output-style <style>`; see [chapter 18](18-output-styles-statusline-keybindings.md).
 
 ## How to choose
 
@@ -207,7 +207,7 @@ The "Extend Claude Code" page (https://code.claude.com/docs/en/features-overview
 
 | Trigger | Add |
 |---|---|
-| Claude gets a convention or command wrong twice | Add it to CLAUDE.md |
+| [Claude gets a convention or command wrong twice](https://code.claude.com/docs/en/features-overview) | Add it to CLAUDE.md |
 | You keep asking Claude to be shorter, explain more, or answer in the same format | Set an output style |
 | You keep typing the same prompt to start a task | Save it as a user-invocable skill |
 | You paste the same playbook or multi-step procedure into chat for the third time | Capture it as a skill |
@@ -216,7 +216,7 @@ The "Extend Claude Code" page (https://code.claude.com/docs/en/features-overview
 | You want something to happen every time without asking | Write a hook |
 | A second repository needs the same setup | Package it as a plugin |
 
-Three lines from its comparison tabs carry most of the weight: "**Put guardrails in hooks.** An instruction like 'never edit `.env`' in CLAUDE.md or a skill is a request, not a guarantee." / "MCP connects Claude to external services. Skills extend what Claude knows, including how to use those services effectively." / "**Rule of thumb:** Keep CLAUDE.md under 200 lines." Its context-cost row: CLAUDE.md "Every request"; skills "Low (descriptions every request)"; MCP "Low until a tool is used"; subagents "Isolated from main session"; hooks "Zero, unless hook returns additional context".
+[Three lines from its comparison tabs](https://code.claude.com/docs/en/features-overview) carry most of the weight: "**Put guardrails in hooks.** An instruction like 'never edit `.env`' in CLAUDE.md or a skill is a request, not a guarantee." / "MCP connects Claude to external services. Skills extend what Claude knows, including how to use those services effectively." / "**Rule of thumb:** Keep CLAUDE.md under 200 lines." Its context-cost row: CLAUDE.md "Every request"; skills "Low (descriptions every request)"; MCP "Low until a tool is used"; subagents "Isolated from main session"; hooks "Zero, unless hook returns additional context".
 
 ### A decision flowchart
 
@@ -250,7 +250,7 @@ Permission rules (`permissions.deny` and friends) are not an extension, but they
 | Never let Claude push to main | `PreToolUse` hook on `Bash`, plus server-side branch protection | A hook can match spellings such as `git -C . push` that a `Bash(git push *)` rule misses; the server holds for everyone | A line in CLAUDE.md, which is only a request |
 | Keep secrets out of reads | Deny rules such as `Read(./.env)`, plus the sandbox with `filesystem.denyRead` | The rule stops file tools and `cat`; only the sandbox stops a script that opens the file itself | "Never read .env" as an instruction |
 | Format code after every edit | `PostToolUse` hook on `Edit\|Write` | Runs every time, costs no context | Asking Claude to run the formatter |
-| Run tests before Claude stops | `Stop` hook that checks a predicate | Blocking `Stop` keeps the turn going until it passes, up to 8 continuations in a row | A reminder in CLAUDE.md, which Claude can forget |
+| Run tests before Claude stops | `Stop` hook that checks a predicate | Blocking `Stop` keeps the turn going until it passes, [up to 8 continuations in a row](https://code.claude.com/docs/en/hooks) | A reminder in CLAUDE.md, which Claude can forget |
 | Our build and test commands | CLAUDE.md | Needed in nearly every session | A skill nobody triggers |
 | Rules for one directory or language | Path-scoped rule | Loads only for matching files | A longer root CLAUDE.md |
 | Our release checklist | Skill with `disable-model-invocation: true` | A procedure you run on purpose | Pasting it into chat each time |
@@ -264,12 +264,12 @@ Permission rules (`permissions.deny` and friends) are not an extension, but they
 | Shorter answers in every reply | Output style | Sets the voice for the whole session | Repeating "be brief" |
 | Share our team's setup | Plugin in a team marketplace | One install, versioned updates | Copying files between repos |
 | One personal helper skill | `~/.claude/skills/` | No packaging needed | A plugin |
-| Keep critical context after compaction | `SessionStart` hook with matcher `compact` returning `additionalContext` | Re-injected after every compaction | Hoping the summary keeps it |
+| Keep critical context after compaction | `SessionStart` hook with matcher `compact` returning `additionalContext` | [Re-injected after every compaction](https://code.claude.com/docs/en/hooks-guide) | Hoping the summary keeps it |
 
 ### Combinations that work
 
-- **A skill that runs in a subagent:** `context: fork` plus `agent: Explore` gives a read-only investigation that leaves only its result in your window. The inverse is a subagent with `skills:` to preload knowledge.
-- **A hook that enforces what CLAUDE.md asks:** the instruction says why, the hook makes it true. The docs: "Use CLAUDE.md for 'we do it this way here.' Use permissions or hooks for security boundaries."
+- **[A skill that runs in a subagent:](https://code.claude.com/docs/en/skills)** `context: fork` plus `agent: Explore` gives a read-only investigation that leaves only its result in your window. The inverse is a subagent with `skills:` to preload knowledge.
+- **A hook that enforces what CLAUDE.md asks:** the instruction says why, the hook makes it true. [The docs](https://code.claude.com/docs/en/debug-your-config): "Use CLAUDE.md for 'we do it this way here.' Use permissions or hooks for security boundaries."
 - **A skill that teaches an MCP server or CLI:** the server gives access; the skill says how your team uses it.
 - **A plugin bundling skill + hook + agent + MCP server:** a changelog skill, a read-only reviewer agent, a push guard and the tracker server, installed in one step.
 
@@ -279,7 +279,7 @@ Permission rules (`permissions.deny` and friends) are not an extension, but they
 - **A giant always-loaded CLAUDE.md.** Every line costs tokens in every request. Move procedures to skills and directory rules to path-scoped rules.
 - **A subagent for a two-line lookup.** It pays for a new window and a summary to save nothing.
 - **An MCP server where a CLI exists.** You pay for tool listings and a server process for what `gh` already does.
-- **A plugin for one personal skill.** The docs: "Keep that standalone setup while it serves one project or only you."
+- **A plugin for one personal skill.** [The docs](https://code.claude.com/docs/en/plugins/create): "Keep that standalone setup while it serves one project or only you."
 - **A hook that answers `ask` by default.** Hooks run before the permission mode is consulted, so a hook `ask` prompts even in bypass mode; let a hook deny or stay out of the way.
 
 ## From the field

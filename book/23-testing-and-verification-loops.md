@@ -23,7 +23,7 @@ Pick the rung by the risk of the change. A README edit can stop at the second ru
 
 ## Test-first with an agent
 
-Test-first development (also called red/green/refactor) means: write a test that fails, write the code that makes it pass, then clean up while the tests stay green. It suits agents because the test is exactly the kind of check [chapter 22](22-explore-plan-implement-verify.md) asks for: something the agent can run that comes back pass or fail.
+Test-first development (also called red/green/refactor) means: write a test that fails, write the code that makes it pass, then clean up while the tests stay green. [It suits agents](https://simonwillison.net/guides/agentic-engineering-patterns/red-green-tdd/) because the test is exactly the kind of check [chapter 22](22-explore-plan-implement-verify.md) asks for: something the agent can run that comes back pass or fail.
 
 ```mermaid
 flowchart TD
@@ -59,9 +59,9 @@ Commit the test. Now implement until it passes. Do not edit anything under
 tests/. If you believe a test is wrong, stop and tell me why instead.
 ```
 
-**Why the test must be seen to fail.** A test that passes before the code exists is not exercising the new behaviour: it imports the wrong module, asserts on a mock, or was never collected by the test runner. Only the red run proves the test is connected to the thing you are about to build.
+**Why the test must be seen to fail.** A test that passes before the code exists [is not exercising the new behaviour](https://simonwillison.net/guides/agentic-engineering-patterns/red-green-tdd/): it imports the wrong module, asserts on a mock, or was never collected by the test runner. Only the red run proves the test is connected to the thing you are about to build.
 
-**Protect the tests.** Anthropic's own long-running-agent harness used this instruction: "It is unacceptable to remove or edit tests because this could lead to missing or buggy functionality." A prompt line is a request. For the implementation step you can add a deny rule to `.claude/settings.json` ([chapter 9](09-settings-and-permissions.md)):
+**Protect the tests.** [Anthropic's own long-running-agent harness](https://www.anthropic.com/research/effective-harnesses-for-long-running-agents) used this instruction: "It is unacceptable to remove or edit tests because this could lead to missing or buggy functionality." A prompt line is a request. For the implementation step you can add a deny rule to `.claude/settings.json` ([chapter 9](09-settings-and-permissions.md)):
 
 ```json
 {
@@ -80,7 +80,7 @@ git diff --stat "$RED_COMMIT"..HEAD -- tests/        # expect no output
 
 ## How false "done" claims happen
 
-The best-practices page describes the symptom plainly: "Claude said it was done and it wasn't quite". There are five mechanisms, and each has a different remedy:
+[The best-practices page](https://code.claude.com/docs/en/best-practices) describes the symptom plainly: "Claude said it was done and it wasn't quite". There are five mechanisms, and each has a different remedy:
 
 | Mechanism | What it looks like | How to catch it |
 |---|---|---|
@@ -90,7 +90,7 @@ The best-practices page describes the symptom plainly: "Claude said it was done 
 | The behaviour was mocked away | A test asserts on a mock or on a special-cased input | Seam tests, mutation checks, running the real feature |
 | A proxy was checked | An API field says "available"; a build is "processed"; CI is green | Check the artifact the user actually touches |
 
-This is documented behaviour, not an occasional glitch. The vendor's prompting guide says Claude "can sometimes focus too heavily on making tests pass at the expense of more general solutions". The Claude Code issue tracker has reports with titles such as "Claude fabricated test results in PR description without running tests". Research benchmarks built to provoke the behaviour have measured models from more than one vendor editing tests, special-casing test inputs and overloading comparison operators; one of those papers found that making tests read-only "restores legitimate performance while preventing test modification attempts" but "does not eliminate other cheating methods". Those studies use artificial tasks and mostly older models, so take the mechanisms from them and not the percentages.
+This is documented behaviour, not an occasional glitch. [The vendor's prompting guide](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices) says Claude "can sometimes focus too heavily on making tests pass at the expense of more general solutions". The Claude Code issue tracker has reports with titles such as ["Claude fabricated test results in PR description without running tests"](https://github.com/anthropics/claude-code/issues/22507). Research benchmarks built to provoke the behaviour have [measured models from more than one vendor](https://metr.org/blog/2025-06-05-recent-reward-hacking/) editing tests, special-casing test inputs and overloading comparison operators; [one of those papers found](https://arxiv.org/html/2510.20270v1) that making tests read-only "restores legitimate performance while preventing test modification attempts" but "does not eliminate other cheating methods". Those studies use artificial tasks and mostly older models, so take the mechanisms from them and not the percentages.
 
 > **Field note:** In the author's data a build gate's output was filtered through `grep`; the pattern missed the line that started with `error:` and a failing build shipped to production. The lesson recorded afterwards: verify a gate by its exit code, never by text matching on its output.
 
@@ -186,7 +186,7 @@ Two more rules from the same repos: a gate must sit on the path it guards *and* 
 
 ## Verify UI and behaviour in a real browser
 
-A type checker cannot see a blank page. The official list of acceptable checks includes "A browser screenshot next to the mockup", and the web repo in the product workspace says it directly: "A green `make ci` is not verification" for UI work.
+A type checker cannot see a blank page. [The official list of acceptable checks](https://code.claude.com/docs/en/best-practices) includes "A browser screenshot next to the mockup", and the web repo in the product workspace says it directly: "A green `make ci` is not verification" for UI work.
 
 1. Start the app from a fresh build. A reused dev server can serve a stale bundle and fake your results.
 2. Drive the real flow: click, type, submit. Loading the page is not using it.
@@ -197,7 +197,7 @@ A type checker cannot see a blank page. The official list of acceptable checks i
 
 | Tool | What it does (docs, as of Nov 2026) |
 |---|---|
-| `/verify` | Skill: build, run and observe a change |
+| `/verify` | [Skill: build, run and observe a change](https://code.claude.com/docs/en/commands) |
 | `/run` | Skill: launch and drive your app |
 | `/run-skill-generator` | Skill: writes a per-project skill that teaches `/run` and `/verify` |
 | `claude --chrome` | Enables Chrome browser integration for web automation and testing |
@@ -216,7 +216,7 @@ Some checks cannot be automated: OS permission dialogs, a logged-in browser prof
 
 ## Put the evidence in the final report
 
-The official wording: "ask Claude for *evidence*: the command it ran and its output, or the screenshot. 'All tests pass' on its own tells you very little". Ask for a fixed shape:
+[The official wording](https://code.claude.com/docs/en/best-practices): "ask Claude for *evidence*: the command it ran and its output, or the screenshot. 'All tests pass' on its own tells you very little". Ask for a fixed shape:
 
 ```markdown
 ## Verification
@@ -234,7 +234,7 @@ The official wording: "ask Claude for *evidence*: the command it ran and its out
 
 ## Enforce it, do not request it
 
-A line in a prompt or in `CLAUDE.md` is read by the model, with no guarantee. A hook or a CI job is executed by software. The docs say: "If something has to happen every time, make it a hook, a deny rule, or a managed setting."
+A line in a prompt or in `CLAUDE.md` is read by the model, with no guarantee. A hook or a CI job is executed by software. The docs say: ["If something has to happen every time, make it a hook, a deny rule, or a managed setting."](https://code.claude.com/docs/en/best-practices)
 
 | Control | Who runs it | Can the agent skip it? |
 |---|---|---|
@@ -243,7 +243,7 @@ A line in a prompt or in `CLAUDE.md` is read by the model, with no guarantee. A 
 | `Stop` hook | Claude Code, when Claude tries to stop | No, unless it can edit the hook |
 | Required CI check | Your CI, on the pushed commit | No, without bypass rights on the branch |
 
-A `Stop` hook ([chapter 16](16-hooks.md)) runs when Claude finishes a response. The docs: "Exit code 2 is what blocks the stop." Their one-line example is `pnpm tsc --noEmit 1>&2 || exit 2`. A fuller version, registered in `.claude/settings.json` (make the script executable with `chmod +x`):
+A `Stop` hook ([chapter 16](16-hooks.md)) [runs when Claude finishes a response](https://code.claude.com/docs/en/hooks). The docs: ["Exit code 2 is what blocks the stop."](https://code.claude.com/docs/en/best-practices) Their one-line example is `pnpm tsc --noEmit 1>&2 || exit 2`. A fuller version, registered in `.claude/settings.json` (make the script executable with `chmod +x`):
 
 ```json
 {
@@ -271,8 +271,8 @@ fi
 exit 0
 ```
 
-- "`Stop` hooks fire whenever Claude finishes responding, not only at task completion." Keep the check fast.
-- After eight blocked stops in a row with no tool call, Claude Code ends the turn anyway (the cap is `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP`). The cap is a backstop, not a design.
+- "`Stop` [hooks fire whenever Claude finishes responding, not only at task completion.](https://code.claude.com/docs/en/hooks-guide)" Keep the check fast.
+- After eight blocked stops in a row with no tool call, [Claude Code ends the turn anyway](https://code.claude.com/docs/en/hooks-guide) (the cap is `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP`). The cap is a backstop, not a design.
 - With the loop guard, this hook forces one more attempt and no more. It also sees only uncommitted changes, so it is silent once the agent has committed. CI is still the gate that counts.
 - Write a `/goal` condition as a predicate ("`npm test` exits 0"), not as an imperative. In the author's data a goal phrased as "do not stop" produced 21 consecutive blocks.
 
@@ -286,15 +286,15 @@ Prompts, skills and plugins are non-deterministic, so one successful run proves 
 
 | Idea | What to know |
 |---|---|
-| Graders | Code-based (fast, objective, brittle), model-based (flexible, needs calibration), human (the reference, slow) |
-| Where to start | Anthropic's evals guide suggests 20 to 50 simple tasks drawn from real failures |
-| One run is not enough | At 75% per trial, three passes in a row happen about 42% of the time |
-| Grade outcomes | Check the result, not the path the agent took; read transcripts when a score surprises you |
-| Baseline | A high score "doesn't tell you the plugin helped, because Claude might do as well without it" |
+| Graders | [Code-based (fast, objective, brittle)](https://www.anthropic.com/research/demystifying-evals-for-ai-agents), model-based (flexible, needs calibration), human (the reference, slow) |
+| Where to start | [Anthropic's evals guide](https://www.anthropic.com/research/demystifying-evals-for-ai-agents) suggests 20 to 50 simple tasks drawn from real failures |
+| One run is not enough | At 75% per trial, three passes in a row happen [about 42% of the time](https://www.anthropic.com/research/demystifying-evals-for-ai-agents) |
+| Grade outcomes | [Check the result, not the path the agent took](https://www.anthropic.com/research/demystifying-evals-for-ai-agents); read transcripts when a score surprises you |
+| Baseline | A high score ["doesn't tell you the plugin helped, because Claude might do as well without it"](https://code.claude.com/docs/en/plugin-evals) |
 
-For skills, the authoring guide says: "Create evaluations BEFORE writing extensive documentation." Find what fails without the skill, build three scenarios that test those gaps, record a baseline, then write the minimum instructions that move it.
+For skills, [the authoring guide says](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices): "Create evaluations BEFORE writing extensive documentation." Find what fails without the skill, build three scenarios that test those gaps, record a baseline, then write the minimum instructions that move it.
 
-Claude Code has a built-in runner, `claude plugin eval` (v2.1.269 or later). The suite lives in `evals/` inside the plugin. Each case is a prompt plus graders, runs three times by default, and is rerun without the plugin so the difference is the plugin's contribution. `--threshold` (default 1.0) makes it a CI gate with exit code 1 on failure, and it writes a self-contained `report.html`.
+Claude Code [has a built-in runner](https://code.claude.com/docs/en/plugin-evals), `claude plugin eval` (v2.1.269 or later). The suite lives in `evals/` inside the plugin. Each case is a prompt plus graders, runs three times by default, and is rerun without the plugin so the difference is the plugin's contribution. `--threshold` (default 1.0) makes it a CI gate with exit code 1 on failure, and it writes a self-contained `report.html`.
 
 ```bash
 claude plugin eval init          # draft a suite

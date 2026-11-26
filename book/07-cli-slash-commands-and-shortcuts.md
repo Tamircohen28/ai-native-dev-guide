@@ -10,7 +10,7 @@ You give Claude Code instructions in three places, and each one reaches a differ
 2. **In the prompt box:** the start of the message routes it. `/` runs a command or a skill, `!` runs a shell command yourself, and anything else is a prompt for the model.
 3. **On the keyboard:** keys act on the interface (interrupt, switch mode, send work to the background) without adding anything to the conversation.
 
-Two kinds of `/name` exist. Most are built-in commands "whose behavior is coded into the CLI". The rest are *skills*: "a prompt handed to Claude", the same mechanism as the skills you write yourself in [chapter 15](15-skills.md).
+Two kinds of `/name` exist. Most are built-in commands "[whose behavior is coded into the CLI](https://code.claude.com/docs/en/commands)". The rest are *skills*: "a prompt handed to Claude", the same mechanism as the skills you write yourself in [chapter 15](15-skills.md).
 
 ```mermaid
 flowchart TD
@@ -28,7 +28,7 @@ flowchart TD
 
 ## The `claude` command
 
-Everything below is from the CLI reference as of Nov 2026 (the docs mention builds up to v2.1.331). The page warns that "`claude --help` does not list every flag", so check the reference when a flag seems to be missing.
+Everything below is from [the CLI reference](https://code.claude.com/docs/en/cli-reference) as of Nov 2026 (the docs mention builds up to v2.1.331). The page warns that "`claude --help` does not list every flag", so check the reference when a flag seems to be missing.
 
 ### Subcommands
 
@@ -64,7 +64,7 @@ Everything below is from the CLI reference as of Nov 2026 (the docs mention buil
 | `--fork-session` | With `--resume` or `--continue`, create a new session ID | Try another approach without touching the original |
 | `--name`, `-n` | Set a display name, shown in `/resume` and the terminal title | `claude -n oauth-migration` so you can find it later |
 | `--model` | Model for this session: an alias such as `sonnet`, `opus`, `haiku` or `fable`, or a full model name | A cheaper model for a chore |
-| `--effort` | Effort for this session: `low`, `medium`, `high`, `xhigh`, `max` or `ultracode` (the last is "a Claude Code setting rather than a model effort level"; available levels depend on the model) | `--effort high` for a hard bug |
+| `--effort` | Effort for this session: `low`, `medium`, `high`, `xhigh`, `max` or `ultracode` (the last is "[a Claude Code setting rather than a model effort level](https://code.claude.com/docs/en/model-config)"; available levels depend on the model) | `--effort high` for a hard bug |
 | `--permission-mode` | Begin in `default`, `acceptEdits`, `plan`, `auto`, `dontAsk` or `bypassPermissions` (`manual` is an alias for `default`) | `--permission-mode plan` to look before editing |
 | `--allowedTools` | Tools that run without prompting, in permission rule syntax | `"Bash(git log *)" "Read"` for a read-only script |
 | `--disallowedTools` | Deny rules; a bare tool name removes the tool entirely | Block `Bash(rm *)` for one run |
@@ -83,9 +83,9 @@ Everything below is from the CLI reference as of Nov 2026 (the docs mention buil
 | `--plugin-dir` | Load a plugin from a directory for this session only | Testing a plugin you are writing |
 | `--settings` | A settings JSON file or inline JSON for this session | One-off overrides |
 | `--verbose`, `--debug` | Full turn-by-turn output; debug mode with a category filter | `--debug='mcp,startup'` |
-| `--dangerously-skip-permissions` | "Equivalent to `--permission-mode bypassPermissions`" | Disposable sandboxes only ([chapter 29](29-security-and-guardrails.md)) |
+| `--dangerously-skip-permissions` | "[Equivalent to](https://code.claude.com/docs/en/cli-reference) `--permission-mode bypassPermissions`" | Disposable sandboxes only ([chapter 29](29-security-and-guardrails.md)) |
 
-> **Warning:** `--system-prompt` replaces the whole default prompt, "including tool guidance and safety instructions". Prefer `--append-system-prompt` unless you are building a different product on top of the CLI.
+> **Warning:** `--system-prompt` replaces the whole default prompt, "[including tool guidance and safety instructions](https://code.claude.com/docs/en/cli-reference)". Prefer `--append-system-prompt` unless you are building a different product on top of the CLI.
 
 ### Piping and one-shot use
 
@@ -109,20 +109,20 @@ claude -p "list the three riskiest files in this repo and say why" \
 
 Print mode differs from an interactive session in four ways that surprise people:
 
-- **It starts in `default` permission mode, not `auto`.** Nobody is there to answer a prompt, so anything that would ask is denied. Pass `--permission-mode` and `--allowedTools` explicitly.
+- **[It starts in](https://code.claude.com/docs/en/permission-modes) `default` permission mode, not `auto`.** Nobody is there to answer a prompt, so anything that would ask is denied. Pass `--permission-mode` and `--allowedTools` explicitly.
 - **It always uses `ANTHROPIC_API_KEY` when the variable is present**, even if you are signed in with a subscription.
-- **Its sessions are hidden from `claude -c`**, which skips sessions created with `claude -p`. Use `claude -p --continue` to include them.
+- **Its sessions are hidden from `claude -c`**, [which skips sessions created with](https://code.claude.com/docs/en/cli-reference) `claude -p`. Use `claude -p --continue` to include them.
 - **Some flags only exist here** (`--max-turns`, `--max-budget-usd`, `--json-schema`), and `--bg` cannot be combined with `-p`.
 
 [Chapter 27](27-headless-ci-and-the-agent-sdk.md) builds real automation on these flags.
 
 ## Slash commands by purpose
 
-The docs' command table lists 126 distinct names as of Nov 2026; 25 are marked **Skill** and one **Workflow**. Three rules apply to all of them:
+[The docs' command table](https://code.claude.com/docs/en/commands) lists 126 distinct names as of Nov 2026; 25 are marked **Skill** and one **Workflow**. Three rules apply to all of them:
 
-- "A command is only recognized at the start of your message."
-- A command sent while Claude is responding is queued, except a few that run immediately "such as `/status`, `/tasks`, and `/usage`".
-- "Not every command appears for every user. Availability depends on your platform, plan, and environment." `/help` shows what your build has.
+- "[A command is only recognized at the start of your message.](https://code.claude.com/docs/en/commands)"
+- A command sent while Claude is responding is queued, [except a few that run immediately](https://code.claude.com/docs/en/commands) "such as `/status`, `/tasks`, and `/usage`".
+- "[Not every command appears for every user. Availability depends on your platform, plan, and environment.](https://code.claude.com/docs/en/commands)" `/help` shows what your build has.
 
 **Session: start, stop, move around**
 
@@ -158,7 +158,7 @@ The docs' command table lists 126 distinct names as of Nov 2026; 25 are marked *
 | Command | What it does |
 |---|---|
 | `/config` | Open the Settings interface; `/config theme=dark` sets a key directly. Alias `/settings` |
-| `/model [model]` | Switch the model "and save it as your default for new sessions" |
+| `/model [model]` | Switch the model "[and save it as your default for new sessions](https://code.claude.com/docs/en/commands)" |
 | `/effort` | Set the effort level: `low` to `xhigh`, `max` (session-only) or `auto`; `/effort status` prints it |
 | `/fast` | Toggle fast mode; also `/fast on` and `/fast off` |
 | `/permissions` | Manage allow, ask and deny rules for tool permissions. Alias `/allowed-tools` |
@@ -168,7 +168,7 @@ The docs' command table lists 126 distinct names as of Nov 2026; 25 are marked *
 | `/keybindings`, `/terminal-setup` | Open your keyboard shortcuts file; install a Shift+Enter newline binding for some terminals |
 | `/login`, `/logout` | Sign in to, or out from, your Anthropic account |
 
-`/model` with no argument opens a picker: `Enter` switches and saves the model as your default, `s` switches for this session only, and the left and right arrows adjust effort. Aliases include `sonnet`, `opus`, `haiku`, `fable` and `opusplan` (Opus during plan mode, Sonnet for execution). As of Nov 2026, Fable 5.2, Opus 5.5, Sonnet 5.5 and Haiku 5.5 default to `medium` effort. For one hard turn, put `ultrathink` in the prompt; phrases like "think hard" are ordinary text, not keywords. `/fast` buys speed, "up to 2.5x faster at a higher cost per token".
+`/model` with no argument opens a picker: `Enter` switches and saves the model as your default, `s` switches for this session only, and the left and right arrows adjust effort. Aliases include `sonnet`, `opus`, `haiku`, `fable` and `opusplan` ([Opus during plan mode, Sonnet for execution](https://code.claude.com/docs/en/model-config)). As of Nov 2026, Fable 5.2, Opus 5.5, Sonnet 5.5 and Haiku 5.5 default to `medium` effort. For one hard turn, put `ultrathink` in the prompt; phrases like "think hard" are [ordinary text, not keywords](https://code.claude.com/docs/en/best-practices). `/fast` buys speed, "[up to 2.5x faster at a higher cost per token](https://code.claude.com/docs/en/fast-mode)".
 
 **Extension: what is plugged in**
 
@@ -190,7 +190,7 @@ The docs' command table lists 126 distinct names as of Nov 2026; 25 are marked *
 | `/diff` | Review the changes in your working tree, including Claude's edits |
 | `/code-review` | Skill. Review the current diff, or a PR number, branch or path, for correctness bugs; `--fix` applies the findings. Alias `/review` |
 | `/security-review` | Analyze the changes on your current branch for security vulnerabilities; needs an `origin` remote |
-| `/simplify [target]` | Skill. Review changed code for cleanup opportunities and apply the fixes; "The review doesn't look for correctness bugs" |
+| `/simplify [target]` | Skill. Review changed code for cleanup opportunities and apply the fixes; "[The review doesn't look for correctness bugs](https://code.claude.com/docs/en/commands)" |
 | `/verify` | Skill. Build, run and observe a change |
 
 **Diagnostics: when something is off**
@@ -207,40 +207,40 @@ The docs' command table lists 126 distinct names as of Nov 2026; 25 are marked *
 
 ## Interactive mode
 
-"Keyboard shortcuts may vary by platform and terminal." Press `?` on an empty prompt to see the panel for yours.
+"[Keyboard shortcuts may vary by platform and terminal.](https://code.claude.com/docs/en/interactive-mode)" Press `?` on an empty prompt to see the panel for yours.
 
 ### Input prefixes
 
 | You type | What happens |
 |---|---|
-| `/` at the start | "Command or skill" |
-| `!` at the start | Shell mode: "Run a command directly, add its output to the session, and have Claude respond to it" |
-| `@` | "File path mention" with path autocomplete, for example `@src/utils/auth.js` or a directory such as `@src/components` |
+| `/` at the start | "[Command or skill](https://code.claude.com/docs/en/interactive-mode)" |
+| `!` at the start | Shell mode: "[Run a command directly, add its output to the session, and have Claude respond to it](https://code.claude.com/docs/en/interactive-mode)" |
+| `@` | "[File path mention](https://code.claude.com/docs/en/interactive-mode)" with path autocomplete, for example `@src/utils/auth.js` or a directory such as `@src/components` |
 | `#` | Not documented today. Older guides describe it as a memory shortcut; ask Claude to "add this to CLAUDE.md" or use `/memory` instead |
 
-Shell mode does not need Claude to interpret or approve the command: it is you typing, with the output shared. Claude answers the output automatically, at the cost of a normal prompt, unless `respondToBashCommands` is `false` in `settings.json`. Leave shell mode with `Escape`, `Backspace` or `Ctrl+U` on an empty prompt.
+Shell mode does not need Claude to interpret or approve the command: it is you typing, with the output shared. [Claude answers the output automatically](https://code.claude.com/docs/en/interactive-mode), at the cost of a normal prompt, unless `respondToBashCommands` is `false` in `settings.json`. Leave shell mode with `Escape`, `Backspace` or `Ctrl+U` on an empty prompt.
 
-An `@` file is included "when it fits the Read tool's token limit, 25,000 tokens by default"; a text file over 256KB is not included at all. For larger files, name the path and let Claude read the part it needs.
+An `@` file is included "[when it fits the Read tool's token limit, 25,000 tokens by default](https://code.claude.com/docs/en/common-workflows)"; a text file over 256KB is not included at all. For larger files, name the path and let Claude read the part it needs.
 
 ### Multiline input
 
 | Keys | Works where |
 |---|---|
-| `\` then `Enter` | "Works in all terminals" |
-| `Ctrl+J` | "Works in any terminal without configuration" |
-| `Shift+Enter` | Native in iTerm2, WezTerm, Ghostty, Kitty, Warp and Windows Terminal 1.25 or later. Run `/terminal-setup` once in VS Code, Cursor, Devin Desktop, Alacritty before 0.16 and Zed |
+| `\` then `Enter` | "[Works in all terminals](https://code.claude.com/docs/en/interactive-mode)" |
+| `Ctrl+J` | "[Works in any terminal without configuration](https://code.claude.com/docs/en/terminal-config)" |
+| `Shift+Enter` | [Native in iTerm2, WezTerm, Ghostty, Kitty, Warp and Windows Terminal 1.25 or later](https://code.claude.com/docs/en/terminal-config). Run `/terminal-setup` once in VS Code, Cursor, Devin Desktop, Alacritty before 0.16 and Zed |
 | `Option+Enter` | macOS, after enabling Option as Meta |
-| Paste | Any terminal; a paste over 800 characters or three lines collapses to a placeholder such as `[Pasted text #1 +120 lines]` |
+| Paste | Any terminal; [a paste over 800 characters or three lines](https://code.claude.com/docs/en/terminal-config) collapses to a placeholder such as `[Pasted text #1 +120 lines]` |
 | `Ctrl+G` | Opens the prompt in your default text editor |
 
-To rebind keys, `/keybindings` opens `~/.claude/keybindings.json` (the newline and submit actions are `chat:newline` and `chat:submit`). [Chapter 18](18-output-styles-statusline-keybindings.md) covers the file format, tmux settings and Vim mode.
+[To rebind keys](https://code.claude.com/docs/en/keybindings), `/keybindings` opens `~/.claude/keybindings.json` (the newline and submit actions are `chat:newline` and `chat:submit`). [Chapter 18](18-output-styles-statusline-keybindings.md) covers the file format, tmux settings and Vim mode.
 
 ### Keyboard shortcuts
 
 | Key | Action |
 |---|---|
 | `Esc` | Interrupt Claude; see the next section for every case |
-| `Shift+Tab` | Cycle permission modes. From `auto`, the first press goes to `default`, then `acceptEdits`, then `plan` |
+| `Shift+Tab` | [Cycle permission modes](https://code.claude.com/docs/en/permission-modes). From `auto`, the first press goes to `default`, then `acceptEdits`, then `plan` |
 | `Ctrl+C` | Interrupt a running operation. With nothing running, the first press clears the prompt and a second press exits |
 | `Ctrl+D` | Exit; press twice |
 | `Ctrl+B` | Send running Bash commands and agents to the background (tmux users press twice) |
@@ -255,9 +255,9 @@ To rebind keys, `/keybindings` opens `~/.claude/keybindings.json` (the newline a
 | `Tab` or `Right arrow` | Accept the greyed-out prompt suggestion |
 | `Ctrl+A`, `Ctrl+E`, `Ctrl+K`, `Ctrl+U`, `Ctrl+W` | Line editing: start, end, delete to end, delete to start, delete previous word |
 
-**Queueing.** While Claude is working, plain `Enter` queues your message instead of interrupting the turn. `Ctrl+Enter` sends queued messages now (v2.1.275 or later).
+**Queueing.** While Claude is working, plain `Enter` queues your message instead of interrupting the turn. `Ctrl+Enter` [sends queued messages now](https://code.claude.com/docs/en/interactive-mode) (v2.1.275 or later).
 
-**Background tasks.** There are two ways to background a shell command: ask Claude to run it in the background, or press `Ctrl+B` while it runs. The command returns a task ID at once and its output goes to a file Claude can read later. A command that hits its timeout is moved to the background automatically "unless the command starts with `sleep`". `/tasks` lists and manages them; they are cleaned up when Claude Code exits. `Ctrl+X Ctrl+K`, pressed twice within 3 seconds, stops all running background subagents.
+**Background tasks.** There are two ways to background a shell command: ask Claude to run it in the background, or press `Ctrl+B` while it runs. The command returns a task ID at once and its output goes to a file Claude can read later. A command that hits its timeout [is moved to the background automatically](https://code.claude.com/docs/en/interactive-mode) "unless the command starts with `sleep`". `/tasks` lists and manages them; they are cleaned up when Claude Code exits. `Ctrl+X Ctrl+K`, pressed twice within 3 seconds, stops all running background subagents.
 
 ### What `Esc` does
 
@@ -272,36 +272,36 @@ flowchart TD
     T -->|"No"| R["Rewind menu opens"]
 ```
 
-The docs describe a single `Esc` like this: "Stop the current response or tool call mid-turn so you can redirect. Claude keeps the work done so far". Queued messages are sent next. One trap: at a plan approval prompt, press `Esc` to back out, because `Shift+Tab` there approves the plan.
+The docs describe a single `Esc` like this: "[Stop the current response or tool call mid-turn so you can redirect. Claude keeps the work done so far](https://code.claude.com/docs/en/interactive-mode)". Queued messages are sent next. One trap: at a plan approval prompt, press `Esc` to back out, because `Shift+Tab` there approves the plan.
 
 ## Removed and renamed: for readers of older tutorials
 
 | Older material says | Status in the docs (Nov 2026) | Use instead |
 |---|---|---|
-| `/vim` | "Removed in v2.1.92" | `/config`, then Editor mode; or `editorMode` set to `"vim"` |
-| `/pr-comments [PR]` | "Removed in v2.1.91" | No replacement is named in the command table |
-| `/ultraplan <prompt>` | "Removed. Use plan mode instead" | `/plan` or `Shift+Tab` |
+| `/vim` | "[Removed in v2.1.92](https://code.claude.com/docs/en/commands)" | `/config`, then Editor mode; or `editorMode` set to `"vim"` |
+| `/pr-comments [PR]` | "[Removed in v2.1.91](https://code.claude.com/docs/en/commands)" | No replacement is named in the command table |
+| `/ultraplan <prompt>` | "[Removed. Use plan mode instead](https://code.claude.com/docs/en/commands)" | `/plan` or `Shift+Tab` |
 | `/extra-usage` | Renamed | `/usage-credits` |
 | `/agents` opens a wizard | Only on v2.1.197 and earlier; it now prints a reminder | Ask Claude to create the subagent, or edit `.claude/agents/` |
 | `/cost`, `/stats`, `/review` | Still work, as aliases | `/usage`, `/code-review` |
 | "routines" | Now "cloud scheduled tasks" | `/schedule` (alias `/routines`) |
-| `--enable-auto-mode` | Listed as removed in v2.1.111 | `--permission-mode auto` |
-| `--remote` | "Deprecated alias for `--cloud`" | `--cloud` |
+| `--enable-auto-mode` | [Listed as removed in v2.1.111](https://code.claude.com/docs/en/cli-reference) | `--permission-mode auto` |
+| `--remote` | "[Deprecated alias for](https://code.claude.com/docs/en/cli-reference) `--cloud`" | `--cloud` |
 | The `Task` tool | Renamed to `Agent` in v2.1.63 | `Agent` in permission rules and hooks |
-| Custom commands in `.claude/commands/` | Merged into skills; existing files keep working, and a skill wins a name clash | A skill ([chapter 15](15-skills.md)) |
+| Custom commands in `.claude/commands/` | [Merged into skills](https://code.claude.com/docs/en/skills); existing files keep working, and a skill wins a name clash | A skill ([chapter 15](15-skills.md)) |
 
 ## Ten commands to learn first
 
 | # | Command | Why it is worth learning first |
 |---|---|---|
-| 1 | `/clear` | The cheapest quality lever: "a focused context gets you better answers and costs less" |
+| 1 | `/clear` | The cheapest quality lever: "[a focused context gets you better answers and costs less](https://code.claude.com/docs/en/best-practices)" |
 | 2 | `claude --continue` and `/resume` | Real work spans days; getting back should take one command |
 | 3 | `/rewind` | An undo for edits and conversation. It does not restore changes made only by Bash commands |
 | 4 | `/plan` | Makes Claude read and propose before it edits |
 | 5 | `/context` | Shows what fills the window, so you stop guessing |
 | 6 | `/compact` | With focus instructions, keeps a long session usable: `/compact focus on the auth bug fix` |
-| 7 | `/usage` | The docs' first step when a task cost too much: run it "to see where it went" |
-| 8 | `/model` and `/effort` | "Effort is the main control for how long Claude thinks" |
+| 7 | `/usage` | The docs' first step when a task cost too much: run it "[to see where it went](https://code.claude.com/docs/en/best-practices)" |
+| 8 | `/model` and `/effort` | "[Effort is the main control for how long Claude thinks](https://code.claude.com/docs/en/best-practices)" |
 | 9 | `/diff` | Read what changed before you commit it |
 | 10 | `/doctor` | The first stop when anything looks wrong; `claude doctor` if the CLI will not start |
 
@@ -326,7 +326,7 @@ Numbers are from about four weeks of one developer's transcripts. Slash-command 
 | `claude -c` cannot find the last run | It skips sessions created with `claude -p` | `claude -p --continue`, or `claude --resume` |
 | Typing during a turn did not stop Claude | `Enter` queues the message | Press `Esc` to interrupt; `Ctrl+Enter` sends the queue now |
 | `Ctrl+B` does nothing inside tmux | tmux uses it as its prefix key | Press it twice |
-| A resumed session lost its extra directory or tool rules | `--add-dir`, `--allowedTools`, `--mcp-config` and similar flags are not restored | Pass them again on `--resume` |
+| A resumed session lost its extra directory or tool rules | `--add-dir`, `--allowedTools`, `--mcp-config` and [similar flags are not restored](https://code.claude.com/docs/en/sessions) | Pass them again on `--resume` |
 
 ## Checklist
 

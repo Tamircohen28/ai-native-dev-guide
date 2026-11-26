@@ -36,10 +36,10 @@ claude mcp add --env AIRTABLE_API_KEY=YOUR_KEY --transport stdio airtable -- npx
 |---|---|---|
 | HTTP | `claude mcp add --transport http <name> <url>` | In JSON config, `"type"` accepts `streamable-http` as an alias for `http` |
 | stdio | `claude mcp add [options] <name> -- <command> [args...]` | `--env` takes several `KEY=value` pairs, so put another option between `--env` and the name. `CLAUDE_PROJECT_DIR` is set in the server's environment |
-| SSE | `claude mcp add --transport sse <name> <url>` | Deprecated. From v2.1.265 you can add an SSE-only endpoint with `--transport http`; Claude Code tries HTTP first, then switches to SSE |
+| SSE | `claude mcp add --transport sse <name> <url>` | [Deprecated](https://code.claude.com/docs/en/mcp). From v2.1.265 you can add an SSE-only endpoint with `--transport http`; Claude Code tries HTTP first, then switches to SSE |
 | WebSocket | Config only: `"type": "ws"` in `.mcp.json` or `claude mcp add-json` | `--transport` does not accept `ws`. Header auth only, no OAuth |
 
-Short flags are `-s` (`--scope`), `-e` (`--env`), `-t` (`--transport`) and `-H` (`--header`). To manage servers use `claude mcp list`, `claude mcp get <name>`, `claude mcp remove <name>`, `claude mcp add-json <name> '<json>'` and `claude mcp add-from-claude-desktop`. Inside a session, `/mcp` shows status and `/mcp reconnect all` (v2.1.284+) reconnects. Some names are reserved, such as `workspace`, `claude-in-chrome` and `computer-use`.
+Short flags are `-s` (`--scope`), `-e` (`--env`), `-t` (`--transport`) and `-H` (`--header`). To manage servers use `claude mcp list`, `claude mcp get <name>`, `claude mcp remove <name>`, `claude mcp add-json <name> '<json>'` and `claude mcp add-from-claude-desktop`. Inside a session, `/mcp` shows status and `/mcp reconnect all` (v2.1.284+) [reconnects](https://code.claude.com/docs/en/mcp). Some names are reserved, such as `workspace`, `claude-in-chrome` and `computer-use`.
 
 ## Scopes and precedence
 
@@ -49,7 +49,7 @@ Short flags are `-s` (`--scope`), `-e` (`--env`), `-t` (`--transport`) and `-H` 
 | Project | Current project only | Yes, through version control | `.mcp.json` in the project root |
 | User | All your projects | No | `~/.claude.json` |
 
-- **Precedence** when one name is defined twice: local, project, user, plugin-provided, then claude.ai connectors (connectors rank above plugins in `claude -p`, the Agent SDK and VS Code). The whole entry from the winning source is used: "fields are not merged across scopes". An administrator's `managedMcpServers` ranks above all of them (v2.1.259+).
+- **Precedence** when one name is defined twice: local, project, user, plugin-provided, then claude.ai connectors (connectors rank above plugins in `claude -p`, the Agent SDK and VS Code). The whole entry from the winning source is used: "[fields are not merged across scopes](https://code.claude.com/docs/en/mcp)". An administrator's `managedMcpServers` ranks above all of them (v2.1.259+).
 - **Approval.** An interactive session asks before it uses a server from `.mcp.json`. `claude -p`, the Agent SDK and cloud sessions cannot show that prompt and load project servers without asking. Keep one out with `disabledMcpjsonServers`, `--setting-sources` or `--strict-mcp-config` ([chapter 27](27-headless-ci-and-the-agent-sdk.md)).
 - MCP "local scope" is not `.claude/settings.local.json`, and `mcpServers` inside `settings.json` is not read.
 
@@ -77,21 +77,21 @@ A project file that teammates can share without sharing secrets:
 
 - `${VAR}` and `${VAR:-default}` expand in `command`, `args`, `env`, `url` and `headers`.
 - An unset variable with no default produces a warning in `claude mcp list`, and the literal text `${VAR}` is used. A variable set to an empty string counts as set.
-- In a remote `url` or `headers`, credential variables such as `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` and `NPM_TOKEN` "read as empty". `Bearer ${ANTHROPIC_AUTH_TOKEN}` sends `Bearer ` and gets a 401. Give each server's token its own variable name.
+- In a remote `url` or `headers`, credential variables such as `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` and `NPM_TOKEN` "[read as empty](https://code.claude.com/docs/en/mcp)". `Bearer ${ANTHROPIC_AUTH_TOKEN}` sends `Bearer ` and gets a 401. Give each server's token its own variable name.
 - An entry with a `url` but no `type` is read as stdio and skipped. A file under `.claude/`, or one that uses a `servers` key, never loads. Edits are ignored until you restart Claude Code.
 
 ## Authenticate
 
-- **OAuth.** A remote server that answers `401` or `403` is flagged in `/mcp`. Run `/mcp` and finish the sign-in in the browser. From the shell, use `claude mcp login <name>` (`--no-browser` prints the URL) and `claude mcp logout <name>`.
+- **OAuth.** A remote server that answers `401` or `403` is flagged in `/mcp`. Run `/mcp` and [finish the sign-in in the browser](https://code.claude.com/docs/en/mcp). From the shell, use `claude mcp login <name>` (`--no-browser` prints the URL) and `claude mcp logout <name>`.
 - **Pre-registered apps.** `--callback-port` fixes the redirect to `http://localhost:PORT/callback`; `--client-id` and `--client-secret` cover servers without dynamic client registration.
 - **Headless.** `claude -p` and SDK runs cannot run the browser flow. Sign in interactively first.
 - **Static headers.** If a configured `headers.Authorization` is rejected, the connection fails; it does not fall back to OAuth. `headersHelper` runs a command to produce headers dynamically.
 
 ## Tool names and permissions
 
-Claude sees an MCP tool as `mcp__<server>__<tool>`. Dots and spaces in a server name become `_`. A server bundled in a plugin gets `mcp__plugin_<plugin-name>_<server-name>__<tool-name>`, so a hook matcher written against the bare server key never fires for it ([chapter 16](16-hooks.md)). A tool whose full name exceeds 128 characters is not sent to Claude at all.
+Claude sees an MCP tool as `mcp__<server>__<tool>`. Dots and spaces in a server name become `_`. A server bundled in a plugin gets `mcp__plugin_<plugin-name>_<server-name>__<tool-name>`, so a hook matcher written against the bare server key never fires for it ([chapter 16](16-hooks.md)). A tool whose full name exceeds 128 characters [is not sent to Claude at all](https://code.claude.com/docs/en/mcp).
 
-Permission rules use the same names. `mcp__puppeteer` or `mcp__puppeteer__*` matches a whole server; a full name matches one tool. In `settings.json` ([chapter 9](09-settings-and-permissions.md)):
+Permission rules use the same names. `mcp__puppeteer` or `mcp__puppeteer__*` [matches a whole server](https://code.claude.com/docs/en/permissions#mcp); a full name matches one tool. In `settings.json` ([chapter 9](09-settings-and-permissions.md)):
 
 ```json
 {
@@ -102,7 +102,7 @@ Permission rules use the same names. `mcp__puppeteer` or `mcp__puppeteer__*` mat
 }
 ```
 
-**Resources and prompts.** Type `@` to attach a resource, written `@server:protocol://resource/path` (for example `@github:issue://123`). With `claude -p` a resource mention stays plain text. Server prompts appear as commands, listed as `/servername:promptname (MCP)`; `/mcp__servername__promptname` also runs, and arguments are space-separated (`/mcp__github__pr_review 456`).
+**Resources and prompts.** Type `@` to [attach a resource](https://code.claude.com/docs/en/mcp), written `@server:protocol://resource/path` (for example `@github:issue://123`). With `claude -p` a resource mention stays plain text. Server prompts appear as commands, listed as `/servername:promptname (MCP)`; `/mcp__servername__promptname` also runs, and arguments are space-separated (`/mcp__github__pr_review 456`).
 
 ## Output limits, timeouts and tool search
 
@@ -112,29 +112,29 @@ Permission rules use the same names. `mcp__puppeteer` or `mcp__puppeteer__*` mat
 | Largest result kept in the conversation | 25,000 tokens | `MAX_MCP_OUTPUT_TOKENS` |
 | Text result over 50,000 characters | Saved to a file | A server can raise it per tool with `_meta["anthropic/maxResultSizeChars"]`, up to 500,000 |
 | HTTP or SSE response size | Over 16 MiB fails | Paginate |
-| Server startup | `MCP_TIMEOUT`, 30000 ms | `MCP_TIMEOUT=60000 claude` |
-| One tool call | `MCP_TOOL_TIMEOUT`, "about 28 hours" | Per-server `"timeout": 600000` |
+| Server startup | `MCP_TIMEOUT`, [30000 ms](https://code.claude.com/docs/en/env-vars) | `MCP_TIMEOUT=60000 claude` |
+| One tool call | `MCP_TOOL_TIMEOUT`, "[about 28 hours](https://code.claude.com/docs/en/mcp)" | Per-server `"timeout": 600000` |
 | Idle call | 5 minutes (remote), 30 minutes (stdio) | `CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT` |
 
-A result over the limit is not truncated. Claude Code saves it to a file in the session's `tool-results` directory and puts a message naming the path in the conversation. A main-conversation call still running after two minutes moves to a background task. Values are as of Nov 2026.
+A result over the limit [is not truncated](https://code.claude.com/docs/en/mcp). Claude Code saves it to a file in the session's `tool-results` directory and puts a message naming the path in the conversation. A main-conversation call still running after two minutes moves to a background task. Values are as of Nov 2026.
 
-**Tool search** is on by default: "Only tool names and server instructions load at session start", and Claude loads a tool's full definition when it needs it. `ENABLE_TOOL_SEARCH` controls this: unset or `true` defers, `auto` loads everything upfront while definitions total under 10% of the context window, `auto:N` sets your own percentage, and `false` loads all upfront. `"alwaysLoad": true` on a server entry exempts that server. For those servers the MCP page speaks of "the standard 5-second connect timeout"; the docs do not say how that relates to the 30000 ms `MCP_TIMEOUT` default, so check your version.
+**Tool search** is on by default: "[Only tool names and server instructions load at session start](https://code.claude.com/docs/en/mcp)", and Claude loads a tool's full definition when it needs it. `ENABLE_TOOL_SEARCH` controls this: unset or `true` defers, `auto` loads everything upfront while definitions total under 10% of the context window, `auto:N` sets your own percentage, and `false` loads all upfront. `"alwaysLoad": true` on a server entry exempts that server. For those servers the MCP page speaks of "the standard 5-second connect timeout"; the docs do not say how that relates to [the 30000 ms](https://code.claude.com/docs/en/env-vars) `MCP_TIMEOUT` default, so check your version.
 
-**Why too many tools hurt.** Definitions cost tokens before any work starts: Anthropic reports "58 tools consuming approximately 55K tokens", and an 85% reduction with tool search in its own test. Similar names also get confused, for example `notification-send-user` and `notification-send-channel`. The cost docs give two more levers: prefer a CLI such as `gh`, `aws` or `gcloud` over an MCP server when one exists, and disable servers you are not using (`/mcp disable <name>`).
+**Why too many tools hurt.** Definitions cost tokens before any work starts: Anthropic reports "[58 tools consuming approximately 55K tokens](https://www.anthropic.com/research/advanced-tool-use)", and an 85% reduction with tool search in its own test. Similar names also get confused, for example `notification-send-user` and `notification-send-channel`. The cost docs give [two more levers](https://code.claude.com/docs/en/costs): prefer a CLI such as `gh`, `aws` or `gcloud` over an MCP server when one exists, and disable servers you are not using (`/mcp disable <name>`).
 
 ## Design rules for agent-facing tools
 
-1. **Few tools, built around tasks.** "More tools don't always lead to better outcomes." Prefer `search_contacts` to `list_contacts`, and one `schedule_event` to `list_users` plus `list_events` plus `create_event`.
+1. **Few tools, built around tasks.** "[More tools don't always lead to better outcomes.](https://www.anthropic.com/research/writing-tools-for-agents)" Prefer `search_contacts` to `list_contacts`, and one `schedule_event` to `list_users` plus `list_events` plus `create_event`.
 2. **Names that disambiguate.** Use a common prefix per service (`asana_search`, `jira_search`).
 3. **Bounded output.** Set a hard page cap that no argument can raise. Return meaning, not internal IDs. Offer a concise format when a detailed one is rarely needed.
 4. **Opaque cursors bound to the query.** A cursor from one query must not work on another.
-5. **Actionable errors.** Return failures as `isError` results that say what to change, "rather than opaque error codes or tracebacks".
+5. **Actionable errors.** [Return failures as](https://modelcontextprotocol.io/specification/latest/server/tools) `isError` results that say what to change, "rather than opaque error codes or tracebacks".
 6. **Returned strings are untrusted.** Text from files, tickets or web pages can contain instructions. Label it as data in the result.
 7. **Advertise only what the caller can use,** and return explicit handles instead of relying on session state.
 
 ## A minimal server in Python
 
-The official quickstart needs Python 3.10+ and the MCP Python SDK 2.0.0 or higher, and uses `uv`, a Python package and project manager. This server has one tool and applies rules 3 to 6. It is adapted from the quickstart and was run against `mcp` 2.3.0 (Nov 2026). Save the code as `notes_server.py` in the project folder.
+The official quickstart [needs Python 3.10+ and the MCP Python SDK 2.0.0 or higher](https://modelcontextprotocol.io/docs/develop/build-server), and uses `uv`, a Python package and project manager. This server has one tool and applies rules 3 to 6. It is adapted from the quickstart and was run against `mcp` 2.3.0 (Nov 2026). Save the code as `notes_server.py` in the project folder.
 
 ```bash
 uv init notes-server && cd notes-server
@@ -192,11 +192,11 @@ if __name__ == "__main__":
     mcp.run(transport="stdio")
 ```
 
-The SDK builds the tool definition from the type hints and the docstring, and checks arguments against that schema before your function runs. Raising `ToolError` produces an `isError` result whose text the model reads. Any other exception is treated as a crash: the model learns only that the call failed, and the traceback goes to your log. The cursor here is unsigned, which is acceptable because it only holds an offset into the caller's own query. Sign it (for example with an HMAC) if it ever carries something the caller must not forge.
+The SDK [builds the tool definition from the type hints and the docstring](https://modelcontextprotocol.io/docs/develop/build-server), and checks arguments against that schema before your function runs. Raising `ToolError` produces an `isError` result whose text the model reads. Any other exception [is treated as a crash](https://py.sdk.modelcontextprotocol.io/servers/handling-errors/): the model learns only that the call failed, and the traceback goes to your log. The cursor here is unsigned, which is acceptable because it only holds an offset into the caller's own query. Sign it (for example with an HMAC) if it ever carries something the caller must not forge.
 
 ## The same server in TypeScript
 
-The quickstart needs Node.js 20 or higher. Set `"type": "module"` in `package.json`, copy the quickstart's `tsconfig.json` (`Node16` modules, `rootDir` `./src`, `outDir` `./build`), save the code as `src/index.ts` and compile with `npx tsc`. This version was run against `@modelcontextprotocol/server` 2.4.0.
+The quickstart [needs Node.js 20 or higher](https://modelcontextprotocol.io/docs/develop/build-server). Set `"type": "module"` in `package.json`, copy the quickstart's `tsconfig.json` (`Node16` modules, `rootDir` `./src`, `outDir` `./build`), save the code as `src/index.ts` and compile with `npx tsc`. This version was run against `@modelcontextprotocol/server` 2.4.0.
 
 ```bash
 mkdir notes-ts && cd notes-ts && npm init -y
@@ -259,11 +259,11 @@ serveStdio(createServer, { onerror: (error) => console.error("notes server error
 console.error("notes server running on stdio"); // stderr is safe; stdout is the protocol channel
 ```
 
-`serveStdio` negotiates the protocol revision with each client. The quickstart warns that wiring the server by hand with `server.connect(new StdioServerTransport())` still compiles but serves only 2025-era clients.
+`serveStdio` [negotiates the protocol revision with each client](https://modelcontextprotocol.io/docs/develop/build-server). The quickstart warns that wiring the server by hand with `server.connect(new StdioServerTransport())` still compiles but serves only 2025-era clients.
 
 ## Test it, then register it
 
-The MCP Inspector CLI connects, sends one request, prints the result and exits. It defaults to the `legacy` protocol era, so run each check in both eras. A variable exported in your shell may not reach the server (it did not in this chapter's test run), so pass it with `-e`.
+The MCP Inspector CLI [connects, sends one request, prints the result and exits](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/cli). It defaults to the `legacy` protocol era, so run each check in both eras. A variable exported in your shell may not reach the server (it did not in this chapter's test run), so pass it with `-e`.
 
 ```bash
 npx @modelcontextprotocol/inspector --cli node build/index.js --protocol-era modern --method tools/list
@@ -272,7 +272,7 @@ npx @modelcontextprotocol/inspector --cli -e NOTES_DIR=/absolute/path/to/notes n
   --protocol-era modern --method tools/call --tool-name search_notes --tool-arg query=retry
 ```
 
-For the Python server replace `node build/index.js` with `uv run notes_server.py`. A call that returns `isError: true` still prints its payload but exits with code 5, which makes the CLI usable in CI. In Python you can also test in-process, with no subprocess (adapted from the SDK's testing page). Run `uv add --dev pytest`, save this as `test_notes_server.py` next to the server and run `uv run pytest`:
+For the Python server replace `node build/index.js` with `uv run notes_server.py`. A call that returns `isError: true` [still prints its payload but exits with code 5](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/cli), which makes the CLI usable in CI. In Python you can also test in-process, with no subprocess (adapted from [the SDK's testing page](https://py.sdk.modelcontextprotocol.io/get-started/testing/)). Run `uv add --dev pytest`, save this as `test_notes_server.py` next to the server and run `uv run pytest`:
 
 ```python
 import pytest
@@ -303,7 +303,7 @@ claude mcp add --env NOTES_DIR=/absolute/path/to/notes --transport stdio notes -
 claude mcp add --scope project --transport stdio notes-ts -- node /absolute/path/to/notes-ts/build/index.js
 ```
 
-To ship a server inside a plugin ([chapter 17](17-plugins-and-marketplaces.md)), put a `.mcp.json` at the plugin root. `${CLAUDE_PLUGIN_ROOT}` is the installed plugin directory, which changes on every update, and `${user_config.KEY}` reads an option the user set at install time. Options marked `sensitive` are kept in the OS credential store. The author's plugin ships its server in this shape:
+To ship a server inside a plugin ([chapter 17](17-plugins-and-marketplaces.md)), put a `.mcp.json` at the plugin root. `${CLAUDE_PLUGIN_ROOT}` is the installed plugin directory, which [changes on every update](https://code.claude.com/docs/en/plugins/manifest-reference), and `${user_config.KEY}` reads an option the user set at install time. Options marked `sensitive` are kept in the OS credential store. The author's plugin ships its server in this shape:
 
 ```json
 {
@@ -330,16 +330,16 @@ To ship a server inside a plugin ([chapter 17](17-plugins-and-marketplaces.md)),
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `! Needs authentication`, or `needs you to sign in again (run /mcp to re-authenticate)` | OAuth token missing, rejected or expired; a headless run cannot open a browser | `/mcp` and authenticate; `claude mcp login <name>` before `-p` runs; `--callback-port` or `--client-id` for pre-registered apps |
-| `Connection timed out at startup` | The server took longer than the 30-second startup timeout | `MCP_TIMEOUT=60000 claude`; run the server command by hand; `claude --debug=mcp` and read `~/.claude/debug/<session-id>.txt` |
-| Connected, but zero tools or a corrupted stream | A stdio server wrote logs to `stdout` | Log to `stderr` (`logging` in Python, `console.error` in Node) |
+| `! Needs authentication`, or `needs you to sign in again (run /mcp to re-authenticate)` | [OAuth token missing, rejected or expired](https://code.claude.com/docs/en/errors); a headless run cannot open a browser | `/mcp` and authenticate; `claude mcp login <name>` before `-p` runs; `--callback-port` or `--client-id` for pre-registered apps |
+| `Connection timed out at startup` | The server took longer than the [30-second startup timeout](https://code.claude.com/docs/en/mcp-quickstart) | `MCP_TIMEOUT=60000 claude`; run the server command by hand; `claude --debug=mcp` and read `~/.claude/debug/<session-id>.txt` |
+| Connected, but zero tools or a corrupted stream | [A stdio server wrote logs](https://modelcontextprotocol.io/docs/develop/build-server) to `stdout` | Log to `stderr` (`logging` in Python, `console.error` in Node) |
 | A server in `.mcp.json` never appears | File under `.claude/`, a `servers` key, a `url` without `type`, or no restart | Project root, `mcpServers`, `"type": "http"`, restart |
 | 401 from a remote server although a header is configured | A credential variable read as empty, or a rejected static header with no OAuth fallback | Use a dedicated variable name; fix the token; `headersHelper` |
 | The result is replaced by a file path | Over 25,000 tokens or 50,000 characters | Narrow the query or paginate; raise `MAX_MCP_OUTPUT_TOKENS` |
 | Wrong tool chosen, context full of definitions | Too many servers and tools | Leave tool search on; `/mcp disable <name>`; use a CLI instead |
 | A call dropped mid-run | Connection lost; the tool may have run | Check before repeating a write; `/mcp reconnect all` |
 
-If you cannot tell which extension is at fault, `claude --safe-mode` starts a session with your customizations disabled ([chapter 32](32-troubleshooting-common-problems.md)).
+If you cannot tell which extension is at fault, `claude --safe-mode` [starts a session with your customizations disabled](https://code.claude.com/docs/en/debug-your-config) ([chapter 32](32-troubleshooting-common-problems.md)).
 
 ## Checklist
 
