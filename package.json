@@ -12,5 +12,8 @@
     "markdown-it": "15.0.3",
     "pagedjs": "0.4.3",
     "puppeteer": "25.17.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }

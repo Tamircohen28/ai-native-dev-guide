@@ -38,7 +38,7 @@ Reading the book needs none of these.
 
 | Target | What it does | Needs |
 |---|---|---|
-| `make pdf` | Builds the whole book as one PDF, `dist/AI-Native Development.pdf`: a cover with the version, commit, license and build time, a table of contents with page numbers, page numbers at the bottom of every page, and PDF metadata. It then checks the metadata and that every internal link resolves | Node.js 20 or later, Python 3 with `pypdf` |
+| `make pdf` | Builds the whole book as one PDF, `dist/AI-Native Development.pdf`: a cover with the version, commit, license and build time, a table of contents with page numbers, page numbers at the bottom of every page, and PDF metadata. It then checks the metadata and that every internal link resolves | Node.js 22.12 or later, Python 3 with `pypdf` |
 | `make clean` | Also removes `dist/`, where the PDF is written | Nothing |
 
 Run `make agent:check` and `make check-book` before every pull request. The first is what CI will run; the second is the only one that proves the diagrams render. `make agent:check` does not include the documentation standard, so run `make lint` as well when you change `README.md` or `docs/`.

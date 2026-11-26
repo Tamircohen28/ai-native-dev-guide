@@ -69,7 +69,7 @@ PDF := dist/AI-Native Development.pdf
 # npm ci runs only when node_modules is missing; it downloads a headless Chrome
 # for puppeteer on first use. pypdf comes from requirements-pdf.txt.
 pdf: ## Build the whole book as one PDF: dist/AI-Native Development.pdf
-	@command -v node >/dev/null 2>&1 || { echo "node is required (Node.js 20 or later)"; exit 1; }
+	@command -v node >/dev/null 2>&1 || { echo "node is required (Node.js 22.12 or later)"; exit 1; }
 	@test -d node_modules/pagedjs || npm ci
 	@python3 -c 'import pypdf' 2>/dev/null || { \
 	  echo "pypdf is missing: python3 -m pip install -r requirements-pdf.txt"; exit 1; }
