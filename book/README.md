@@ -170,7 +170,7 @@ Any Markdown viewer that supports Mermaid will do: GitHub, VS Code's preview wit
 
 ## License
 
-© 2026 Tamir Cohen. The book, its figures, scripts and code examples are licensed under [CC BY-NC-SA 4.0](../LICENSE). You may share and adapt them for non-commercial purposes, with credit to the author, and anything you publish that builds on them must use the same license.
+© 2026 the author (see [LICENSE](../LICENSE) for the copyright holder). The book, its figures, scripts and code examples are licensed under [CC BY-NC-SA 4.0](../LICENSE). You may share and adapt them for non-commercial purposes, with credit to the author, and anything you publish that builds on them must use the same license.
 
 ---
 
