@@ -137,7 +137,7 @@
               "status": "native",
               "since": "2.0.0",
               "validation": "command -v claude",
-              "notes": "Claude Code's built-in Agent tool. This repo ships no .claude/agents/ definitions, so only the built-in subagent types are available; book chapter 12 shows how to add one. The validation only proves the CLI is present."
+              "notes": "Claude Code's built-in Agent tool. This repo ships no .claude/agents/ definitions, so only the built-in subagent types are available; book chapter 14 shows how to add one. The validation only proves the CLI is present."
             },
             "parallel_subagents": {
               "status": "native",
@@ -152,17 +152,17 @@
             },
             "hooks": {
               "status": "unsupported",
-              "notes": "No hooks are shipped: there is no .claude/settings.json (reserved for the owner) and no hooks/ directory. Claude Code supports hooks; book chapter 14 shows how to add them.",
+              "notes": "No hooks are shipped: there is no .claude/settings.json (reserved for the owner) and no hooks/ directory. Claude Code supports hooks; book chapter 16 shows how to add them.",
               "fallback": "The rules live in AGENTS.md (and .claude/rules/constraints.md for Claude Code); CI runs make agent:check."
             },
             "mcp": {
               "status": "unsupported",
-              "notes": "No .mcp.json is shipped, so this repo declares no MCP servers. Book chapters 10 and 11 cover adding one.",
+              "notes": "No .mcp.json is shipped, so this repo declares no MCP servers. Book chapters 12 and 13 cover adding one.",
               "fallback": "Use gh or another CLI through the shell."
             },
             "statusline": {
               "status": "unsupported",
-              "notes": "No status line script is shipped. Book chapter 16 covers configuring one.",
+              "notes": "No status line script is shipped. Book chapter 18 covers configuring one.",
               "fallback": "Cosmetic only; nothing depends on it."
             },
             "shell": {
@@ -185,7 +185,7 @@
             },
             "worktree_isolation": {
               "status": "emulated",
-              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 20 covers the workflow.",
+              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 25 covers the workflow.",
               "fallback": "Explicit git worktree add/remove steps."
             },
             "plugin_marketplace": {
@@ -450,7 +450,7 @@
             },
             "worktree_isolation": {
               "status": "emulated",
-              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 20 covers the workflow.",
+              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 25 covers the workflow.",
               "fallback": "Explicit git worktree add/remove steps."
             },
             "plugin_marketplace": {
@@ -598,7 +598,7 @@
             },
             "worktree_isolation": {
               "status": "emulated",
-              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 20 covers the workflow.",
+              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 25 covers the workflow.",
               "fallback": "Explicit git worktree add/remove steps."
             },
             "plugin_marketplace": {
@@ -748,7 +748,7 @@
             },
             "worktree_isolation": {
               "status": "emulated",
-              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 20 covers the workflow.",
+              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 25 covers the workflow.",
               "fallback": "Explicit git worktree add/remove steps."
             },
             "plugin_marketplace": {
@@ -900,7 +900,7 @@
             },
             "worktree_isolation": {
               "status": "emulated",
-              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 20 covers the workflow.",
+              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 25 covers the workflow.",
               "fallback": "Explicit git worktree add/remove steps."
             },
             "plugin_marketplace": {
