@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="717" viewBox="0 0 860 717" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+<title id="t">Over-eager guards were the most widespread friction: 26 of 37 sessions</title>
+<desc id="d">Guards that block or nag legitimate work: 26 of 37 sessions (199 hook blocks, plus 452 in subagents); Silent waits and the “status?” poke: 22 of 37 sessions (218 status pokes); Context bloat, compaction, lost instructions: 22 of 37 sessions (86 compactions); “Done” without evidence: 20 of 37 sessions (60 agent self-corrections); Shell traps: zsh, macOS, quoting: 19 of 37 sessions (36 errors, plus 112 in subagents); Approval friction: 17 of 37 sessions (blanket approval re-typed 33 times); Subagents that stall, die or return nothing: 16 of 37 sessions (52 runs ended blocked or partial); CI capacity: is it the code or the host?: 16 of 37 sessions (flaky-test or runner discussion); Bouncing manual work back to the owner: 14 of 37 sessions (“do it yourself” prompts (about 14 sessions)); Sessions that take hours: 10 of 37 sessions (slow / too-long complaints (about 10 sessions)); Scripted edits that silently corrupt: 9 of 37 sessions (18 inline-script edits denied by the safety check); Parallel agents and sessions colliding: 5 of 37 sessions (duplicate PRs or watchers mentioned); Usage and rate limits: 5 of 37 sessions (limit messages (about 5 sessions))</desc>
+<rect x="0.5" y="0.5" width="859" height="716" rx="10" fill="#ffffff" stroke="#0b0b0b" stroke-opacity="0.12"/>
+<text x="28" y="44" font-size="20" fill="#191919" font-weight="600">Over-eager guards were the most widespread friction: 26 of 37 sessions</text>
+<text x="28" y="67" font-size="13" fill="#666666">Sessions in which each friction category appeared, of 37 substantive sessions (regex counts, ±30%). Grey line: what was counted. 5</text>
+<text x="28" y="85" font-size="13" fill="#666666">categories reached more than half of the sessions; 5 categories with no per-session count are not plotted.</text>
+<line x1="525.5" y1="133" x2="525.5" y2="657" stroke="#e7e7e7" stroke-width="1"/>
+<text x="525.5" y="127" font-size="11.5" fill="#666666" text-anchor="middle">half</text>
+<line x1="750.5" y1="133" x2="750.5" y2="657" stroke="#e7e7e7" stroke-width="1"/>
+<text x="750.5" y="127" font-size="11.5" fill="#666666" text-anchor="middle">all 37</text>
+<path d="M300.5,149h312.2a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-312.2z" fill="#257de0"/>
+<text x="288.5" y="155" font-size="13" fill="#191919" text-anchor="end">Guards that block or nag legitimate work</text>
+<text x="288.5" y="170" font-size="11.5" fill="#666666" text-anchor="end">199 hook blocks, plus 452 in subagents</text>
+<text x="624.7" y="161.5" font-size="13" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" paint-order="stroke"><tspan fill="#191919" font-weight="600">26</tspan><tspan fill="#666666" dx="7">of 37</tspan></text>
+<path d="M300.5,189h263.6a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-263.6z" fill="#257de0"/>
+<text x="288.5" y="195" font-size="13" fill="#191919" text-anchor="end">Silent waits and the “status?” poke</text>
+<text x="288.5" y="210" font-size="11.5" fill="#666666" text-anchor="end">218 status pokes</text>
+<text x="576.1" y="201.5" font-size="13" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" paint-order="stroke"><tspan fill="#191919" font-weight="600">22</tspan><tspan fill="#666666" dx="7">of 37</tspan></text>
+<path d="M300.5,229h263.6a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-263.6z" fill="#257de0"/>
+<text x="288.5" y="235" font-size="13" fill="#191919" text-anchor="end">Context bloat, compaction, lost instructions</text>
+<text x="288.5" y="250" font-size="11.5" fill="#666666" text-anchor="end">86 compactions</text>
+<text x="576.1" y="241.5" font-size="13" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" paint-order="stroke"><tspan fill="#191919" font-weight="600">22</tspan><tspan fill="#666666" dx="7">of 37</tspan></text>
+<path d="M300.5,269h239.2a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-239.2z" fill="#257de0"/>
+<text x="288.5" y="275" font-size="13" fill="#191919" text-anchor="end">“Done” without evidence</text>
+<text x="288.5" y="290" font-size="11.5" fill="#666666" text-anchor="end">60 agent self-corrections</text>
+<text x="551.8" y="281.5" font-size="13" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" paint-order="stroke"><tspan fill="#191919" font-weight="600">20</tspan><tspan fill="#666666" dx="7">of 37</tspan></text>
+<path d="M300.5,309h227.1a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-227.1z" fill="#257de0"/>
+<text x="288.5" y="315" font-size="13" fill="#191919" text-anchor="end">Shell traps: zsh, macOS, quoting</text>
+<text x="288.5" y="330" font-size="11.5" fill="#666666" text-anchor="end">36 errors, plus 112 in subagents</text>
+<text x="539.6" y="321.5" font-size="13" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" paint-order="stroke"><tspan fill="#191919" font-weight="600">19</tspan><tspan fill="#666666" dx="7">of 37</tspan></text>
+<path d="M300.5,349h202.8a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-202.8z" fill="#257de0"/>
+<text x="288.5" y="355" font-size="13" fill="#191919" text-anchor="end">Approval friction</text>
+<text x="288.5" y="370" font-size="11.5" fill="#666666" text-anchor="end">blanket approval re-typed 33 times</text>
+<text x="515.3" y="361.5" font-size="13" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" paint-order="stroke"><tspan fill="#191919" font-weight="600">17</tspan><tspan fill="#666666" dx="7">of 37</tspan></text>
+<path d="M300.5,389h190.6a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-190.6z" fill="#257de0"/>
+<text x="288.5" y="395" font-size="13" fill="#191919" text-anchor="end">Subagents that stall, die or return nothing</text>
+<text x="288.5" y="410" font-size="11.5" fill="#666666" text-anchor="end">52 runs ended blocked or partial</text>
+<text x="503.1" y="401.5" font-size="13" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" paint-order="stroke"><tspan fill="#191919" font-weight="600">16</tspan><tspan fill="#666666" dx="7">of 37</tspan></text>
+<path d="M300.5,429h190.6a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-190.6z" fill="#257de0"/>
+<text x="288.5" y="435" font-size="13" fill="#191919" text-anchor="end">CI capacity: is it the code or the host?</text>
+<text x="288.5" y="450" font-size="11.5" fill="#666666" text-anchor="end">flaky-test or runner discussion</text>
+<text x="503.1" y="441.5" font-size="13" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" paint-order="stroke"><tspan fill="#191919" font-weight="600">16</tspan><tspan fill="#666666" dx="7">of 37</tspan></text>
+<path d="M300.5,469h166.3a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-166.3z" fill="#257de0"/>
+<text x="288.5" y="475" font-size="13" fill="#191919" text-anchor="end">Bouncing manual work back to the owner</text>
+<text x="288.5" y="490" font-size="11.5" fill="#666666" text-anchor="end">“do it yourself” prompts (about 14 sessions)</text>
+<text x="478.8" y="481.5" font-size="13" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" paint-order="stroke"><tspan fill="#191919" font-weight="600">14</tspan><tspan fill="#666666" dx="7">of 37</tspan></text>
+<path d="M300.5,509h117.6a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-117.6z" fill="#257de0"/>
+<text x="288.5" y="515" font-size="13" fill="#191919" text-anchor="end">Sessions that take hours</text>
+<text x="288.5" y="530" font-size="11.5" fill="#666666" text-anchor="end">slow / too-long complaints (about 10 sessions)</text>
+<text x="430.1" y="521.5" font-size="13" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" paint-order="stroke"><tspan fill="#191919" font-weight="600">10</tspan><tspan fill="#666666" dx="7">of 37</tspan></text>
+<path d="M300.5,549h105.5a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-105.5z" fill="#257de0"/>
+<text x="288.5" y="555" font-size="13" fill="#191919" text-anchor="end">Scripted edits that silently corrupt</text>
+<text x="288.5" y="570" font-size="11.5" fill="#666666" text-anchor="end">18 inline-script edits denied by the safety check</text>
+<text x="418" y="561.5" font-size="13" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" paint-order="stroke"><tspan fill="#191919" font-weight="600">9</tspan><tspan fill="#666666" dx="7">of 37</tspan></text>
+<path d="M300.5,589h56.8a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-56.8z" fill="#257de0"/>
+<text x="288.5" y="595" font-size="13" fill="#191919" text-anchor="end">Parallel agents and sessions colliding</text>
+<text x="288.5" y="610" font-size="11.5" fill="#666666" text-anchor="end">duplicate PRs or watchers mentioned</text>
+<text x="369.3" y="601.5" font-size="13" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" paint-order="stroke"><tspan fill="#191919" font-weight="600">5</tspan><tspan fill="#666666" dx="7">of 37</tspan></text>
+<path d="M300.5,629h56.8a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-56.8z" fill="#257de0"/>
+<text x="288.5" y="635" font-size="13" fill="#191919" text-anchor="end">Usage and rate limits</text>
+<text x="288.5" y="650" font-size="11.5" fill="#666666" text-anchor="end">limit messages (about 5 sessions)</text>
+<text x="369.3" y="641.5" font-size="13" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" paint-order="stroke"><tspan fill="#191919" font-weight="600">5</tspan><tspan fill="#666666" dx="7">of 37</tspan></text>
+<line x1="300.5" y1="133" x2="300.5" y2="661" stroke="#c2c2c2" stroke-width="1"/>
+<line x1="28" y1="681" x2="832" y2="681" stroke="#e7e7e7" stroke-width="1"/>
+<text x="28" y="702" font-size="11.5" fill="#666666">Field data: one developer, ~4 weeks of Claude Code transcripts, Nov 2026</text>
+</svg>

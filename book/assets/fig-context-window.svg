@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="719" viewBox="0 0 960 719" role="img" aria-labelledby="t d">
+<title id="t">Anatomy of a context window</title>
+<desc id="d">Stacked bar of what fills a Claude Code context window: system prompt, tool definitions, CLAUDE.md and memory, skill descriptions, conversation messages, tool results, free space and the output reserve. Illustrative, not to scale.</desc>
+<rect x="0.75" y="0.75" width="958.5" height="717.5" rx="14" fill="#F5F2EA" stroke="#D9D2C2" stroke-width="1.5"/>
+<text x="32" y="48" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#1B2430">Anatomy of a context window</text>
+<text x="32" y="73" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#465062">Everything a Claude Code session sends to the model on each request. Illustrative, not to scale.</text>
+<rect x="54" y="104" width="148" height="52" rx="4" fill="#2B5BC7"/>
+<path d="M208,130 L222,130" fill="none" stroke="#C9C1AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="232" y="126.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">System prompt</text>
+<text x="232" y="145.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">Claude Code's own instructions, plus the output style.</text>
+<rect x="54" y="159" width="148" height="68" rx="4" fill="#5179D5"/>
+<path d="M208,193 L222,193" fill="none" stroke="#C9C1AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="232" y="180.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">Tool definitions</text>
+<text x="232" y="199.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">Built-in tools plus MCP. With tool search on (the default),</text>
+<text x="232" y="216.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">only MCP tool names and server instructions load at start.</text>
+<rect x="54" y="230" width="148" height="68" rx="4" fill="#7E9CE2"/>
+<path d="M208,264 L222,264" fill="none" stroke="#C9C1AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="232" y="251.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="14" fill="#1B2430">CLAUDE.md</tspan><tspan>, rules, auto memory</tspan></text>
+<text x="232" y="270.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">Delivered as a user message after the system prompt.</text>
+<text x="232" y="287.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">MEMORY.md</tspan><tspan>: the first 200 lines or 25KB.</tspan></text>
+<rect x="54" y="301" width="148" height="52" rx="4" fill="#B0C3EF"/>
+<path d="M208,327 L222,327" fill="none" stroke="#C9C1AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="232" y="323.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">Skill descriptions</text>
+<text x="232" y="342.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">Descriptions only. A skill's body loads when it is invoked.</text>
+<rect x="54" y="356" width="148" height="86" rx="4" fill="#D08A2A"/>
+<path d="M208,399 L222,399" fill="none" stroke="#C9C1AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="232" y="395.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">Conversation messages</text>
+<text x="232" y="414.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">Your prompts and the model's replies, earlier thinking included.</text>
+<rect x="54" y="445" width="148" height="86" rx="4" fill="#E8B66C"/>
+<path d="M208,488 L222,488" fill="none" stroke="#C9C1AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="232" y="484.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">Tool results</text>
+<text x="232" y="503.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">File reads, command output, MCP responses, subagent summaries.</text>
+<rect x="54.75" y="534.75" width="146.5" height="66.5" rx="4" fill="#FFFEFB" stroke="#58616F" stroke-width="1.5" stroke-dasharray="5 4"/>
+<path d="M208,568 L222,568" fill="none" stroke="#C9C1AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="232" y="564.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">Free space</text>
+<text x="232" y="583.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">What is left for the turns still to come.</text>
+<rect x="54.75" y="605.75" width="146.5" height="50.5" rx="4" fill="#EEE3F7" stroke="#7A45B0" stroke-width="1.5"/>
+<path d="M208,631 L222,631" fill="none" stroke="#C9C1AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="232" y="627.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">Output reserve</text>
+<text x="232" y="646.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">The reply being generated counts toward the window too.</text>
+<path d="M36,104 L36,657" fill="none" stroke="#58616F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M31,104 L41,104" fill="none" stroke="#58616F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M31,657 L41,657" fill="none" stroke="#58616F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="27" y="380.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#58616F" text-anchor="middle" transform="rotate(-90 27 380.5)">one context window</text>
+<path d="M692,108 H700 V349 H692" fill="none" stroke="#2B5BC7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="716" y="214.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#2B5BC7">Loaded at session start</text>
+<text x="716" y="234.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">Counts on every request,</text>
+<text x="716" y="251.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">cached or not.</text>
+<path d="M692,360 H700 V527 H692" fill="none" stroke="#9A5205" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="716" y="429.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#9A5205">Grows with every turn</text>
+<text x="716" y="449.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">Each request resends the history;</text>
+<text x="716" y="466.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">/compact</tspan><tspan> summarizes it.</tspan></text>
+<path d="M692,538 H700 V653 H692" fill="none" stroke="#58616F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="716" y="581.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#58616F">Headroom</text>
+<text x="716" y="601.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">As it runs out, Claude Code</text>
+<text x="716" y="618.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">compacts automatically.</text>
+<text x="32" y="695" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#58616F"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#465062">/context</tspan><tspan> shows current usage as a colored grid; </tspan><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#465062">/context all</tspan><tspan> expands the per-item breakdown.</tspan></text>
+</svg>

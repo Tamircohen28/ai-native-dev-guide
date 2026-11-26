@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="526" viewBox="0 0 960 526" role="img" aria-labelledby="t d">
+<title id="t">Guardrails in depth</title>
+<desc id="d">Five nested layers, outermost to innermost: human review and CI gates, hooks, sandbox, permission rules and modes, and instructions. The first four are enforced; instructions are advisory only.</desc>
+<rect x="0.75" y="0.75" width="958.5" height="524.5" rx="14" fill="#F5F2EA" stroke="#D9D2C2" stroke-width="1.5"/>
+<text x="32" y="48" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#1B2430">Guardrails in depth</text>
+<text x="32" y="73" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#465062">Five layers between what the model intends and your main branch. Only the innermost is advisory.</text>
+<rect x="24" y="96" width="912" height="374" rx="12" fill="#EAE4D6" stroke="#465062" stroke-width="1.5"/>
+<text x="42" y="121" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">Human review and CI gates</text>
+<rect x="719.578" y="105" width="202.422" height="24" rx="12" fill="#09736A"/>
+<text x="820.789" y="121.55" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">enforced outside the session</text>
+<text x="42" y="142" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">Branch protection, a person who approves the merge, CI as the real gate.</text>
+<rect x="48" y="156" width="864" height="300" rx="12" fill="#EFEADD" stroke="#465062" stroke-width="1.5"/>
+<text x="66" y="181" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">Hooks</text>
+<rect x="736.207" y="165" width="161.793" height="24" rx="12" fill="#09736A"/>
+<text x="817.104" y="181.55" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">enforced by your code</text>
+<text x="66" y="202" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062"><tspan>Your code on lifecycle events. A </tspan><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">PreToolUse</tspan><tspan> deny overrides every permission mode; only exit code 2 or a JSON deny blocks.</tspan></text>
+<rect x="72" y="216" width="816" height="226" rx="12" fill="#F4F0E6" stroke="#465062" stroke-width="1.5"/>
+<text x="90" y="241" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">Sandbox</text>
+<rect x="730.522" y="225" width="143.478" height="24" rx="12" fill="#09736A"/>
+<text x="802.261" y="241.55" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">enforced by the OS</text>
+<text x="90" y="262" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">OS-level filesystem and network limits, for shell commands only. Off by default.</text>
+<rect x="96" y="276" width="768" height="152" rx="12" fill="#F9F6EF" stroke="#465062" stroke-width="1.5"/>
+<text x="114" y="301" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">Permission rules and modes</text>
+<rect x="676.255" y="285" width="173.745" height="24" rx="12" fill="#09736A"/>
+<text x="763.127" y="301.55" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">enforced by the harness</text>
+<text x="114" y="322" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">allow</tspan><tspan>, </tspan><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">ask</tspan><tspan> and </tspan><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">deny</tspan><tspan> rules; </tspan><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">deny</tspan><tspan> holds in every mode. Rules match text, not intent.</tspan></text>
+<rect x="120" y="336" width="720" height="78" rx="12" fill="#FFFEFB" stroke="#9A5205" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="138" y="364" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">Instructions</text>
+<rect x="722.377" y="347" width="103.623" height="24" rx="12" fill="#9A5205"/>
+<text x="774.189" y="363.55" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" text-anchor="middle">advisory only</text>
+<text x="138" y="385" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">CLAUDE.md</tspan><tspan> and rules are context, not configuration. No guarantee of strict compliance.</tspan></text>
+<text x="138" y="402" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">To block an action regardless of what the model decides, move it one layer out.</text>
+<path d="M32,500 L62,500" fill="none" stroke="#465062" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="70" y="504.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">enforced: holds whatever the model decides</text>
+<path d="M384,500 L414,500" fill="none" stroke="#9A5205" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="7 5"/>
+<text x="422" y="504.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">advisory: guidance the model may not follow</text>
+</svg>

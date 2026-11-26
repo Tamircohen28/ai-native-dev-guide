@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600" role="img" aria-labelledby="t d">
+<title id="t">From zero to hero: six levels</title>
+<desc id="d">A six-rung ladder: 0 autocomplete and chat, 1 single interactive agent session, 2 project memory and permissions, 3 extended harness, 4 parallel and multi-agent work, 5 agents in the pipeline. Each rung notes what changes for the developer.</desc>
+<rect x="0.75" y="0.75" width="958.5" height="598.5" rx="14" fill="#F5F2EA" stroke="#D9D2C2" stroke-width="1.5"/>
+<text x="32" y="48" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#1B2430">From zero to hero: six levels of AI-native development</text>
+<text x="32" y="73" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#465062">Each level keeps everything below it. What changes is where your attention goes.</text>
+<path d="M52,98 L52,572" fill="none" stroke="#465062" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M112,98 L112,572" fill="none" stroke="#465062" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M52,135 L112,135" fill="none" stroke="#465062" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M116,135 L150,135" fill="none" stroke="#C9C1AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 4"/>
+<circle cx="82" cy="135" r="18" fill="#234FB4" stroke="#F5F2EA" stroke-width="3"/>
+<text x="82" y="140.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">5</text>
+<rect x="150" y="100" width="786" height="70" rx="10" fill="#FFFEFB" stroke="#E7E1D3" stroke-width="1.5"/>
+<rect x="150" y="100" width="8" height="70" rx="4" fill="#234FB4"/>
+<text x="176" y="129" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="600" fill="#1B2430">Agents in the pipeline</text>
+<text x="347.087" y="129" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#58616F">headless, CI, gates, observability</text>
+<text x="176" y="152" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#465062">Agents run unattended. You design the gates and watch the signals.</text>
+<path d="M52,215 L112,215" fill="none" stroke="#465062" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M116,215 L150,215" fill="none" stroke="#C9C1AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 4"/>
+<circle cx="82" cy="215" r="18" fill="#3F6BCB" stroke="#F5F2EA" stroke-width="3"/>
+<text x="82" y="220.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">4</text>
+<rect x="150" y="180" width="786" height="70" rx="10" fill="#FFFEFB" stroke="#E7E1D3" stroke-width="1.5"/>
+<rect x="150" y="180" width="8" height="70" rx="4" fill="#3F6BCB"/>
+<text x="176" y="209" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="600" fill="#1B2430">Parallel and multi-agent work</text>
+<text x="401.832" y="209" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#58616F">worktrees, orchestration, workflows</text>
+<text x="176" y="232" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#465062">Several agents work at once. You write briefs and review results.</text>
+<path d="M52,295 L112,295" fill="none" stroke="#465062" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M116,295 L150,295" fill="none" stroke="#C9C1AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 4"/>
+<circle cx="82" cy="295" r="18" fill="#7092E0" stroke="#F5F2EA" stroke-width="3"/>
+<text x="82" y="300.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B2430" text-anchor="middle">3</text>
+<rect x="150" y="260" width="786" height="70" rx="10" fill="#FFFEFB" stroke="#E7E1D3" stroke-width="1.5"/>
+<rect x="150" y="260" width="8" height="70" rx="4" fill="#7092E0"/>
+<text x="176" y="289" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="600" fill="#1B2430">Extended harness</text>
+<text x="322.426" y="289" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#58616F">MCP, skills, hooks, subagents</text>
+<text x="176" y="312" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#465062">The agent gains tools and guardrails you built. Rules become code.</text>
+<path d="M52,375 L112,375" fill="none" stroke="#465062" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M116,375 L150,375" fill="none" stroke="#C9C1AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 4"/>
+<circle cx="82" cy="375" r="18" fill="#9DB6EC" stroke="#F5F2EA" stroke-width="3"/>
+<text x="82" y="380.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B2430" text-anchor="middle">2</text>
+<rect x="150" y="340" width="786" height="70" rx="10" fill="#FFFEFB" stroke="#E7E1D3" stroke-width="1.5"/>
+<rect x="150" y="340" width="8" height="70" rx="4" fill="#9DB6EC"/>
+<text x="176" y="369" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="600" fill="#1B2430">Project memory and permissions</text>
+<text x="429.204" y="369" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#58616F"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#58616F">CLAUDE.md</tspan><tspan>, settings</tspan></text>
+<text x="176" y="392" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#465062">The repo carries your conventions and limits. You stop repeating yourself.</text>
+<path d="M52,455 L112,455" fill="none" stroke="#465062" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M116,455 L150,455" fill="none" stroke="#C9C1AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 4"/>
+<circle cx="82" cy="455" r="18" fill="#C3D2F4" stroke="#F5F2EA" stroke-width="3"/>
+<text x="82" y="460.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B2430" text-anchor="middle">1</text>
+<rect x="150" y="420" width="786" height="70" rx="10" fill="#FFFEFB" stroke="#E7E1D3" stroke-width="1.5"/>
+<rect x="150" y="420" width="8" height="70" rx="4" fill="#C3D2F4"/>
+<text x="176" y="449" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="600" fill="#1B2430">Single interactive agent session</text>
+<text x="176" y="472" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#465062">The agent reads, edits and runs commands. You steer and approve.</text>
+<path d="M52,535 L112,535" fill="none" stroke="#465062" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M116,535 L150,535" fill="none" stroke="#C9C1AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 4"/>
+<circle cx="82" cy="535" r="18" fill="#E1E9FA" stroke="#F5F2EA" stroke-width="3"/>
+<text x="82" y="540.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B2430" text-anchor="middle">0</text>
+<rect x="150" y="500" width="786" height="70" rx="10" fill="#FFFEFB" stroke="#E7E1D3" stroke-width="1.5"/>
+<rect x="150" y="500" width="8" height="70" rx="4" fill="#E1E9FA"/>
+<text x="176" y="529" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15.5" font-weight="600" fill="#1B2430">Autocomplete and chat</text>
+<text x="176" y="552" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#465062">You write the code. The model suggests and explains.</text>
+</svg>

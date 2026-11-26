@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="509" viewBox="0 0 860 509" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+<title id="t">Two agent types take 62% of all subagent launches</title>
+<desc id="d">implementer: 414 (32.8%); general-purpose: 371 (29.4%); security-reviewer: 72 (5.7%); backend-engineer: 71 (5.6%); Explore: 50 (4.0%); spec-reviewer: 38 (3.0%); frontend-engineer: 27 (2.1%); test-engineer: 26 (2.1%); research-agent: 26 (2.1%); (no type given): 20 (1.6%); Other (19 types): 147 (11.6%)</desc>
+<rect x="0.5" y="0.5" width="859" height="508" rx="10" fill="#ffffff" stroke="#0b0b0b" stroke-opacity="0.12"/>
+<text x="28" y="44" font-size="20" fill="#191919" font-weight="600">Two agent types take 62% of all subagent launches</text>
+<text x="28" y="67" font-size="13" fill="#666666">Agent-tool calls by subagent type (n = 1,262). Plugin namespace prefixes are dropped and same-named roles merged, giving 29</text>
+<text x="28" y="85" font-size="13" fill="#666666">types; the 10 most used are shown.</text>
+<path d="M148.7,126h516a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-516z" fill="#257de0"/>
+<text x="136.7" y="138.5" font-size="13" fill="#191919" text-anchor="end">implementer</text>
+<text x="676.7" y="138.5" font-size="13"><tspan fill="#191919" font-weight="600">414</tspan><tspan fill="#666666" dx="7">32.8%</tspan></text>
+<path d="M148.7,156h462a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-462z" fill="#257de0"/>
+<text x="136.7" y="168.5" font-size="13" fill="#191919" text-anchor="end">general-purpose</text>
+<text x="622.7" y="168.5" font-size="13"><tspan fill="#191919" font-weight="600">371</tspan><tspan fill="#666666" dx="7">29.4%</tspan></text>
+<path d="M148.7,186h86.4a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-86.4z" fill="#257de0"/>
+<text x="136.7" y="198.5" font-size="13" fill="#191919" text-anchor="end">security-reviewer</text>
+<text x="247.1" y="198.5" font-size="13"><tspan fill="#191919" font-weight="600">72</tspan><tspan fill="#666666" dx="7">5.7%</tspan></text>
+<path d="M148.7,216h85.2a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-85.2z" fill="#257de0"/>
+<text x="136.7" y="228.5" font-size="13" fill="#191919" text-anchor="end">backend-engineer</text>
+<text x="245.9" y="228.5" font-size="13"><tspan fill="#191919" font-weight="600">71</tspan><tspan fill="#666666" dx="7">5.6%</tspan></text>
+<path d="M148.7,246h58.8a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-58.8z" fill="#257de0"/>
+<text x="136.7" y="258.5" font-size="13" fill="#191919" text-anchor="end">Explore</text>
+<text x="219.5" y="258.5" font-size="13"><tspan fill="#191919" font-weight="600">50</tspan><tspan fill="#666666" dx="7">4.0%</tspan></text>
+<path d="M148.7,276h43.7a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-43.7z" fill="#257de0"/>
+<text x="136.7" y="288.5" font-size="13" fill="#191919" text-anchor="end">spec-reviewer</text>
+<text x="204.4" y="288.5" font-size="13"><tspan fill="#191919" font-weight="600">38</tspan><tspan fill="#666666" dx="7">3.0%</tspan></text>
+<path d="M148.7,306h29.9a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-29.9z" fill="#257de0"/>
+<text x="136.7" y="318.5" font-size="13" fill="#191919" text-anchor="end">frontend-engineer</text>
+<text x="190.6" y="318.5" font-size="13"><tspan fill="#191919" font-weight="600">27</tspan><tspan fill="#666666" dx="7">2.1%</tspan></text>
+<path d="M148.7,336h28.7a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-28.7z" fill="#257de0"/>
+<text x="136.7" y="348.5" font-size="13" fill="#191919" text-anchor="end">test-engineer</text>
+<text x="189.3" y="348.5" font-size="13"><tspan fill="#191919" font-weight="600">26</tspan><tspan fill="#666666" dx="7">2.1%</tspan></text>
+<path d="M148.7,366h28.7a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-28.7z" fill="#257de0"/>
+<text x="136.7" y="378.5" font-size="13" fill="#191919" text-anchor="end">research-agent</text>
+<text x="189.3" y="378.5" font-size="13"><tspan fill="#191919" font-weight="600">26</tspan><tspan fill="#666666" dx="7">2.1%</tspan></text>
+<path d="M148.7,396h21.1a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-21.1z" fill="#257de0"/>
+<text x="136.7" y="408.5" font-size="13" fill="#191919" text-anchor="end">(no type given)</text>
+<text x="181.8" y="408.5" font-size="13"><tspan fill="#191919" font-weight="600">20</tspan><tspan fill="#666666" dx="7">1.6%</tspan></text>
+<path d="M148.7,426h180.6a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-180.6z" fill="#c2c2c2"/>
+<text x="136.7" y="438.5" font-size="13" fill="#191919" text-anchor="end">Other (19 types)</text>
+<text x="341.3" y="438.5" font-size="13"><tspan fill="#191919" font-weight="600">147</tspan><tspan fill="#666666" dx="7">11.6%</tspan></text>
+<line x1="148.7" y1="115" x2="148.7" y2="453" stroke="#c2c2c2" stroke-width="1"/>
+<line x1="28" y1="473" x2="832" y2="473" stroke="#e7e7e7" stroke-width="1"/>
+<text x="28" y="494" font-size="11.5" fill="#666666">Field data: one developer, ~4 weeks of Claude Code transcripts, Nov 2026</text>
+</svg>

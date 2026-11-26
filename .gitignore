@@ -1,0 +1,44 @@
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+
+# Build
+dist/
+build/
+.build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python (scripts/check-book.py)
+__pycache__/
+*.pyc
+
+# Node (only ever present if the Mermaid CLI is installed locally)
+node_modules/
+
+# Claude Code and agent worktrees
+.dev-files/
+.claude/worktrees/
+.claude/settings.local.json
+.worktrees/
+.agent-worktrees/
+
+# Scratch render output
+/tmp/
+*.mmd.svg
+
+# The book and its figures are content: nothing under them is ignored,
+# apart from OS and interpreter noise.
+!/book/**
+!/assets/**
+/book/**/.DS_Store
+/assets/**/.DS_Store
+/book/**/Thumbs.db
+/assets/**/Thumbs.db
+/book/**/__pycache__/
+/assets/**/__pycache__/

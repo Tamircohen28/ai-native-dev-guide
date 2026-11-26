@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="539" viewBox="0 0 860 539" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+<title id="t">82% of all tool calls are shell commands</title>
+<desc id="d">Bash (shell commands): 91,450 (82.0%); Edit: 5,840 (5.2%); Read: 3,415 (3.1%); Write: 3,138 (2.8%); Agent coordination (messages, monitors): 2,542 (2.3%); MCP tools (all servers): 1,822 (1.6%); Agent (subagent launch): 1,262 (1.1%); WebSearch + WebFetch: 942 (0.8%); Grep + Glob: 207 (0.2%); Skill: 184 (0.2%); Unavailable tool names, called anyway: 114 (0.1%); Other built-in tools: 641 (0.6%)</desc>
+<rect x="0.5" y="0.5" width="859" height="538" rx="10" fill="#ffffff" stroke="#0b0b0b" stroke-opacity="0.12"/>
+<text x="28" y="44" font-size="20" fill="#191919" font-weight="600">82% of all tool calls are shell commands</text>
+<text x="28" y="67" font-size="13" fill="#666666">Tool calls by tool group, main thread and subagents combined (n = 111,557; one tool call = one tool_use block). Number, then share</text>
+<text x="28" y="85" font-size="13" fill="#666666">of all calls.</text>
+<path d="M288.5,126h425.2a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-425.2z" fill="#257de0"/>
+<text x="276.5" y="138.5" font-size="13" fill="#191919" text-anchor="end">Bash (shell commands)</text>
+<text x="725.7" y="138.5" font-size="13"><tspan fill="#191919" font-weight="600">91,450</tspan><tspan fill="#666666" dx="7">82.0%</tspan></text>
+<path d="M288.5,156h23.4a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-23.4z" fill="#257de0"/>
+<text x="276.5" y="168.5" font-size="13" fill="#191919" text-anchor="end">Edit</text>
+<text x="323.9" y="168.5" font-size="13"><tspan fill="#191919" font-weight="600">5,840</tspan><tspan fill="#666666" dx="7">5.2%</tspan></text>
+<path d="M288.5,186h12a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-12z" fill="#257de0"/>
+<text x="276.5" y="198.5" font-size="13" fill="#191919" text-anchor="end">Read</text>
+<text x="312.6" y="198.5" font-size="13"><tspan fill="#191919" font-weight="600">3,415</tspan><tspan fill="#666666" dx="7">3.1%</tspan></text>
+<path d="M288.5,216h10.7a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-10.7z" fill="#257de0"/>
+<text x="276.5" y="228.5" font-size="13" fill="#191919" text-anchor="end">Write</text>
+<text x="311.3" y="228.5" font-size="13"><tspan fill="#191919" font-weight="600">3,138</tspan><tspan fill="#666666" dx="7">2.8%</tspan></text>
+<path d="M288.5,246h7.9a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-7.9z" fill="#257de0"/>
+<text x="276.5" y="258.5" font-size="13" fill="#191919" text-anchor="end">Agent coordination (messages, monitors)</text>
+<text x="308.5" y="258.5" font-size="13"><tspan fill="#191919" font-weight="600">2,542</tspan><tspan fill="#666666" dx="7">2.3%</tspan></text>
+<path d="M288.5,276h4.6a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-4.6z" fill="#257de0"/>
+<text x="276.5" y="288.5" font-size="13" fill="#191919" text-anchor="end">MCP tools (all servers)</text>
+<text x="305.1" y="288.5" font-size="13"><tspan fill="#191919" font-weight="600">1,822</tspan><tspan fill="#666666" dx="7">1.6%</tspan></text>
+<rect x="288.5" y="306" width="5.9" height="16" fill="#257de0"/>
+<text x="276.5" y="318.5" font-size="13" fill="#191919" text-anchor="end">Agent (subagent launch)</text>
+<text x="302.5" y="318.5" font-size="13"><tspan fill="#191919" font-weight="600">1,262</tspan><tspan fill="#666666" dx="7">1.1%</tspan></text>
+<rect x="288.5" y="336" width="4.4" height="16" fill="#257de0"/>
+<text x="276.5" y="348.5" font-size="13" fill="#191919" text-anchor="end">WebSearch + WebFetch</text>
+<text x="301" y="348.5" font-size="13"><tspan fill="#191919" font-weight="600">942</tspan><tspan fill="#666666" dx="7">0.8%</tspan></text>
+<rect x="288.5" y="366" width="2" height="16" fill="#257de0"/>
+<text x="276.5" y="378.5" font-size="13" fill="#191919" text-anchor="end">Grep + Glob</text>
+<text x="298.5" y="378.5" font-size="13"><tspan fill="#191919" font-weight="600">207</tspan><tspan fill="#666666" dx="7">0.2%</tspan></text>
+<rect x="288.5" y="396" width="2" height="16" fill="#257de0"/>
+<text x="276.5" y="408.5" font-size="13" fill="#191919" text-anchor="end">Skill</text>
+<text x="298.5" y="408.5" font-size="13"><tspan fill="#191919" font-weight="600">184</tspan><tspan fill="#666666" dx="7">0.2%</tspan></text>
+<rect x="288.5" y="426" width="2" height="16" fill="#257de0"/>
+<text x="276.5" y="438.5" font-size="13" fill="#191919" text-anchor="end">Unavailable tool names, called anyway</text>
+<text x="298.5" y="438.5" font-size="13"><tspan fill="#191919" font-weight="600">114</tspan><tspan fill="#666666" dx="7">0.1%</tspan></text>
+<rect x="288.5" y="456" width="3" height="16" fill="#c2c2c2"/>
+<text x="276.5" y="468.5" font-size="13" fill="#191919" text-anchor="end">Other built-in tools</text>
+<text x="299.5" y="468.5" font-size="13"><tspan fill="#191919" font-weight="600">641</tspan><tspan fill="#666666" dx="7">0.6%</tspan></text>
+<line x1="288.5" y1="115" x2="288.5" y2="483" stroke="#c2c2c2" stroke-width="1"/>
+<line x1="28" y1="503" x2="832" y2="503" stroke="#e7e7e7" stroke-width="1"/>
+<text x="28" y="524" font-size="11.5" fill="#666666">Field data: one developer, ~4 weeks of Claude Code transcripts, Nov 2026</text>
+</svg>

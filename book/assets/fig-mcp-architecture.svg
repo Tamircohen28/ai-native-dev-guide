@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="690" viewBox="0 0 960 690" role="img" aria-labelledby="t d">
+<title id="t">How MCP connects an application to its tools</title>
+<desc id="d">An application connects through an MCP client to a local MCP server over stdio and to a remote MCP server over Streamable HTTP. Servers expose tools, resources and prompts. The client sends tools/list, then tools/call.</desc>
+<defs><marker id="ah1b2430" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1.4 L9.2,5 L1,8.6 Z" fill="#1B2430"/></marker><marker id="ah465062" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto"><path d="M1,1.4 L9.2,5 L1,8.6 Z" fill="#465062"/></marker></defs>
+<rect x="0.75" y="0.75" width="958.5" height="688.5" rx="14" fill="#F5F2EA" stroke="#D9D2C2" stroke-width="1.5"/>
+<text x="32" y="48" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#1B2430">How MCP connects an application to its tools</text>
+<text x="32" y="73" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#465062">One protocol, two standard transports. Servers expose tools, resources and prompts.</text>
+<path d="M26,92 H934 Q948,92 948,106 V270 Q948,284 934,284 H402 Q388,284 388,298 V414 Q388,428 374,428 H26 Q12,428 12,414 V106 Q12,92 26,92 Z" fill="#ECE7DA"/>
+<text x="30" y="114" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#58616F" letter-spacing="1">YOUR MACHINE</text>
+<text x="936" y="420" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#58616F" text-anchor="end" letter-spacing="1">REMOTE</text>
+<rect x="28" y="126" width="344" height="290" rx="12" fill="#FFFEFB" stroke="#2B5BC7" stroke-width="1.5"/>
+<text x="46" y="152" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">Application</text>
+<text x="46" y="171" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">for example, Claude Code</text>
+<text x="46" y="198" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">Tools reach the model as</text>
+<text x="46" y="216" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">mcp__&lt;server&gt;__&lt;tool&gt;</tspan></text>
+<rect x="46" y="250" width="140" height="74" rx="10" fill="#E1E9FA" stroke="#2B5BC7" stroke-width="1.5"/>
+<text x="116" y="281.3" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430" text-anchor="middle">Model</text>
+<text x="116" y="303.3" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062" text-anchor="middle">chooses a tool</text>
+<path d="M186,275 C214,275 204,226 232,226" fill="none" stroke="#465062" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah465062)"/>
+<path d="M186,299 C214,299 204,348 232,348" fill="none" stroke="#465062" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah465062)"/>
+<text x="46" y="356" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#7A45B0">A human should always be</text>
+<text x="46" y="374" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#7A45B0">able to deny a tool call.</text>
+<rect x="236" y="199" width="120" height="54" rx="10" fill="#D9F0EC" stroke="#09736A" stroke-width="1.5"/>
+<text x="296" y="230.8" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430" text-anchor="middle">MCP client</text>
+<rect x="236" y="321" width="120" height="54" rx="10" fill="#D9F0EC" stroke="#09736A" stroke-width="1.5"/>
+<text x="296" y="352.8" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430" text-anchor="middle">MCP client</text>
+<rect x="668" y="180" width="268" height="92" rx="10" fill="#FFFEFB" stroke="#465062" stroke-width="1.5"/>
+<text x="684" y="208" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">MCP server</text>
+<text x="920" y="208" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#58616F" text-anchor="end">local process</text>
+<rect x="684" y="228" width="48.5542" height="26" rx="13" fill="#E7E1D3"/>
+<text x="708.277" y="245.55" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430" text-anchor="middle">tools</text>
+<rect x="740.554" y="228" width="79.3528" height="26" rx="13" fill="#E7E1D3"/>
+<text x="780.231" y="245.55" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430" text-anchor="middle">resources</text>
+<rect x="827.907" y="228" width="68.8342" height="26" rx="13" fill="#E7E1D3"/>
+<text x="862.324" y="245.55" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430" text-anchor="middle">prompts</text>
+<rect x="668" y="302" width="268" height="92" rx="10" fill="#FFFEFB" stroke="#465062" stroke-width="1.5"/>
+<text x="684" y="330" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">MCP server</text>
+<text x="920" y="330" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#58616F" text-anchor="end">remote service</text>
+<rect x="684" y="350" width="48.5542" height="26" rx="13" fill="#E7E1D3"/>
+<text x="708.277" y="367.55" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430" text-anchor="middle">tools</text>
+<rect x="740.554" y="350" width="79.3528" height="26" rx="13" fill="#E7E1D3"/>
+<text x="780.231" y="367.55" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430" text-anchor="middle">resources</text>
+<rect x="827.907" y="350" width="68.8342" height="26" rx="13" fill="#E7E1D3"/>
+<text x="862.324" y="367.55" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430" text-anchor="middle">prompts</text>
+<path d="M356,226 L668,226" fill="none" stroke="#465062" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="356" cy="226" r="5.5" fill="#09736A" stroke="#FFFEFB" stroke-width="1.5"/>
+<circle cx="668" cy="226" r="5.5" fill="#465062" stroke="#FFFEFB" stroke-width="1.5"/>
+<path d="M356,348 L668,348" fill="none" stroke="#465062" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="356" cy="348" r="5.5" fill="#09736A" stroke="#FFFEFB" stroke-width="1.5"/>
+<circle cx="668" cy="348" r="5.5" fill="#465062" stroke="#FFFEFB" stroke-width="1.5"/>
+<text x="512" y="212" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#465062" text-anchor="middle"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-weight="700" fill="#1B2430">stdio</tspan><tspan dx="6">for local servers</tspan></text>
+<text x="512" y="247" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062" text-anchor="middle">the client launches the server as a</text>
+<text x="512" y="264" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062" text-anchor="middle">subprocess; newline-delimited messages</text>
+<text x="528" y="334" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#465062" text-anchor="middle"><tspan font-weight="700" fill="#1B2430">Streamable HTTP</tspan><tspan dx="6">for remote servers</tspan></text>
+<text x="528" y="369" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062" text-anchor="middle">each client message is an HTTP POST</text>
+<text x="528" y="386" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062" text-anchor="middle">to a single MCP endpoint</text>
+<rect x="24" y="448" width="912" height="196" rx="12" fill="#FFFEFB" stroke="#C9C1AF" stroke-width="1.5"/>
+<text x="44" y="476" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">The same exchange on either transport</text>
+<text x="916" y="476" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#58616F" text-anchor="end">JSON-RPC, UTF-8</text>
+<path d="M200,518 L200,632" fill="none" stroke="#C9C1AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 4"/>
+<rect x="155.361" y="492" width="89.277" height="26" rx="13" fill="#D9F0EC" stroke="#09736A" stroke-width="1.25"/>
+<text x="200" y="509.55" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#1B2430" text-anchor="middle">MCP client</text>
+<path d="M760,518 L760,632" fill="none" stroke="#C9C1AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 4"/>
+<rect x="712.18" y="492" width="95.6401" height="26" rx="13" fill="#F5F2EA" stroke="#465062" stroke-width="1.25"/>
+<text x="760" y="509.55" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#1B2430" text-anchor="middle">MCP server</text>
+<path d="M204,540 L755,540" fill="none" stroke="#1B2430" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah1b2430)"/>
+<text x="480" y="533" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062" text-anchor="middle"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">tools/list</tspan><tspan> · discover, paginated with </tspan><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">cursor</tspan><tspan> and </tspan><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">nextCursor</tspan></text>
+<path d="M756,568 L205,568" fill="none" stroke="#465062" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 4" marker-end="url(#ah465062)"/>
+<text x="480" y="561" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062" text-anchor="middle">the server's tools</text>
+<path d="M204,596 L755,596" fill="none" stroke="#1B2430" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah1b2430)"/>
+<text x="480" y="589" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062" text-anchor="middle"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">tools/call</tspan><tspan> { </tspan><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">name</tspan><tspan>, </tspan><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">arguments</tspan><tspan> } · the tool the model chose</tspan></text>
+<path d="M756,624 L205,624" fill="none" stroke="#465062" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 4" marker-end="url(#ah465062)"/>
+<text x="480" y="617" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062" text-anchor="middle"><tspan>result, with </tspan><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">isError: true</tspan><tspan> if the tool itself failed</tspan></text>
+<text x="32" y="670" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#58616F"><tspan>Spec revision 2026-07-28 is stateless: no </tspan><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#465062">initialize</tspan><tspan> handshake; every request carries its protocol version in </tspan><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#465062">_meta</tspan><tspan>.</tspan></text>
+</svg>

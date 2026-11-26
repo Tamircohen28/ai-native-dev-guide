@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="461" viewBox="0 0 860 461" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+<title id="t">97% of all tokens are cache reads: context re-read, not new text</title>
+<desc id="d">Cache read: 24,636,662,031 tokens (97.13%); Cache write: 642,640,477 tokens (2.53%); Output: 85,782,469 tokens (0.34%); Uncached input: 392,703 tokens (0.002%)</desc>
+<rect x="0.5" y="0.5" width="859" height="460" rx="10" fill="#ffffff" stroke="#0b0b0b" stroke-opacity="0.12"/>
+<text x="28" y="44" font-size="20" fill="#191919" font-weight="600">97% of all tokens are cache reads: context re-read, not new text</text>
+<text x="28" y="67" font-size="13" fill="#666666">All 25.37B tokens logged for 104,932 model responses, by token class (subagents included). Cache-hit ratio = cache read ÷ (cache</text>
+<text x="28" y="85" font-size="13" fill="#666666">read + cache write + uncached input) = 97.5%.</text>
+<text x="28" y="133" font-size="12.5" fill="#191919" font-weight="600">All tokens: 25.37B</text>
+<rect x="28" y="143" width="779.9" height="28" rx="4" fill="#257de0"/>
+<text x="38" y="161.6" font-size="13" fill="#ffffff" font-weight="600">97.1% of all tokens</text>
+<rect x="809.9" y="143" width="18.4" height="28" rx="4" fill="#f47230"/>
+<rect x="830.3" y="143" width="1.7" height="28" rx="0.9" fill="#00b894"/>
+<path d="M809.9,173L832,173L832,227L28,227z" fill="#f4f4f4"/>
+<line x1="809.9" y1="173" x2="28" y2="227" stroke="#c2c2c2" stroke-width="1"/>
+<line x1="832" y1="173" x2="832" y2="227" stroke="#c2c2c2" stroke-width="1"/>
+<text x="822" y="217" font-size="12.5" fill="#191919" font-weight="600" text-anchor="end">The other 2.9%, enlarged: 728.8M tokens that were not cache reads</text>
+<rect x="28" y="229" width="707.9" height="28" rx="4" fill="#f47230"/>
+<text x="38" y="247.6" font-size="13" fill="#ffffff" font-weight="600">88.2% of the remainder</text>
+<rect x="737.9" y="229" width="94.1" height="28" rx="4" fill="#00b894"/>
+<text x="747.9" y="247.6" font-size="13" fill="#ffffff" font-weight="600">11.8%</text>
+<text x="28" y="291" font-size="11.5" fill="#666666">Token class</text>
+<text x="690" y="291" font-size="11.5" fill="#666666" text-anchor="end">Tokens</text>
+<text x="832" y="291" font-size="11.5" fill="#666666" text-anchor="end">Share of all tokens</text>
+<line x1="28" y1="299" x2="832" y2="299" stroke="#e7e7e7" stroke-width="1"/>
+<rect x="28" y="308.5" width="12" height="12" rx="2.5" fill="#257de0"/>
+<text x="48" y="319" font-size="13" fill="#191919" font-weight="600">Cache read</text>
+<text x="158" y="319" font-size="12.5" fill="#666666">input tokens served from the prompt cache</text>
+<text x="690" y="319" font-size="13" fill="#191919" font-weight="600" text-anchor="end" style="font-variant-numeric: tabular-nums">24.64B</text>
+<text x="832" y="319" font-size="13" fill="#191919" text-anchor="end" style="font-variant-numeric: tabular-nums">97.13%</text>
+<rect x="28" y="333.5" width="12" height="12" rx="2.5" fill="#f47230"/>
+<text x="48" y="344" font-size="13" fill="#191919" font-weight="600">Cache write</text>
+<text x="158" y="344" font-size="12.5" fill="#666666">input tokens newly written to the cache</text>
+<text x="690" y="344" font-size="13" fill="#191919" font-weight="600" text-anchor="end" style="font-variant-numeric: tabular-nums">642.6M</text>
+<text x="832" y="344" font-size="13" fill="#191919" text-anchor="end" style="font-variant-numeric: tabular-nums">2.53%</text>
+<rect x="28" y="358.5" width="12" height="12" rx="2.5" fill="#00b894"/>
+<text x="48" y="369" font-size="13" fill="#191919" font-weight="600">Output</text>
+<text x="158" y="369" font-size="12.5" fill="#666666">tokens the model generated</text>
+<text x="690" y="369" font-size="13" fill="#191919" font-weight="600" text-anchor="end" style="font-variant-numeric: tabular-nums">85.8M</text>
+<text x="832" y="369" font-size="13" fill="#191919" text-anchor="end" style="font-variant-numeric: tabular-nums">0.34%</text>
+<rect x="28" y="383.5" width="12" height="12" rx="2.5" fill="#f2a600"/>
+<text x="48" y="394" font-size="13" fill="#191919" font-weight="600">Uncached input</text>
+<text x="158" y="394" font-size="12.5" fill="#666666">input tokens that bypassed the cache (1 token in 64,592; too thin to draw)</text>
+<text x="690" y="394" font-size="13" fill="#191919" font-weight="600" text-anchor="end" style="font-variant-numeric: tabular-nums">393K</text>
+<text x="832" y="394" font-size="13" fill="#191919" text-anchor="end" style="font-variant-numeric: tabular-nums">0.002%</text>
+<line x1="28" y1="425" x2="832" y2="425" stroke="#e7e7e7" stroke-width="1"/>
+<text x="28" y="446" font-size="11.5" fill="#666666">Field data: one developer, ~4 weeks of Claude Code transcripts, Nov 2026</text>
+</svg>

@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="678" viewBox="0 0 960 678" role="img" aria-labelledby="t d">
+<title id="t">Six ways to extend Claude Code</title>
+<desc id="d">Matrix of CLAUDE.md and rules, skills, subagents, hooks, MCP servers and plugins: who triggers each, when it enters context, and what it is best for.</desc>
+<rect x="0.75" y="0.75" width="958.5" height="676.5" rx="14" fill="#F5F2EA" stroke="#D9D2C2" stroke-width="1.5"/>
+<text x="32" y="48" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#1B2430">Six ways to extend Claude Code</text>
+<text x="32" y="73" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#465062">Who triggers each one, what it costs in context, and what it is best for.</text>
+<text x="40" y="136" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#58616F" letter-spacing="0.8">EXTENSION</text>
+<text x="344" y="110" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#58616F" text-anchor="middle" letter-spacing="0.8">WHO TRIGGERS IT</text>
+<text x="257" y="130" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#2B5BC7" text-anchor="middle">always</text>
+<text x="257" y="146" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#2B5BC7" text-anchor="middle">loaded</text>
+<text x="315" y="130" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#09736A" text-anchor="middle">model</text>
+<text x="315" y="146" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#09736A" text-anchor="middle">decides</text>
+<text x="373" y="130" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#7A45B0" text-anchor="middle">you</text>
+<text x="373" y="146" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#7A45B0" text-anchor="middle">invoke</text>
+<text x="431" y="130" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#9A5205" text-anchor="middle">harness</text>
+<text x="431" y="146" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#9A5205" text-anchor="middle">event</text>
+<text x="476" y="136" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#58616F" letter-spacing="0.8">WHEN IT ENTERS CONTEXT</text>
+<text x="726" y="136" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#58616F" letter-spacing="0.8">BEST FOR</text>
+<rect x="24" y="158" width="912" height="72" rx="10" fill="#FFFEFB" stroke="#E7E1D3" stroke-width="1.5"/>
+<path d="M228,168 L228,220" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M460,168 L460,220" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M712,168 L712,220" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="40" y="189" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="14" fill="#1B2430">CLAUDE.md</tspan><tspan> and rules</tspan></text>
+<text x="40" y="210" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#465062">.claude/rules/*.md</tspan></text>
+<circle cx="257" cy="194" r="9" fill="#2B5BC7"/>
+<circle cx="315" cy="194" r="3" fill="#E7E1D3"/>
+<circle cx="373" cy="194" r="3" fill="#E7E1D3"/>
+<circle cx="431" cy="194" r="3" fill="#E7E1D3"/>
+<text x="476" y="181.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">In full at launch, every session.</text>
+<text x="476" y="198.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062"><tspan>Nested files and </tspan><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#1B2430">paths:</tspan><tspan> rules</tspan></text>
+<text x="476" y="215.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">load on demand.</text>
+<text x="726" y="190" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430">Conventions every task needs.</text>
+<text x="726" y="207" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430">Advisory, not enforced.</text>
+<rect x="24" y="238" width="912" height="72" rx="10" fill="#FFFEFB" stroke="#E7E1D3" stroke-width="1.5"/>
+<path d="M228,248 L228,300" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M460,248 L460,300" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M712,248 L712,300" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="40" y="269" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">Skills</text>
+<text x="40" y="290" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#465062">&lt;name&gt;/SKILL.md</tspan></text>
+<circle cx="257" cy="274" r="3" fill="#E7E1D3"/>
+<circle cx="315" cy="274" r="9" fill="#09736A"/>
+<circle cx="373" cy="274" r="9" fill="#7A45B0"/>
+<circle cx="431" cy="274" r="3" fill="#E7E1D3"/>
+<text x="476" y="270" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">Descriptions on every turn;</text>
+<text x="476" y="287" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">the body only when invoked.</text>
+<text x="726" y="270" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430">Procedures and reference</text>
+<text x="726" y="287" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430">material used only sometimes.</text>
+<rect x="24" y="318" width="912" height="72" rx="10" fill="#FFFEFB" stroke="#E7E1D3" stroke-width="1.5"/>
+<path d="M228,328 L228,380" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M460,328 L460,380" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M712,328 L712,380" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="40" y="349" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">Subagents</text>
+<text x="40" y="370" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#465062">.claude/agents/*.md</tspan></text>
+<circle cx="257" cy="354" r="3" fill="#E7E1D3"/>
+<circle cx="315" cy="354" r="9" fill="#09736A"/>
+<circle cx="373" cy="354" r="9" fill="#7A45B0"/>
+<circle cx="431" cy="354" r="3" fill="#E7E1D3"/>
+<text x="476" y="341.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">Works in its own context window;</text>
+<text x="476" y="358.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">a summary returns to yours.</text>
+<text x="476" y="375.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">A fork starts with a copy of yours.</text>
+<text x="726" y="350" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430">Noisy or parallel work that</text>
+<text x="726" y="367" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430">should stay out of your context.</text>
+<rect x="24" y="398" width="912" height="72" rx="10" fill="#FFFEFB" stroke="#E7E1D3" stroke-width="1.5"/>
+<path d="M228,408 L228,460" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M460,408 L460,460" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M712,408 L712,460" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="40" y="429" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">Hooks</text>
+<text x="40" y="450" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#465062">hooks</tspan><tspan> in </tspan><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#465062">settings.json</tspan></text>
+<circle cx="257" cy="434" r="3" fill="#E7E1D3"/>
+<circle cx="315" cy="434" r="3" fill="#E7E1D3"/>
+<circle cx="373" cy="434" r="3" fill="#E7E1D3"/>
+<circle cx="431" cy="434" r="9" fill="#9A5205"/>
+<text x="476" y="421.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">Runs outside the conversation.</text>
+<text x="476" y="438.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">Only what it returns is added</text>
+<text x="476" y="455.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">to context.</text>
+<text x="726" y="430" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430">Rules with zero exceptions:</text>
+<text x="726" y="447" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430">hard blocks, must-run steps.</text>
+<rect x="24" y="478" width="912" height="72" rx="10" fill="#FFFEFB" stroke="#E7E1D3" stroke-width="1.5"/>
+<path d="M228,488 L228,540" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M460,488 L460,540" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M712,488 L712,540" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="40" y="509" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">MCP servers</text>
+<text x="40" y="530" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#465062">.mcp.json</tspan></text>
+<circle cx="257" cy="514" r="3" fill="#E7E1D3"/>
+<circle cx="315" cy="514" r="9" fill="#09736A"/>
+<circle cx="373" cy="514" r="9" fill="#7A45B0"/>
+<circle cx="431" cy="514" r="3" fill="#E7E1D3"/>
+<text x="476" y="501.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">Tool names and server instructions</text>
+<text x="476" y="518.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">at session start; full definitions</text>
+<text x="476" y="535.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">on demand (tool search).</text>
+<text x="726" y="510" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430">Connecting the tools Claude</text>
+<text x="726" y="527" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430">needs when a CLI will not do.</text>
+<rect x="24" y="558" width="912" height="72" rx="10" fill="#FFFEFB" stroke="#E7E1D3" stroke-width="1.5"/>
+<path d="M228,568 L228,620" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M460,568 L460,620" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M712,568 L712,620" fill="none" stroke="#E7E1D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="40" y="589" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1B2430">Plugins</text>
+<text x="40" y="610" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062"><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#465062">.claude-plugin/</tspan></text>
+<rect x="240" y="571" width="208" height="46" rx="8" fill="#F5F2EA" stroke="#C9C1AF" stroke-width="1.25" stroke-dasharray="4 3"/>
+<text x="344" y="591" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062" text-anchor="middle">a bundle: each component</text>
+<text x="344" y="608" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062" text-anchor="middle">keeps its own trigger</text>
+<text x="476" y="581.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">What it ships: skill and agent</text>
+<text x="476" y="598.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">descriptions on every turn, its</text>
+<text x="476" y="615.5" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#465062">MCP servers in every session.</text>
+<text x="726" y="590" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430">Packaging the other five to</text>
+<text x="726" y="607" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#1B2430">share across projects and teams.</text>
+<text x="32" y="656" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#58616F"><tspan>Custom slash commands have been merged into skills. A skill runs when the model matches its description or when you type </tspan><tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#465062">/skill-name</tspan><tspan>.</tspan></text>
+</svg>
