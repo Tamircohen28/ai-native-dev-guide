@@ -31,21 +31,21 @@
         "background_tasks",
         "git",
         "github_cli",
-        "hooks",
-        "mcp",
         "parallel_subagents",
         "session_transcripts",
         "shell",
         "skill_auto_invocation",
         "skills",
         "slash_commands",
-        "statusline",
         "subagents",
         "worktree_isolation"
       ],
       "capability_gaps": {
         "extension_install": "Claude installs plugins, not git-URL extensions.",
-        "plugin_marketplace": "App-gold is a greenfield app repo, not a plugin-distribution repo (see skills/repo/_contract/README.md's profile table) — it ships no .claude-plugin/plugin.json and is not published to a marketplace."
+        "hooks": "No hooks are shipped: there is no .claude/settings.json (reserved for the owner) and no hooks/ directory. Claude Code supports hooks; book chapter 14 shows how to add them.",
+        "mcp": "No .mcp.json is shipped, so this repo declares no MCP servers. Book chapters 10 and 11 cover adding one.",
+        "plugin_marketplace": "This repo is a book, not a plugin: it ships no plugin manifest and is not listed in any marketplace.",
+        "statusline": "No status line script is shipped. Book chapter 16 covers configuring one."
       }
     },
     "codex": {
@@ -68,7 +68,12 @@
       "capability_gaps": {
         "artifacts": "No artifact publishing surface.",
         "extension_install": "Codex installs plugins, not git-URL extensions.",
-        "plugin_marketplace": "App-gold is a greenfield app repo, not a plugin-distribution repo — it ships no .codex-plugin/plugin.json and is not published to a marketplace.",
+        "hooks": "No hooks are shipped for Codex.",
+        "mcp": "No MCP config is shipped for Codex (no .codex/config.toml).",
+        "plugin_marketplace": "This repo is a book, not a plugin: it ships no plugin manifest and is not listed in any marketplace.",
+        "skill_auto_invocation": "No skill is shipped for Codex (see skills).",
+        "skills": "Codex reads AGENTS.md natively. This repo ships no .agents/skills/ tree, so Codex does not see the project skill in .claude/skills/.",
+        "slash_commands": "No Codex commands or skills are shipped.",
         "statusline": "Not a declared Codex capability."
       }
     },
@@ -86,17 +91,18 @@
       "capabilities": [
         "git",
         "github_cli",
-        "hooks",
-        "mcp",
-        "parallel_subagents",
         "shell",
-        "skill_auto_invocation",
         "worktree_isolation"
       ],
       "capability_gaps": {
         "artifacts": "No artifact publishing surface.",
         "extension_install": "Cursor installs plugins, not git-URL extensions.",
-        "plugin_marketplace": "App-gold is a greenfield app repo, not a plugin-distribution repo — it ships no .cursor-plugin/plugin.json and is not published to a marketplace.",
+        "hooks": "No hooks are shipped for Cursor (no .cursor/hooks.json).",
+        "mcp": "No MCP config is shipped for Cursor (no .mcp.json, no .cursor/mcp.json).",
+        "plugin_marketplace": "This repo is a book, not a plugin: it ships no plugin manifest and is not listed in any marketplace.",
+        "skill_auto_invocation": "No skill is shipped for Cursor (see skills).",
+        "skills": "This repo ships no Cursor skill. .cursor/rules/000-project.mdc points the agent at AGENTS.md, which carries the same working rules.",
+        "slash_commands": "No Cursor commands or skills are shipped.",
         "statusline": "No plugin-declared statusline."
       }
     },
@@ -110,19 +116,21 @@
       ],
       "features_adopted": [],
       "capabilities": [
-        "extension_install",
         "git",
         "github_cli",
-        "mcp",
         "shell",
-        "skills",
-        "subagents",
         "worktree_isolation"
       ],
       "capability_gaps": {
         "artifacts": "No artifact publishing surface.",
-        "plugin_marketplace": "Gemini installs extensions from a git URL; there is no marketplace listing to publish to.",
-        "statusline": "Measured on 0.55.1: no extension-declared statusline."
+        "extension_install": "This repo is not a Gemini extension: it ships no gemini-extension.json.",
+        "hooks": "No hooks are shipped for Gemini.",
+        "mcp": "No MCP server config is shipped for Gemini.",
+        "plugin_marketplace": "Gemini installs extensions from a git URL; there is no marketplace listing, and this repo is not an extension.",
+        "skill_auto_invocation": "No skill is shipped for Gemini (see skills).",
+        "skills": "This repo ships no Gemini adapter: no gemini-extension.json, no .gemini/ mirror, no GEMINI.md. Gemini CLI reads GEMINI.md by default; set context.fileName in Gemini settings to include AGENTS.md to load this repo's instructions.",
+        "slash_commands": "No Gemini commands are shipped.",
+        "statusline": "Not provided by this repo."
       }
     },
     "opencode": {
@@ -137,17 +145,15 @@
       "capabilities": [
         "git",
         "github_cli",
-        "mcp",
         "shell",
-        "skills",
-        "subagents",
         "worktree_isolation"
       ],
       "capability_gaps": {
         "artifacts": "No artifact publishing surface.",
         "extension_install": "No git-URL extension install.",
-        "hooks": "OpenCode has no hooks.json; its only lifecycle mechanism is the JS/TS plugin API, and this repo ships no plugin module by design (it would add a Node runtime dependency for no other gain). As installed, the hooks/ guards do not run at all — 'adapter' would imply a generated artifact exists, as it does for subagents, and none does.",
-        "plugin_marketplace": "No plugin marketplace — install is by absolute paths in the `skills` array. Not by symlink: OpenCode does not follow them for skill discovery (see the skills row).",
+        "hooks": "No hooks are shipped: OpenCode's lifecycle mechanism is its JS/TS plugin API, and this repo ships no plugin module.",
+        "mcp": "No opencode.json or other MCP config is shipped.",
+        "plugin_marketplace": "OpenCode has no plugin marketplace; this repo is cloned, not installed.",
         "statusline": "No plugin-declared statusline."
       }
     }

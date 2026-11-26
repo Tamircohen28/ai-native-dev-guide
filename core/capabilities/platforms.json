@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "last_reviewed": "2026-09-08",
+  "last_reviewed": "2026-11-26",
   "capability_definitions": {
     "skills": {
       "summary": "Discovers and loads SKILL.md files shipped by this repo.",
@@ -115,8 +115,7 @@
           ],
           "install": {
             "type": "manual",
-            "command": "git clone https://github.com/TamirCohen28/ai-native-dev-guide.git && cd ai-native-dev-guide",
-            "doc": "docs/user/install/claude-code.md"
+            "command": "git clone https://github.com/TamirCohen28/ai-native-dev-guide.git && cd ai-native-dev-guide"
           },
           "validation": {
             "command": "test -d .claude/skills && ls .claude/skills/*/SKILL.md >/dev/null 2>&1"
@@ -126,19 +125,19 @@
               "status": "native",
               "since": "2.0.0",
               "validation": "ls .claude/skills/*/SKILL.md >/dev/null 2>&1",
-              "notes": "App-gold ships no plugin manifest. Claude Code discovers project-level skills directly from .claude/skills/ with no manifest required \u2014 this is the documented project-skills path, distinct from the plugin-install path used by plugin-gold repos. Validation checks that path directly instead of `claude plugin validate .`, which requires a .claude-plugin/plugin.json this repo shape does not ship."
+              "notes": "This repo ships one project skill, .claude/skills/run-ai-native-dev-guide/SKILL.md. Claude Code discovers project skills from .claude/skills/ with no plugin manifest."
             },
             "skill_auto_invocation": {
               "status": "native",
               "since": "2.0.0",
               "validation": "ls .claude/skills/*/SKILL.md >/dev/null 2>&1",
-              "notes": "Description-driven selection over the same project-level .claude/skills/ tree; suppressed per skill with disable-model-invocation. Same non-plugin discovery path as skills, above."
+              "notes": "Description-driven selection over the same .claude/skills/ tree."
             },
             "subagents": {
               "status": "native",
               "since": "2.0.0",
-              "validation": "ls .claude/agents/*.md >/dev/null 2>&1",
-              "notes": "Claude Code's documented project-level subagent path is .claude/agents/*.md, discovered with no plugin manifest required \u2014 the same non-plugin convention as .claude/skills/, not the root agents/ directory this repo's own .claude-plugin/plugin.json points `agents` at (that field exists only for the plugin-install route, which app-gold does not use). `claude plugin validate .` is dropped because it requires a .claude-plugin/plugin.json this repo shape does not and should not ship."
+              "validation": "command -v claude",
+              "notes": "Claude Code's built-in Agent tool. This repo ships no .claude/agents/ definitions, so only the built-in subagent types are available; book chapter 12 shows how to add one. The validation only proves the CLI is present."
             },
             "parallel_subagents": {
               "status": "native",
@@ -152,20 +151,19 @@
               "notes": "Teammate messaging is available but documented as evolving; skills must not require it. Session behaviour, not gated by this repo's shape \u2014 validation proves the CLI is present rather than requiring a plugin manifest unrelated to the claim."
             },
             "hooks": {
-              "status": "native",
-              "since": "2.0.0",
-              "validation": "jq -e '.hooks.SessionStart | length > 0' .claude/settings.json",
-              "notes": "App-gold has no plugin manifest, so hooks/hooks.json (the CLAUDE_PLUGIN_ROOT-relative plugin hook bundle) is not the applicable mechanism here. Claude Code's non-plugin, project-level hook convention is the `hooks` key of .claude/settings.json, which this repo ships with a minimal SessionStart entry."
+              "status": "unsupported",
+              "notes": "No hooks are shipped: there is no .claude/settings.json (reserved for the owner) and no hooks/ directory. Claude Code supports hooks; book chapter 14 shows how to add them.",
+              "fallback": "The rules live in AGENTS.md (and .claude/rules/constraints.md for Claude Code); CI runs make agent:check."
             },
             "mcp": {
-              "status": "native",
-              "since": "2.0.0",
-              "validation": "bash scripts/check-manifest-declares.sh .mcp.json mcpServers"
+              "status": "unsupported",
+              "notes": "No .mcp.json is shipped, so this repo declares no MCP servers. Book chapters 10 and 11 cover adding one.",
+              "fallback": "Use gh or another CLI through the shell."
             },
             "statusline": {
-              "status": "native",
-              "since": "2.0.0",
-              "validation": "echo '{}' | bash scripts/statusline.sh"
+              "status": "unsupported",
+              "notes": "No status line script is shipped. Book chapter 16 covers configuring one.",
+              "fallback": "Cosmetic only; nothing depends on it."
             },
             "shell": {
               "status": "native",
@@ -186,14 +184,13 @@
               "notes": "Bash tool supports detached execution with completion callback."
             },
             "worktree_isolation": {
-              "status": "native",
-              "since": "2.0.0",
-              "validation": "bash hooks/worktree-create.sh --help",
-              "notes": "Automated by the repo's worktree hooks; on other targets the same thing is emulated by hand."
+              "status": "emulated",
+              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 20 covers the workflow.",
+              "fallback": "Explicit git worktree add/remove steps."
             },
             "plugin_marketplace": {
               "status": "unsupported",
-              "notes": "App-gold is a greenfield app repo, not a plugin-distribution repo (see skills/repo/_contract/README.md's profile table) \u2014 it ships no .claude-plugin/plugin.json and is not published to a marketplace.",
+              "notes": "This repo is a book, not a plugin: it ships no plugin manifest and is not listed in any marketplace.",
               "fallback": "Clone the repo directly; see the install command above."
             },
             "extension_install": {
@@ -219,8 +216,9 @@
             },
             "session_transcripts": {
               "status": "native",
-              "validation": "node skills/toolkit/session-report/analyze-sessions.mjs --json | jq -e '.overall.sessions > 0'",
-              "notes": "JSONL transcripts under ~/.claude/projects; the session-report skill parses this format and no other. The claim is that the history is READABLE, so the validation reads it: the parser runs against the real transcript root and must find at least one session. It previously read `test -d \"$HOME/.claude/projects\"`, which passes on an empty directory created by any Claude Code run that never wrote a transcript, and would keep passing if the format changed under the parser."
+              "since": "2.0.0",
+              "validation": "command -v claude",
+              "notes": "Claude Code writes JSONL transcripts under ~/.claude/projects. This repo ships no tool that reads them; the validation only proves the CLI is present."
             },
             "dynamic_workflows": {
               "status": "unknown",
@@ -249,22 +247,21 @@
           "runtime_surface_of": "claude_code",
           "install": {
             "type": "manual",
-            "command": "Not distributed as an installable plugin. Whether Claude Desktop surfaces a non-plugin project checkout's .claude/skills/ the same way Claude Code CLI does has not been verified by this repo.",
-            "doc": "docs/user/install/claude-desktop.md"
+            "command": "Not distributed as an installable plugin. Whether Claude Desktop surfaces a non-plugin project checkout's .claude/skills/ the same way Claude Code CLI does has not been verified by this repo."
           },
           "validation": {
-            "command": "claude plugin validate .",
-            "requires_cli": true
+            "command": "test -f CLAUDE.md && test -f AGENTS.md",
+            "requires_cli": false
           },
           "capabilities": {
             "skills": {
               "status": "unknown",
-              "notes": "Desktop's documented path is consuming the Claude Code PLUGIN format; app-gold ships no plugin manifest. Whether Desktop also discovers a bare project checkout's .claude/skills/ the way Claude Code CLI does has not been measured, so this stays 'unknown' rather than asserting either way.",
+              "notes": "Desktop's documented path is the Claude Code plugin format, and this repo ships no plugin manifest. Whether Desktop discovers a plain checkout's .claude/skills/ has not been measured.",
               "fallback": "Use Claude Code CLI in this project directory, where project-level skill discovery is verified."
             },
             "skill_auto_invocation": {
               "status": "unknown",
-              "notes": "Desktop's documented path is consuming the Claude Code PLUGIN format; app-gold ships no plugin manifest. Whether Desktop also discovers a bare project checkout's .claude/skills/ the way Claude Code CLI does has not been measured, so this stays 'unknown' rather than asserting either way.",
+              "notes": "Depends on skills, which is unmeasured on Desktop (see skills).",
               "fallback": "Use Claude Code CLI in this project directory, where project-level skill discovery is verified."
             },
             "subagents": {
@@ -280,14 +277,14 @@
               "notes": "No Desktop evidence."
             },
             "hooks": {
-              "status": "unknown",
-              "notes": "Whether the plugin hook bundle fires in Desktop coding sessions has not been verified.",
-              "fallback": "Assume no hooks; rely on in-skill guards and CI."
+              "status": "unsupported",
+              "notes": "No hooks are shipped by this repo: no .claude/settings.json and no hooks/ directory.",
+              "fallback": "The rules live in AGENTS.md (and .claude/rules/constraints.md for Claude Code); CI runs make agent:check."
             },
             "mcp": {
-              "status": "native",
-              "validation": "bash scripts/check-manifest-declares.sh .mcp.json mcpServers",
-              "notes": "Desktop is a long-standing MCP host; server config lives in the Desktop app rather than the repo."
+              "status": "unsupported",
+              "notes": "This repo ships no MCP server config. Desktop's own MCP servers are configured in the app, not here.",
+              "fallback": "Use gh or another CLI through the shell."
             },
             "statusline": {
               "status": "unsupported",
@@ -321,7 +318,7 @@
             },
             "plugin_marketplace": {
               "status": "unsupported",
-              "notes": "App-gold is a greenfield app repo, not a plugin-distribution repo (see skills/repo/_contract/README.md's profile table) \u2014 it ships no .claude-plugin/plugin.json and is not published to a marketplace. Same limit as the claude_code row above; Desktop shares the same listing, so it shares the same absence.",
+              "notes": "This repo is a book, not a plugin: it ships no plugin manifest and is not listed in any marketplace.",
               "fallback": "Clone the repo directly; see the install command above."
             },
             "extension_install": {
@@ -331,7 +328,7 @@
             },
             "slash_commands": {
               "status": "unknown",
-              "notes": "Desktop's documented path is consuming the Claude Code PLUGIN format; app-gold ships no plugin manifest. Whether Desktop also discovers a bare project checkout's .claude/skills/ the way Claude Code CLI does has not been measured, so this stays 'unknown' rather than asserting either way.",
+              "notes": "Depends on skills, which is unmeasured on Desktop (see skills).",
               "fallback": "Use Claude Code CLI in this project directory, where project-level skill discovery is verified."
             },
             "ask_user_question": {
@@ -386,26 +383,26 @@
           ],
           "install": {
             "type": "manual",
-            "command": "git clone https://github.com/TamirCohen28/ai-native-dev-guide.git && cd ai-native-dev-guide",
-            "doc": "docs/user/install/codex.md"
+            "command": "git clone https://github.com/TamirCohen28/ai-native-dev-guide.git && cd ai-native-dev-guide"
           },
           "validation": {
-            "command": "test -f AGENTS.md && test -d .agents/skills"
+            "command": "test -f AGENTS.md",
+            "requires_cli": false
           },
           "capabilities": {
             "skills": {
-              "status": "unknown",
-              "notes": "App-gold ships no .codex-plugin/plugin.json, so the manifest-declared `skills` field this repo's own plugin uses does not apply. platforms/codex/adapter.yaml documents only the manifest route for skill discovery; no non-plugin SKILL.md folder-discovery convention for Codex is documented in this repo. This repo does ship .agents/skills/ (a convention some agent-agnostic tools read), but that is not established as a Codex-native skills path \u2014 asserting 'native' here would claim a route that was never verified.",
-              "fallback": "Document explicit invocation in docs/user/install/codex.md; Codex reads AGENTS.md for general project instructions regardless."
+              "status": "unsupported",
+              "notes": "Codex reads AGENTS.md natively. This repo ships no .agents/skills/ tree, so Codex does not see the project skill in .claude/skills/.",
+              "fallback": "AGENTS.md carries the same working rules as the skill."
             },
             "skill_auto_invocation": {
-              "status": "unknown",
-              "notes": "Codex skill selection behaviour has not been measured by this repo.",
-              "fallback": "Document explicit invocation in docs/user/install/codex.md."
+              "status": "unsupported",
+              "notes": "No skill is shipped for Codex (see skills).",
+              "fallback": "Follow AGENTS.md."
             },
             "subagents": {
               "status": "unknown",
-              "notes": "Demoted from 'native' 2026-09-08. The claim rested on two things, and neither survived checking. (1) The note cited platform-targets.json \u2014 but that file's per-target `capabilities` array is a DERIVED mirror of THIS registry (scripts/check-platform-targets.sh says so in its header), so the row was citing itself. (2) The validation was `jq empty .codex-plugin/plugin.json`, which passes on any valid JSON. Against the upstream manifest spec, .codex-plugin/plugin.json defines name, version, description, author, homepage, repository, license, keywords, skills, hooks, mcpServers, apps and interface \u2014 there is no agents or subagents field, and no documented folder discovery of an agents/ directory. This repo also ships no Codex agent mirror, unlike .gemini/agents/, which exists precisely because Gemini needed one. Codex CLI does have a subagents feature, and it is deliberately outside the plugin system: subagents are standalone .toml files in $CODEX_HOME/agents/ or a per-repo .codex/agents/, and bundling one inside a plugin manifest is an OPEN feature request (https://github.com/openai/codex/issues/28491, closed as a duplicate of #18988). So the missing field is not an oversight in the spec \u2014 there is no plugin-packaging path to this capability at all today. The status stays 'unknown' rather than 'unsupported' because the capability exists on the surface; what is unestablished is a route from this plugin to it, and 'unsupported' would claim Codex lacks subagents, which is false. The identical 'Cloud subagents can run on their own VMs (2026-08-19)' sentence also sat on the cursor row verbatim, date included \u2014 one note copied, not two facts established.",
+              "notes": "Codex has a subagent feature, but this repo ships no Codex agent definitions and has not measured it.",
               "fallback": "Run the role inline in the main session, sequentially, with a narrowed scope."
             },
             "parallel_subagents": {
@@ -419,14 +416,14 @@
               "fallback": "Use session-files/ as the message bus."
             },
             "hooks": {
-              "status": "unknown",
-              "notes": "The manifest `hooks` field this repo's own .codex-plugin/plugin.json uses requires a plugin manifest app-gold does not ship. No non-plugin Codex hooks convention is documented in this repo.",
-              "fallback": "Guards become explicit in-skill steps plus CI checks."
+              "status": "unsupported",
+              "notes": "No hooks are shipped for Codex.",
+              "fallback": "The rules live in AGENTS.md (and .claude/rules/constraints.md for Claude Code); CI runs make agent:check."
             },
             "mcp": {
-              "status": "unknown",
-              "notes": "The manifest `mcpServers` field this repo's own .codex-plugin/plugin.json uses requires a plugin manifest app-gold does not ship. .codex/config.toml is a user-level runtime config and declares nothing this repo ships (see the live registry's identical note); no other non-plugin Codex MCP declaration path is documented here.",
-              "fallback": "Use the equivalent CLI (gh, curl) through the shell capability."
+              "status": "unsupported",
+              "notes": "No MCP config is shipped for Codex (no .codex/config.toml).",
+              "fallback": "Use gh or another CLI through the shell."
             },
             "statusline": {
               "status": "unsupported",
@@ -453,23 +450,23 @@
             },
             "worktree_isolation": {
               "status": "emulated",
-              "notes": "No hook automation; the skill creates and removes worktrees itself via shell and git.",
-              "fallback": "Explicit git worktree add/remove steps inside the skill."
+              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 20 covers the workflow.",
+              "fallback": "Explicit git worktree add/remove steps."
             },
             "plugin_marketplace": {
               "status": "unsupported",
-              "notes": "App-gold is a greenfield app repo, not a plugin-distribution repo \u2014 it ships no .codex-plugin/plugin.json and is not published to a marketplace.",
+              "notes": "This repo is a book, not a plugin: it ships no plugin manifest and is not listed in any marketplace.",
               "fallback": "Clone the repo directly; see the install command above."
             },
             "extension_install": {
               "status": "unsupported",
               "notes": "Codex installs plugins, not git-URL extensions.",
-              "fallback": "Use the plugin manifest install path."
+              "fallback": "Clone the repo; see the install command above."
             },
             "slash_commands": {
-              "status": "unknown",
-              "notes": "Codex custom-command support has not been verified against the shipped skills.",
-              "fallback": "Invoke skills in prose."
+              "status": "unsupported",
+              "notes": "No Codex commands or skills are shipped.",
+              "fallback": "Users invoke skills by describing them in prose."
             },
             "ask_user_question": {
               "status": "unknown",
@@ -502,7 +499,7 @@
           "display_name": "Codex IDE extension",
           "kind": "ide",
           "support": "unverified",
-          "unverified_reason": "The IDE extension consumes the same AGENTS.md and .codex-plugin/plugin.json as the CLI, but this repo has never installed the plugin or invoked a skill there. Every measurement recorded under codex was taken from the CLI, so no capability is claimed for this surface in either direction.",
+          "unverified_reason": "The IDE extension reads the same AGENTS.md as the CLI, but this repo has never been exercised there. No capability is claimed for this surface in either direction.",
           "aliases": [
             "codex-ide"
           ],
@@ -535,32 +532,31 @@
           ],
           "install": {
             "type": "manual",
-            "command": "git clone https://github.com/TamirCohen28/ai-native-dev-guide.git && cd ai-native-dev-guide",
-            "doc": "docs/user/install/cursor.md"
+            "command": "git clone https://github.com/TamirCohen28/ai-native-dev-guide.git && cd ai-native-dev-guide"
           },
           "validation": {
             "command": "test -d .cursor/rules && ls .cursor/rules/*.mdc >/dev/null 2>&1"
           },
           "capabilities": {
             "skills": {
-              "status": "unknown",
-              "notes": "App-gold ships no .cursor-plugin/plugin.json, so the manifest-declared `skills` field this repo's own plugin uses does not apply. This repo ships .cursor/rules/*.mdc (Cursor's project Rules convention), but Rules are a distinct capability from SKILL.md-based skills, and no non-plugin Skill discovery for Cursor is documented in this repo.",
-              "fallback": "Rely on the .cursor/rules/*.mdc entrypoint; name the skill's intent explicitly in prose."
+              "status": "unsupported",
+              "notes": "This repo ships no Cursor skill. .cursor/rules/000-project.mdc points the agent at AGENTS.md, which carries the same working rules.",
+              "fallback": "Follow AGENTS.md through the Cursor rule."
             },
             "skill_auto_invocation": {
-              "status": "partial",
-              "notes": "CLI sticky skills (2026-08-11) plus Agent Window Custom Modes (2026-08-19: Option+Enter from / pins a skill as an always-on mode). Automatic description-based selection across all surfaces is still unverified.",
-              "fallback": "Name the skill explicitly, pin it as a Custom Mode, or rely on the .cursor/rules/*.mdc entrypoint."
+              "status": "unsupported",
+              "notes": "No skill is shipped for Cursor (see skills).",
+              "fallback": "Follow AGENTS.md through the Cursor rule."
             },
             "subagents": {
               "status": "unknown",
-              "notes": "Cursor's folder discovery of agents/ (https://cursor.com/docs/reference/plugins) is documented as a fallback for when an installed plugin's manifest omits an `agents` path \u2014 it presumes the repo is already recognized as a Cursor plugin. App-gold ships no .cursor-plugin/plugin.json at all, so whether that discovery still applies to a bare project checkout is unverified here.",
+              "notes": "This repo ships no Cursor agent definitions, and Cursor subagent behaviour has not been measured here.",
               "fallback": "Run the role inline in the main session, sequentially, with a narrowed scope."
             },
             "parallel_subagents": {
-              "status": "partial",
-              "notes": "Cloud Agents can swarm subagents each on an isolated VM (2026-08-19). Local parallel fan-out concurrency is still unmeasured here. Self-Hosted Machines (2026-09-02): My Machines / Team Pools / partner sandboxes can host tool execution with computer use on Linux/Mac \u2014 not GitHub Actions self-hosted runners.",
-              "fallback": "Prefer cloud-isolated subagents for collision-free swarms; otherwise fan out sequentially locally."
+              "status": "unknown",
+              "notes": "Not measured by this repo.",
+              "fallback": "Fan out sequentially."
             },
             "agent_teams": {
               "status": "unknown",
@@ -568,14 +564,14 @@
               "fallback": "Use session-files/ as the message bus."
             },
             "hooks": {
-              "status": "partial",
-              "notes": "Claude-shaped plugin hooks (hooks/hooks.json, CLAUDE_PLUGIN_ROOT) do NOT run under a Cursor plugin install. Project-level .cursor/hooks.json ships soft contributor guards, and third-party Claude hooks via .claude/settings.json are opt-in in Cursor Settings.",
-              "fallback": "Treat guards as advisory; enforce the same rules in CI."
+              "status": "unsupported",
+              "notes": "No hooks are shipped for Cursor (no .cursor/hooks.json).",
+              "fallback": "The rules live in AGENTS.md (and .claude/rules/constraints.md for Claude Code); CI runs make agent:check."
             },
             "mcp": {
-              "status": "native",
-              "validation": "bash scripts/check-manifest-declares.sh .mcp.json mcpServers",
-              "notes": "Cursor reads project-level .mcp.json directly; no plugin manifest is required for this row."
+              "status": "unsupported",
+              "notes": "No MCP config is shipped for Cursor (no .mcp.json, no .cursor/mcp.json).",
+              "fallback": "Use gh or another CLI through the shell."
             },
             "statusline": {
               "status": "unsupported",
@@ -602,22 +598,22 @@
             },
             "worktree_isolation": {
               "status": "emulated",
-              "notes": "Done by the skill through shell and git; no hook automation.",
+              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 20 covers the workflow.",
               "fallback": "Explicit git worktree add/remove steps."
             },
             "plugin_marketplace": {
               "status": "unsupported",
-              "notes": "App-gold is a greenfield app repo, not a plugin-distribution repo \u2014 it ships no .cursor-plugin/plugin.json and is not published to a marketplace.",
+              "notes": "This repo is a book, not a plugin: it ships no plugin manifest and is not listed in any marketplace.",
               "fallback": "Clone the repo directly; see the install command above."
             },
             "extension_install": {
               "status": "unsupported",
               "notes": "Cursor installs plugins, not git-URL extensions.",
-              "fallback": "Use the plugin manifest install path."
+              "fallback": "Clone the repo; see the install command above."
             },
             "slash_commands": {
-              "status": "unknown",
-              "notes": "Same manifest dependency as skills, above: this repo's own plugin exposes its skills under / through .cursor-plugin/plugin.json, which app-gold does not ship.",
+              "status": "unsupported",
+              "notes": "No Cursor commands or skills are shipped.",
               "fallback": "Users invoke skills by describing them in prose."
             },
             "ask_user_question": {
@@ -651,7 +647,7 @@
           "display_name": "Cursor CLI",
           "kind": "cli",
           "support": "unverified",
-          "unverified_reason": "The CLI shares .cursor-plugin/plugin.json with the IDE, and Cursor documents CLI sticky skills (2026-08-11 CLI changelog), but no CLI run has been recorded here. The measurements under cursor were taken against an IDE plugin install; carrying them over would be an assumption, not evidence.",
+          "unverified_reason": "The CLI reads the same .cursor/rules/ as the IDE, but no CLI run has been recorded here, so the cursor rows are not carried over.",
           "aliases": [
             "cursor-cli"
           ],
@@ -684,32 +680,28 @@
             "https://github.com/google-gemini/gemini-cli/blob/main/docs/core/subagents.md"
           ],
           "install": {
-            "type": "extension",
-            "command": "gemini extensions install https://github.com/TamirCohen28/ai-native-dev-guide && gemini skills install https://github.com/TamirCohen28/ai-native-dev-guide --path .gemini/skills --consent",
-            "doc": "docs/user/install/gemini.md"
+            "type": "manual",
+            "command": "git clone https://github.com/TamirCohen28/ai-native-dev-guide.git && cd ai-native-dev-guide"
           },
           "validation": {
-            "command": "bash scripts/check-gemini-adapter.sh"
+            "command": "test -f AGENTS.md",
+            "requires_cli": false
           },
           "capabilities": {
             "skills": {
-              "status": "adapter",
-              "since": "0.55.1",
-              "validation": "make gemini-extension-check",
-              "notes": "Measured on 0.55.1: Gemini discovers skills exactly one level below a skills root, so the canonical two-level skills/<domain>/<name>/ tree resolves to ZERO skills. scripts/build-gemini-extension.sh generates a flat symlink mirror at .gemini/skills/ (one symlink per skill, so still exactly one copy in the repo), which Gemini then reads natively \u2014 in-workspace with no install at all, or via a single gemini skills install --path .gemini/skills. This row is about the generated mirror, not the canonical tree. NOTE: Gemini follows symlinks for skill discovery; OpenCode does not, at any level. Do not port one platform's mirror strategy to the other.",
-              "fallback": "None needed \u2014 the mirror is committed, and scripts/check-gemini-adapter.sh fails rather than shipping an adapter that finds nothing. Regenerate with make gemini-extension; never hand-edit .gemini/skills/. One live failure mode: an untrusted workspace folder silently skips the mirror, and the only clue is Gemini logging 'Skipping project agents due to untrusted folder'."
+              "status": "unsupported",
+              "notes": "This repo ships no Gemini adapter: no gemini-extension.json, no .gemini/ mirror, no GEMINI.md. Gemini CLI reads GEMINI.md by default; set context.fileName in Gemini settings to include AGENTS.md to load this repo's instructions.",
+              "fallback": "AGENTS.md carries the same working rules as the skill."
             },
             "skill_auto_invocation": {
-              "status": "unknown",
-              "notes": "Gemini follows the Agent Skills model, but its selection behaviour has not been measured.",
-              "fallback": "Document explicit invocation in docs/user/install/gemini.md."
+              "status": "unsupported",
+              "notes": "No skill is shipped for Gemini (see skills).",
+              "fallback": "Follow AGENTS.md."
             },
             "subagents": {
-              "status": "adapter",
-              "since": "0.55.1",
-              "validation": "make gemini-extension-check",
-              "notes": "The CANONICAL form does not load: agents/*.md are read from the extension root and rejected with 'tools.0: Invalid tool name', because Gemini wants tools as an array of its own tool names while this repo's agents declare Claude's (Read, Grep, Glob, Bash) as a string. A GENERATED form does: scripts/build-gemini-extension.sh emits .gemini/agents/*.md with tools as a YAML array of real Gemini names (read_file, search_file_content, glob, run_shell_command), verified against the loader rather than guessed, and omits model: entirely \u2014 a Claude alias like 'sonnet' passes validation and then fails at invocation. Verified on 0.55.1: all agents load with no errors.",
-              "fallback": "Regenerate with make gemini-extension; never hand-edit .gemini/agents/. Installing the extension still emits a harmless load error for the canonical agents/ at the extension root \u2014 noisy, not fatal, and unfixable from this side (no subdirectory flag, no manifest field relocates it)."
+              "status": "unknown",
+              "notes": "No Gemini agent definitions are shipped, and Gemini subagent behaviour has not been measured here.",
+              "fallback": "Run the role inline in the main session, sequentially, with a narrowed scope."
             },
             "parallel_subagents": {
               "status": "unknown",
@@ -722,19 +714,18 @@
               "fallback": "Use session-files/ as the message bus."
             },
             "hooks": {
-              "status": "unknown",
-              "notes": "This adapter ships no hooks, by design \u2014 a statement about the adapter, not a verdict on Gemini. Measured on 0.55.1, read from the shipped bundle rather than the docs: Gemini accepts the outer {\"hooks\": {...}} shape of the Claude Code schema without complaint, AND accepts an invented event name just as silently, so loading proves nothing about firing. The vocabularies partially overlap rather than differ wholesale \u2014 of this repo's ten declared events, three (SessionStart, SessionEnd, Notification) are real Gemini events, four (PreToolUse, PostToolUse, UserPromptSubmit, Stop) exist only as keys in the gemini hooks migrate --from-claude mapping table, and three (DirectoryAdded, WorktreeCreate, WorktreeRemove) have no counterpart at all. Whether the three shared events actually fire was NOT verified, so no claim is made in either direction. Not 'unsupported' \u2014 that would assert a measured failure that was never measured, and would also imply the dropped-in Claude file is wholly inert when three of its handlers name events Gemini has.",
-              "fallback": "Guards become explicit in-skill steps plus CI checks. gemini hooks migrate --from-claude can translate them into personal settings."
+              "status": "unsupported",
+              "notes": "No hooks are shipped for Gemini.",
+              "fallback": "The rules live in AGENTS.md (and .claude/rules/constraints.md for Claude Code); CI runs make agent:check."
             },
             "mcp": {
-              "status": "native",
-              "since": "0.55.1",
-              "validation": "bash scripts/check-gemini-adapter.sh",
-              "notes": "Measured on 0.55.1. The github server needs its token in the environment variable the official server reads (Claude Code supplies it from the github_token option; Gemini has no option store, so export it in the shell that starts gemini)."
+              "status": "unsupported",
+              "notes": "No MCP server config is shipped for Gemini.",
+              "fallback": "Use gh or another CLI through the shell."
             },
             "statusline": {
               "status": "unsupported",
-              "notes": "Measured on 0.55.1: no extension-declared statusline.",
+              "notes": "Not provided by this repo.",
               "fallback": "Cosmetic only; omit."
             },
             "shell": {
@@ -748,7 +739,7 @@
             "github_cli": {
               "status": "native",
               "validation": "gh auth status",
-              "notes": "Optional host dependency. Also required before the bundled github MCP server's first call."
+              "notes": "Optional host dependency."
             },
             "background_tasks": {
               "status": "unknown",
@@ -757,23 +748,22 @@
             },
             "worktree_isolation": {
               "status": "emulated",
-              "notes": "Shell plus git, driven by the skill.",
+              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 20 covers the workflow.",
               "fallback": "Explicit git worktree add/remove steps."
             },
             "plugin_marketplace": {
               "status": "unsupported",
-              "notes": "Gemini installs extensions from a git URL; there is no marketplace listing to publish to.",
-              "fallback": "Use extension_install."
+              "notes": "Gemini installs extensions from a git URL; there is no marketplace listing, and this repo is not an extension.",
+              "fallback": "Clone the repo; see the install command above."
             },
             "extension_install": {
-              "status": "native",
-              "since": "0.55.1",
-              "validation": "bash scripts/check-gemini-adapter.sh",
-              "notes": "Primary install path, measured on 0.55.1: gemini extensions install <git-url>, or gemini extensions link . for local development. Note that gemini extensions validate only parses the manifest \u2014 it reports success on an extension whose context file does not exist \u2014 so it is not sufficient evidence for any row here."
+              "status": "unsupported",
+              "notes": "This repo is not a Gemini extension: it ships no gemini-extension.json.",
+              "fallback": "Clone the repo; see the install command above."
             },
             "slash_commands": {
-              "status": "unknown",
-              "notes": "Gemini reads commands/*.toml at the extension root, but this repo ships no commands/ directory on any target, so the path was never probed.",
+              "status": "unsupported",
+              "notes": "No Gemini commands are shipped.",
               "fallback": "Users invoke skills by describing them in prose."
             },
             "ask_user_question": {
@@ -807,7 +797,7 @@
           "display_name": "Gemini Code Assist",
           "kind": "ide",
           "support": "unverified",
-          "unverified_reason": "Code Assist is a different host from the Gemini CLI: it does not install CLI extensions, so the generated .gemini/ mirror this repo ships has no established install path there and has never been exercised on it. Listed because it is a real Gemini surface users will ask about, not because it is known to work.",
+          "unverified_reason": "Code Assist is a different host from the Gemini CLI. This repo ships no Gemini adapter and has never been exercised there. Listed because users will ask about it, not because it is known to work.",
           "aliases": [
             "gemini-code-assist"
           ],
@@ -842,30 +832,28 @@
             "https://opencode.ai/config.json"
           ],
           "install": {
-            "type": "path",
-            "command": "Point the opencode.json `skills` array at absolute paths in this checkout. Use absolute paths, not symlinks: symlink following for skill discovery has not been measured on OpenCode 2, so a symlinked install may silently discover nothing.",
-            "doc": "docs/user/install/opencode.md"
+            "type": "manual",
+            "command": "git clone https://github.com/TamirCohen28/ai-native-dev-guide.git && cd ai-native-dev-guide"
           },
           "validation": {
-            "command": "opencode debug config"
+            "command": "test -f AGENTS.md",
+            "requires_cli": false
           },
           "capabilities": {
             "skills": {
-              "status": "native",
-              "since": "2.0.0",
-              "validation": "opencode debug config",
-              "notes": "Recursive (domain-nested) discovery is documented for OpenCode 2; per-skill discovery is not verifiable from the CLI (2.2.5: `api skill.list` returns only the three built-ins). OpenCode recognises a smaller frontmatter set and ignores unknown fields. Symlink following for skill discovery is unmeasured on OpenCode 2; install with absolute paths in the `skills` array, never a symlink.",
-              "last_verified": "2026-10-31"
+              "status": "unknown",
+              "notes": "OpenCode reads AGENTS.md natively. Its docs list .claude/skills/ as a compatible skill location, so the project skill may be discovered, but this repo has not measured it.",
+              "fallback": "AGENTS.md carries the same working rules as the skill."
             },
             "skill_auto_invocation": {
               "status": "unknown",
-              "notes": "Discovery is verified; automatic selection is not. Since 2.0.23 (changelog only, anomalyco/opencode#52747) skill frontmatter accepts disable-model-invocation to keep a skill out of model selection; not exercised here, and no shipped skill sets it.",
+              "notes": "Not measured; skill discovery itself is unverified here (see skills).",
               "fallback": "Name the skill explicitly."
             },
             "subagents": {
-              "status": "adapter",
-              "notes": "Canonical agents/ are translated into .opencode/agent/ by scripts/build-opencode-agents.sh because the frontmatter genuinely differs; drift is enforced by make opencode-agents-check.",
-              "fallback": "Regenerate the adapter rather than hand-editing .opencode/agent/."
+              "status": "unknown",
+              "notes": "This repo ships no OpenCode agent definitions, and subagent behaviour has not been measured here.",
+              "fallback": "Run the role inline in the main session, sequentially, with a narrowed scope."
             },
             "parallel_subagents": {
               "status": "unknown",
@@ -879,13 +867,13 @@
             },
             "hooks": {
               "status": "unsupported",
-              "notes": "OpenCode has no hooks.json; its only lifecycle mechanism is the JS/TS plugin API, and this repo ships no plugin module by design (it would add a Node runtime dependency for no other gain). As installed, the hooks/ guards do not run at all \u2014 'adapter' would imply a generated artifact exists, as it does for subagents, and none does.",
+              "notes": "No hooks are shipped: OpenCode's lifecycle mechanism is its JS/TS plugin API, and this repo ships no plugin module.",
               "fallback": "Guards become explicit in-skill steps plus CI checks."
             },
             "mcp": {
-              "status": "native",
-              "validation": "grep -q 'opencode.ai/docs/mcp-servers' docs/user/install/opencode.md",
-              "notes": "OpenCode reads MCP servers from the 'mcp' block of opencode.json, not from .mcp.json. This repo deliberately ships no 'mcp' block -- docs/user/install/opencode.md tells the user to port the entries they want -- so the validation asserts that documented path, not a key we do not ship. It previously read jq -e '.mcp // {}' opencode.json, which names a key that has never been present AND could not fail: the // {} fallback substitutes an empty object, and jq -e only exits non-zero on false or null. It reported success on every input, including this one."
+              "status": "unsupported",
+              "notes": "No opencode.json or other MCP config is shipped.",
+              "fallback": "Use gh or another CLI through the shell."
             },
             "statusline": {
               "status": "unsupported",
@@ -912,18 +900,18 @@
             },
             "worktree_isolation": {
               "status": "emulated",
-              "notes": "Shell plus git, driven by the skill.",
+              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 20 covers the workflow.",
               "fallback": "Explicit git worktree add/remove steps."
             },
             "plugin_marketplace": {
               "status": "unsupported",
-              "notes": "No plugin marketplace \u2014 install is by absolute paths in the `skills` array. Not by symlink: OpenCode does not follow them for skill discovery (see the skills row).",
-              "fallback": "Document the absolute `skills` array install in docs/user/install/opencode.md."
+              "notes": "OpenCode has no plugin marketplace; this repo is cloned, not installed.",
+              "fallback": "Clone the repo; see the install command above."
             },
             "extension_install": {
               "status": "unsupported",
               "notes": "No git-URL extension install.",
-              "fallback": "Use the path install."
+              "fallback": "Clone the repo; see the install command above."
             },
             "slash_commands": {
               "status": "unknown",
@@ -961,7 +949,7 @@
           "display_name": "OpenCode desktop app",
           "kind": "desktop",
           "support": "unverified",
-          "unverified_reason": "OpenCode ships a desktop client alongside the terminal one. Whether it reads the same opencode.json `skills` array this repo installs into has not been checked, so the skills row under opencode is not carried over here.",
+          "unverified_reason": "OpenCode ships a desktop client alongside the terminal one. This repo has never been exercised there, so the opencode rows are not carried over.",
           "aliases": [
             "opencode-desktop"
           ],
