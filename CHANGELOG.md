@@ -15,6 +15,7 @@ All notable changes to this repository are recorded here. The format follows [Ke
 
 ### Changed
 
+- License: the repository moves from MIT to CC BY-NC-SA 4.0 (credit required, non-commercial use only, adaptations allowed under the same license).
 - Chapters 05 to 29 are now 06 to 34. Every link, heading, footer and cross-reference was remapped, and the contents, ladder, cheat sheet, glossary, learning path and sources follow the new numbering.
 
 ### Fixed

@@ -5,7 +5,7 @@
 <p align="center">
   <a href="https://github.com/Tamircohen28"><img src="https://img.shields.io/badge/author-Tamir%20Cohen-181717?logo=github" alt="Author" /></a>
   <a href="https://github.com/TamirCohen28/ai-native-dev-guide/actions/workflows/ci.yml"><img src="https://github.com/TamirCohen28/ai-native-dev-guide/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-CC%20BY--NC--SA%204.0-lightgrey.svg" alt="License: CC BY-NC-SA 4.0" /></a>
   <a href="docs/CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.1.0-blue" alt="Version" /></a>
 </p>
 
@@ -95,6 +95,6 @@ Corrections and improvements are welcome. Read [docs/CONTRIBUTING.md](docs/CONTR
 
 ---
 
-MIT © [Tamir Cohen](https://github.com/Tamircohen28)
+CC-BY-NC-SA-4.0 © [Tamir Cohen](https://github.com/Tamircohen28)
 
 <p align="center"><a href="https://github.com/TamirCohen28">Have a Question?</a>&nbsp;·&nbsp;<a href="https://github.com/TamirCohen28/ai-native-dev-guide/issues/new/choose">Open an Issue</a></p>
