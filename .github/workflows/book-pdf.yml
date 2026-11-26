@@ -1,0 +1,122 @@
+name: Book PDF
+
+# Builds the whole book as one PDF (make pdf).
+#   push to main / manual run: build, upload as an artifact, deploy to GitHub Pages,
+#     so https://tamircohen28.github.io/ai-native-dev-guide/ always serves the latest PDF.
+#   pull request touching the book or the PDF tooling: build and upload only, so the PR
+#     proves the PDF still builds. Nothing is deployed from a PR.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - "book/**"
+      - "scripts/pdf/**"
+      - "package.json"
+      - "package-lock.json"
+      - "requirements-pdf.txt"
+      - "Makefile"
+      - "docs/CHANGELOG.md"
+      - ".github/workflows/book-pdf.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# PR runs supersede each other; a main build is never cancelled half-way through a deploy.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # The commit the PDF is stamped with: the PR head, not GitHub's merge commit.
+      BOOK_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          # Tags are needed to tell a release build (vX.Y.Z) from version+sha.
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-pdf.txt
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          python -m pip install -r requirements-pdf.txt
+
+      # make pdf builds the book and then checks the metadata and every internal link.
+      - name: Build the PDF
+        run: make pdf
+
+      - name: Upload the PDF
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ai-native-development-pdf
+          path: dist/AI-Native Development.pdf
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Assemble the Pages site
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p _site
+          cp "dist/AI-Native Development.pdf" "_site/AI-Native Development.pdf"
+          # A space-free alias for links that do not survive %20.
+          cp "dist/AI-Native Development.pdf" _site/ai-native-development.pdf
+          short="${BOOK_COMMIT:0:7}"
+          cat > _site/index.html <<EOF
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>AI-Native Development (PDF)</title>
+            <style>
+              body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 3rem auto; padding: 0 1rem; line-height: 1.5; color: #1b2430; background: #fff; }
+              a { color: #09736a; }
+              code { font-size: 0.9em; }
+            </style>
+          </head>
+          <body>
+            <h1>AI-Native Development</h1>
+            <p>Zero to Hero: a field guide to building software with coding agents. By Tamir Cohen.</p>
+            <p><a href="AI-Native%20Development.pdf"><strong>Download the PDF</strong></a> (latest build of <code>main</code>, commit <code>${short}</code>).</p>
+            <p>Read it as Markdown in the <a href="https://github.com/Tamircohen28/ai-native-dev-guide">repository</a>. Licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+          </body>
+          </html>
+          EOF
+
+      - name: Upload the Pages site
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

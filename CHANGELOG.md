@@ -8,6 +8,7 @@ All notable changes to this repository are recorded here. The format follows [Ke
 
 ### Added
 
+- A PDF edition of the whole book: `make pdf` builds `dist/AI-Native Development.pdf` with a cover (version, commit, license, build time), a table of contents with page numbers, page numbers on every page and PDF metadata (`scripts/pdf/`). The Book PDF workflow rebuilds it on every push to `main` and publishes it on GitHub Pages; pull requests that touch the book build it as an artifact.
 - Repository scaffold around the book: landing page and hero banner, the `docs/` tree, contribution guide, documentation standard (`config/docs/`, `scripts/check-doc-standards.sh`), agent instructions, Makefile and CI.
 - Five chapters, renumbering the book from 29 to 34 chapters: 05 Inside the harness (components, the session and turn lifecycle, request assembly, settings and permissions inside the harness, where state lives, trust boundaries); 11 The extension model (CLAUDE.md, skills, subagents, hooks, MCP servers and plugins with their file structures, and how to choose between them); and a three-part workshop, 19 Guide: write a subagent, 20 Guide: write a skill, 21 Guide: build and ship a plugin.
 - A settings scope-stack diagram in chapter 09.

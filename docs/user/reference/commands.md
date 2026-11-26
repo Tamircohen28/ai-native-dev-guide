@@ -1,6 +1,6 @@
 # Command reference
 
-Every command this repository offers. There is no build and no runtime: the commands set up optional tools and check the text.
+Every command this repository offers. There is no runtime: the commands set up optional tools, check the text and build the optional PDF edition.
 
 Run `make help` for the list as the Makefile itself reports it; the Makefile is the source of truth if this page and it ever disagree.
 
@@ -33,6 +33,13 @@ Reading the book needs none of these.
 | `make check-doc-standards` | Checks that `README.md` and `docs/` follow the documentation standard: shared footer and themed Mermaid | bash, jq |
 | `make check-action-pinning` | Fails if any workflow refers to an action or container by a movable reference instead of a commit | bash |
 | `make lint` | Runs `check-doc-standards` and `check-action-pinning` | bash, jq |
+
+### PDF edition
+
+| Target | What it does | Needs |
+|---|---|---|
+| `make pdf` | Builds the whole book as one PDF, `dist/AI-Native Development.pdf`: a cover with the version, commit, license and build time, a table of contents with page numbers, page numbers at the bottom of every page, and PDF metadata. It then checks the metadata and that every internal link resolves | Node.js 20 or later, Python 3 with `pypdf` |
+| `make clean` | Also removes `dist/`, where the PDF is written | Nothing |
 
 Run `make agent:check` and `make check-book` before every pull request. The first is what CI will run; the second is the only one that proves the diagrams render. `make agent:check` does not include the documentation standard, so run `make lint` as well when you change `README.md` or `docs/`.
 
@@ -110,6 +117,36 @@ The Mermaid CLI comes from the npm package `@mermaid-js/mermaid-cli`:
 ```bash
 npm install -g @mermaid-js/mermaid-cli
 ```
+
+## scripts/pdf/build.mjs
+
+The PDF build behind `make pdf`. It reads the reading order from the Contents tables in `book/README.md`, renders each file with markdown-it, renders every Mermaid block to inline SVG with the Mermaid CLI, paginates with Paged.js in headless Chromium, and writes the metadata with `scripts/pdf/metadata.py`. A Mermaid block that fails to render, a link to a missing anchor, or content wider than the page fails the build.
+
+`make pdf` runs `npm ci` when `node_modules/` is missing; the first run downloads a headless Chrome for puppeteer. Install the Python dependency once:
+
+```bash
+python3 -m pip install -r requirements-pdf.txt
+make pdf
+```
+
+The cover and metadata take the version from the latest released `## [x.y.z]` heading in `docs/CHANGELOG.md`, with `+<short-sha>` appended unless `HEAD` is exactly at tag `vX.Y.Z`. The commit and build time come from git and the clock. Override them for a reproducible build:
+
+| Variable | Effect |
+|---|---|
+| `BOOK_COMMIT` | The full commit SHA printed on the cover and in the metadata |
+| `BOOK_VERSION` | The version string, used as given |
+| `BOOK_BUILD_TIME` | The build timestamp, ISO 8601 in UTC, for example `2026-11-26T12:00:00Z` |
+| `SOURCE_DATE_EPOCH` | The build time as Unix seconds, when `BOOK_BUILD_TIME` is not set |
+| `BOOK_PDF_KEEP_HTML` | Keep the intermediate `dist/pdf-build/book.html` for debugging |
+
+Print the metadata of a built PDF, or re-run its checks:
+
+```bash
+python3 scripts/pdf/metadata.py --show "dist/AI-Native Development.pdf"
+python3 scripts/pdf/metadata.py --check "dist/AI-Native Development.pdf"
+```
+
+The [Book PDF workflow](../../../.github/workflows/book-pdf.yml) runs `make pdf` on every push to `main` and publishes the result to GitHub Pages, at <https://tamircohen28.github.io/ai-native-dev-guide/>. On a pull request that touches the book or the PDF tooling it builds the PDF and uploads it as a workflow artifact, without deploying.
 
 ## scripts/check-doc-standards.sh
 

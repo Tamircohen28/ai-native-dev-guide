@@ -9,8 +9,9 @@
 "AI-Native Development: Zero to Hero" is a book: a field guide to building software with
 coding agents. It has 29 Markdown chapters, appendices A–E and SVG figures.
 
-The repo is documentation only. There is no build and no runtime. The product is the
-Markdown under `book/`, and the only code is the scripts that check it and draw its figures.
+The repo is documentation only. There is no runtime. The product is the Markdown under
+`book/`; the only code is the scripts that check it, draw its figures and build the optional
+PDF edition (`make pdf`, `scripts/pdf/`).
 
 ## Layout
 
@@ -22,6 +23,7 @@ Markdown under `book/`, and the only code is the scripts that check it and draw 
 | `book/assets/` | Figures: `chart-*.svg`, `fig-*.svg`, `cover.svg` |
 | `book/assets/_src/` | The scripts that generate those figures |
 | `scripts/` | Checks: `check-book.py` and the `check-*.sh` scripts |
+| `scripts/pdf/` | The PDF build: `build.mjs`, `book.css`, `metadata.py` |
 | `docs/` | Docs about the repo itself, not book content |
 | `docs/agent-guidelines/` | Detail this file links to |
 | `core/capabilities/platforms.json` | Which coding agents this repo targets and what each can do |
@@ -42,6 +44,7 @@ must hold the same directory names.
 | `make check-book` | Checks the book: file length, code fences, local links, images, Mermaid syntax |
 | `make check-doc-standards` | Checks the footer and themed Mermaid in `README.md` and `docs/` |
 | `python3 scripts/check-book.py book/NN-<slug>.md` | Checks the named files only |
+| `make pdf` | Builds `dist/AI-Native Development.pdf`; needs Node.js and `pypdf` |
 
 Work is done when `make agent:check` exits 0 and you have quoted its output. A check that
 did not run is not a pass: if a tool is missing, say so.
