@@ -43,6 +43,7 @@ The chapter-by-chapter list, with one line on what each chapter gives you, is on
 - **To read:** a Markdown viewer that renders Mermaid diagrams. GitHub does; so do VS Code with a Mermaid extension and Obsidian.
 - **To follow the exercises:** a terminal, git, and basic comfort with one programming language. No machine-learning background is assumed.
 - **To build the PDF yourself (optional):** Node.js 22.12 or later and Python 3 with `pypdf`, then `make pdf`. See the [command reference](docs/user/reference/commands.md#scriptspdfbuildmjs).
+- **To make NotebookLM video packages (optional):** Node.js 22.12 or later, then `make notebookLM`. It writes one folder per section of the book to `notebookLM/` (not committed), each holding the sources for one NotebookLM notebook and Video Overview. See the [command reference](docs/user/reference/commands.md#notebooklm-packages).
 - **To validate changes (optional):** Python 3 for `scripts/check-book.py`, and the Mermaid CLI (`mmdc`, from the npm package `@mermaid-js/mermaid-cli`) so `make check-book` can render every diagram.
 
 ## Quick Start

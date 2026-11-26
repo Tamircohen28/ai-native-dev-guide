@@ -6,7 +6,7 @@
 # optional PDF edition (make pdf), whose Node and Python tools are pinned in
 # package.json / package-lock.json and requirements-pdf.txt.
 
-.PHONY: help install update uninstall build test lint dev clean pdf \
+.PHONY: help install update uninstall build test lint dev clean pdf notebookLM notebooklm \
 	check-book check-book-no-mermaid check-doc-standards check-manifest-declares
 
 help: ## Show this help
@@ -55,8 +55,8 @@ dev: ## Print how to preview the book
 	@echo "  In an editor  open book/ and use the Markdown preview (VS Code: Cmd+Shift+V)"
 	@echo "  Before a PR   make test && make lint"
 
-clean: ## Remove scratch render output, the built PDF and interpreter caches
-	rm -rf tmp dist
+clean: ## Remove scratch render output, the built PDF, the NotebookLM packages and interpreter caches
+	rm -rf tmp dist notebookLM
 	find . \( -path ./.git -o -path ./book -o -path ./assets -o -path ./node_modules \) -prune \
 	  -o -type f \( -name '*.mmd.svg' -o -name '*.pyc' \) -exec rm -f {} +
 	find . \( -path ./.git -o -path ./book -o -path ./assets -o -path ./node_modules \) -prune \
@@ -75,6 +75,17 @@ pdf: ## Build the whole book as one PDF: dist/AI-Native Development.pdf
 	  echo "pypdf is missing: python3 -m pip install -r requirements-pdf.txt"; exit 1; }
 	node scripts/pdf/build.mjs
 	python3 scripts/pdf/metadata.py --check "$(PDF)"
+
+# --- NotebookLM packages ------------------------------------------------------
+
+# One NotebookLM notebook (and Video Overview) per section of the book, written to
+# notebookLM/ (git-ignored, rebuilt from scratch on every run). Same Node tools as make pdf.
+notebookLM: ## Package each book section for NotebookLM: notebookLM/<NN-section>/
+	@command -v node >/dev/null 2>&1 || { echo "node is required (Node.js 22.12 or later)"; exit 1; }
+	@test -d node_modules/puppeteer || npm ci
+	node scripts/notebooklm/build.mjs
+
+notebooklm: notebookLM ## Lower-case alias for make notebookLM
 
 # --- Book and documentation checks --------------------------------------------
 

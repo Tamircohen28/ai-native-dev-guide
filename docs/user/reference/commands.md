@@ -18,7 +18,7 @@ Nothing is compiled and no package manager is involved, so these targets do the 
 | `make uninstall` | Runs `make clean`. Nothing else is ever installed, so there is nothing else to remove | To tidy up |
 | `make build` | Does nothing, and says so: the book is read as Markdown | Never needed |
 | `make dev` | Prints how to preview the book. There is no dev server | When you want a reminder |
-| `make clean` | Removes scratch render output and Python caches. It never touches `book/` or `assets/` | After local rendering experiments |
+| `make clean` | Removes scratch render output, `dist/`, `notebookLM/` and Python caches. It never touches `book/` or `assets/` | After local rendering experiments |
 
 Reading the book needs none of these.
 
@@ -42,6 +42,29 @@ Reading the book needs none of these.
 | `make clean` | Also removes `dist/`, where the PDF is written | Nothing |
 
 Run `make agent:check` and `make check-book` before every pull request. The first is what CI will run; the second is the only one that proves the diagrams render. `make agent:check` does not include the documentation standard, so run `make lint` as well when you change `README.md` or `docs/`.
+
+### NotebookLM packages
+
+| Target | What it does | Needs |
+|---|---|---|
+| `make notebookLM` | Packages the book for NotebookLM, one notebook and one Video Overview per section, in `notebookLM/` at the repository root. `make notebooklm` is the same target | Node.js 22.12 or later |
+| `make clean` | Also removes `notebookLM/` | Nothing |
+
+`notebookLM/` is a build output, like `dist/`: it is git-ignored and every run wipes and rebuilds it. Regenerate it after the book changes, then upload a section's files to its notebook. The generator is `scripts/notebooklm/build.mjs`; `make notebookLM` runs `npm ci` first when `node_modules/` is missing and uses the same pinned Mermaid CLI and puppeteer as `make pdf`.
+
+It reads the reading order from the Contents tables in `book/README.md`. Each part is a section, and a sub-heading inside a part (the Workshop) is a section of its own, so a new chapter lands in the right package when it is added to the contents. The appendices are left out: they are reference tables that narrate poorly, and every package links to them on GitHub instead.
+
+Each section folder, `notebookLM/NN-<section>/`, holds:
+
+| File | What it is |
+|---|---|
+| `01-video-outline.md` | Narrative guidance built only from the chapters' own text: learning objectives from each opener, then per chapter the core concept (from `## Mental model`), key sections, suggested visuals and key takeaways (from `## Checklist`), and narration guidance |
+| `NN-chNN-<slug>.md` | Each chapter, cleaned for NotebookLM: no footer navigation, links to other book files rewritten to GitHub URLs, images pointed at `media/*.png`, and a `Diagram: media/…png — caption` line after every Mermaid block, which is kept as text |
+| `visual-references.pdf` | Every figure and Mermaid diagram in the section, one per page with a caption |
+| `media/` | PNG versions of the section's figures and Mermaid diagrams at 2x on white. NotebookLM does not accept SVG sources |
+| `README.md` | Not a source: which files to upload, the source count against NotebookLM's per-notebook limit, Video Overview settings and a steering prompt |
+
+`notebookLM/README.md` lists the sections with their chapters, source files, images and word counts. The Markdown output is deterministic for a given commit; `BOOK_COMMIT` and `BOOK_VERSION` override the commit and version it records, as for `make pdf`. A Mermaid block that does not render, an image that does not exist or a section without chapters fails the run.
 
 ### Agent and platform targets
 

@@ -45,6 +45,7 @@ must hold the same directory names.
 | `make check-doc-standards` | Checks the footer and themed Mermaid in `README.md` and `docs/` |
 | `python3 scripts/check-book.py book/NN-<slug>.md` | Checks the named files only |
 | `make pdf` | Builds `dist/AI-Native Development.pdf`; needs Node.js and `pypdf` |
+| `make notebookLM` | Builds `notebookLM/` (git-ignored): one NotebookLM package per book section |
 
 Work is done when `make agent:check` exits 0 and you have quoted its output. A check that
 did not run is not a pass: if a tool is missing, say so.
