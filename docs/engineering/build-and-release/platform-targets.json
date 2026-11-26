@@ -1,0 +1,155 @@
+{
+  "schema_version": 2,
+  "last_reviewed": "2026-11-26",
+  "reviewed_by_skill": "tamirs-superpowers@6.1.1",
+  "capability_source": "core/capabilities/platforms.json",
+  "capability_source_note": "targets.<key>.capabilities and capability_gaps are DERIVED from the capability registry. Regenerate with `bash scripts/check-platform-targets.sh . --sync-capabilities`.",
+  "supported_targets": [
+    "claude_code",
+    "codex",
+    "cursor",
+    "gemini_cli",
+    "opencode"
+  ],
+  "targets": {
+    "claude_code": {
+      "platform": "claude",
+      "supported_min": "unknown",
+      "validated_against": "unknown",
+      "latest_known": "unknown",
+      "doc_urls": [
+        "https://code.claude.com/docs/en/skills"
+      ],
+      "features_adopted": [
+        "agents-md-import",
+        "project-skills"
+      ],
+      "capabilities": [
+        "agent_teams",
+        "artifacts",
+        "ask_user_question",
+        "background_tasks",
+        "git",
+        "github_cli",
+        "hooks",
+        "mcp",
+        "parallel_subagents",
+        "session_transcripts",
+        "shell",
+        "skill_auto_invocation",
+        "skills",
+        "slash_commands",
+        "statusline",
+        "subagents",
+        "worktree_isolation"
+      ],
+      "capability_gaps": {
+        "extension_install": "Claude installs plugins, not git-URL extensions.",
+        "plugin_marketplace": "App-gold is a greenfield app repo, not a plugin-distribution repo (see skills/repo/_contract/README.md's profile table) — it ships no .claude-plugin/plugin.json and is not published to a marketplace."
+      }
+    },
+    "codex": {
+      "platform": "codex",
+      "supported_min": "unknown",
+      "validated_against": "unknown",
+      "latest_known": "unknown",
+      "doc_urls": [
+        "https://developers.openai.com/codex/guides/agents-md"
+      ],
+      "features_adopted": [
+        "agents-md"
+      ],
+      "capabilities": [
+        "git",
+        "github_cli",
+        "shell",
+        "worktree_isolation"
+      ],
+      "capability_gaps": {
+        "artifacts": "No artifact publishing surface.",
+        "extension_install": "Codex installs plugins, not git-URL extensions.",
+        "plugin_marketplace": "App-gold is a greenfield app repo, not a plugin-distribution repo — it ships no .codex-plugin/plugin.json and is not published to a marketplace.",
+        "statusline": "Not a declared Codex capability."
+      }
+    },
+    "cursor": {
+      "platform": "cursor",
+      "supported_min": "unknown",
+      "validated_against": "unknown",
+      "latest_known": "unknown",
+      "doc_urls": [
+        "https://cursor.com/docs/rules"
+      ],
+      "features_adopted": [
+        "mdc-rules"
+      ],
+      "capabilities": [
+        "git",
+        "github_cli",
+        "hooks",
+        "mcp",
+        "parallel_subagents",
+        "shell",
+        "skill_auto_invocation",
+        "worktree_isolation"
+      ],
+      "capability_gaps": {
+        "artifacts": "No artifact publishing surface.",
+        "extension_install": "Cursor installs plugins, not git-URL extensions.",
+        "plugin_marketplace": "App-gold is a greenfield app repo, not a plugin-distribution repo — it ships no .cursor-plugin/plugin.json and is not published to a marketplace.",
+        "statusline": "No plugin-declared statusline."
+      }
+    },
+    "gemini_cli": {
+      "platform": "gemini",
+      "supported_min": "unknown",
+      "validated_against": "unknown",
+      "latest_known": "unknown",
+      "doc_urls": [
+        "https://google-gemini.github.io/gemini-cli/docs/extensions/"
+      ],
+      "features_adopted": [],
+      "capabilities": [
+        "extension_install",
+        "git",
+        "github_cli",
+        "mcp",
+        "shell",
+        "skills",
+        "subagents",
+        "worktree_isolation"
+      ],
+      "capability_gaps": {
+        "artifacts": "No artifact publishing surface.",
+        "plugin_marketplace": "Gemini installs extensions from a git URL; there is no marketplace listing to publish to.",
+        "statusline": "Measured on 0.55.1: no extension-declared statusline."
+      }
+    },
+    "opencode": {
+      "platform": "opencode",
+      "supported_min": "unknown",
+      "validated_against": "unknown",
+      "latest_known": "unknown",
+      "doc_urls": [
+        "https://opencode.ai/docs/skills/"
+      ],
+      "features_adopted": [],
+      "capabilities": [
+        "git",
+        "github_cli",
+        "mcp",
+        "shell",
+        "skills",
+        "subagents",
+        "worktree_isolation"
+      ],
+      "capability_gaps": {
+        "artifacts": "No artifact publishing surface.",
+        "extension_install": "No git-URL extension install.",
+        "hooks": "OpenCode has no hooks.json; its only lifecycle mechanism is the JS/TS plugin API, and this repo ships no plugin module by design (it would add a Node runtime dependency for no other gain). As installed, the hooks/ guards do not run at all — 'adapter' would imply a generated artifact exists, as it does for subagents, and none does.",
+        "plugin_marketplace": "No plugin marketplace — install is by absolute paths in the `skills` array. Not by symlink: OpenCode does not follow them for skill discovery (see the skills row).",
+        "statusline": "No plugin-declared statusline."
+      }
+    }
+  }
+}

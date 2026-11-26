@@ -1,0 +1,7 @@
+---
+description: "Project-wide conventions — AGENTS.md is canonical"
+globs:
+alwaysApply: true
+---
+
+Follow [AGENTS.md](../../AGENTS.md) as the canonical source of truth for this repo's layout, commands, book authoring rules and constraints. This rule adds nothing to it: when a rule needs to change, change `AGENTS.md`.

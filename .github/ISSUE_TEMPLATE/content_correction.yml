@@ -1,0 +1,30 @@
+name: Content correction
+description: Something in the book is wrong, out of date or unclear
+labels:
+  - bug
+  - documentation
+body:
+  - type: input
+    id: chapter
+    attributes:
+      label: Chapter
+      description: Chapter or appendix, and the section heading if you have it
+      placeholder: "Chapter 12, section 'Hooks'"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What is wrong
+      description: Quote the passage, then say what it should say instead
+    validations:
+      required: true
+
+  - type: textarea
+    id: source
+    attributes:
+      label: Source that shows it
+      description: A link to official documentation, a changelog, a release note or a reproducible command and its output
+    validations:
+      required: true
