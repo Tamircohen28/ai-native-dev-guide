@@ -1,4 +1,4 @@
-# 19 — Git, pull requests and code review
+# 24 — Git, pull requests and code review
 
 After this chapter you can run source control with an agent without losing track of what changed or who approved it: one branch per task, small commits that say why, and a pull request whose body states what was verified and how. You can use the built-in review commands, decide which automated reviewers gate and which only advise, review AI-written code efficiently, and keep "open a pull request" and "merge it" as two separate authorities.
 
@@ -32,7 +32,7 @@ The official best-practices page puts the last decision outside the model. Under
 
 ## Branch per task, small commits
 
-One task gets one branch, and nothing is committed on the default branch. Commit after each passing step ([chapter 17](17-explore-plan-implement-verify.md)), so the history reads as a sequence of small, checked changes. Tell the agent once, in the brief or in `CLAUDE.md`:
+One task gets one branch, and nothing is committed on the default branch. Commit after each passing step ([chapter 22](22-explore-plan-implement-verify.md)), so the history reads as a sequence of small, checked changes. Tell the agent once, in the brief or in `CLAUDE.md`:
 
 ```text
 Work on a new branch fix/login-rate-limit. Never commit to main.
@@ -59,7 +59,7 @@ git log origin/main -5 --oneline     # was it already merged?
 gh pr list --state open              # is there already a PR for it?
 ```
 
-Two sessions that need different branches at the same time need separate working directories. That is [chapter 20](20-parallel-work-worktrees-and-background-tasks.md).
+Two sessions that need different branches at the same time need separate working directories. That is [chapter 25](25-parallel-work-worktrees-and-background-tasks.md).
 
 ## Open a pull request with gh
 
@@ -158,7 +158,7 @@ jobs:
           claude_args: '--allowedTools "mcp__github_inline_comment__create_inline_comment"'
 ```
 
-`--comment` makes Claude post the review; without it the findings stay in the run log. The `claude_args` line is required, because the action starts the inline-comment server only when `--allowedTools` names it. On public repos, PRs from forks get no secrets, so the review does not run for them. Setup and cost controls are in [chapter 22](22-headless-ci-and-the-agent-sdk.md).
+`--comment` makes Claude post the review; without it the findings stay in the run log. The `claude_args` line is required, because the action starts the inline-comment server only when `--allowedTools` names it. On public repos, PRs from forks get no secrets, so the review does not run for them. Setup and cost controls are in [chapter 27](27-headless-ci-and-the-agent-sdk.md).
 
 **Deterministic checks gate; model reviews advise.** A model reviewer is non-deterministic and always finds something, so a gating one turns into a flaky gate that people learn to bypass. One of the author's repos writes it as an invariant: "No release gate depends on a non-deterministic agent decision." The docs add the other half: "A review with no findings doesn't mean your code is error-free or secure."
 
@@ -169,11 +169,11 @@ jobs:
 Read in this order. The first three steps take minutes and catch most bad PRs:
 
 1. **Proof first.** Does the body show commands and output? Can you rerun one?
-2. **Tests next.** Did existing tests change? Look for loosened assertions, `skip`, lowered thresholds and deleted files ([chapter 18](18-testing-and-verification-loops.md)).
+2. **Tests next.** Did existing tests change? Look for loosened assertions, `skip`, lowered thresholds and deleted files ([chapter 23](23-testing-and-verification-loops.md)).
 3. **Scope.** Is there anything nobody asked for? Unrequested functionality is a warning sign.
 4. **Seams.** Check where the change meets code it did not touch: field names, API contracts, config keys.
 5. **Wiring.** Is the new code actually called? A lesson from the field data: tested code with no caller enforces nothing.
-6. **Sensitive areas.** Authentication, payments, secrets and untrusted input get a human threat-model read ([chapter 24](24-security-and-guardrails.md)).
+6. **Sensitive areas.** Authentication, payments, secrets and untrusted input get a human threat-model read ([chapter 29](29-security-and-guardrails.md)).
 7. **Dependencies.** Does each new package exist, and is it needed?
 
 Agents make writing cheap. The published data suggests that the cost moves to review:
@@ -276,7 +276,7 @@ gh run view "$RUN_ID" --log-failed       # after a failure; RUN_ID comes from `g
 
 Claude Code also ships skills for this loop (check `/help` in your version): `/ship [level] [pr] [+bot]` commits, pushes, opens a PR, reviews it and then watches it; `/steward [pr] [+bot]` watches your open PR and pushes fixes; `/autofix-pr [prompt]` starts a cloud session that does the same for the branch's PR.
 
-- A subagent should finish its work and return after opening the PR. The main session watches CI. Subagents that wait on long gates tend to end mid-task ([chapter 21](21-multi-agent-orchestration.md)).
+- A subagent should finish its work and return after opening the PR. The main session watches CI. Subagents that wait on long gates tend to end mid-task ([chapter 26](26-multi-agent-orchestration.md)).
 - Background commands are not restored when you resume a session. Start the watcher again.
 - Cancel superseded runs per PR, so bursts of agent pushes do not queue stale runs.
 - When every job fails at `Set up job` within a minute, the cause is the CI host or a throttle, not your commit. Do not keep re-running.
@@ -339,4 +339,4 @@ Claude Code also ships skills for this loop (check `/help` in your version): `/s
 
 ---
 
-[← Previous: Testing and verification loops](18-testing-and-verification-loops.md) · [Contents](README.md) · [Next: Parallel work: worktrees and background tasks →](20-parallel-work-worktrees-and-background-tasks.md)
+[← Previous: Testing and verification loops](23-testing-and-verification-loops.md) · [Contents](README.md) · [Next: Parallel work: worktrees and background tasks →](25-parallel-work-worktrees-and-background-tasks.md)

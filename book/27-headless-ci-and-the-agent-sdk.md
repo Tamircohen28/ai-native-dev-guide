@@ -1,4 +1,4 @@
-# 22 — Headless mode, CI and the Agent SDK
+# 27 — Headless mode, CI and the Agent SDK
 
 After this chapter you can run Claude Code from a script, a cron job or a CI pipeline, read its answer as text or JSON, and decide in advance which tools the run may use. You will also know when the GitHub Action or the Agent SDK fits better than the CLI, and how to keep an unattended run from loading a stranger's configuration or spending without a ceiling.
 
@@ -7,7 +7,7 @@ After this chapter you can run Claude Code from a script, a cron job or a CI pip
 *Headless* means no person is at the keyboard. The agent loop from [chapter 3](03-the-agentic-loop-and-tool-use.md) is the same one; three things around it change:
 
 - **Nobody answers a permission prompt.** Every approval is decided before the run starts, by a rule, a hook or a callback. A call that still needs approval is denied and the loop carries on without it.
-- **Nobody sees a trust dialog.** That is the prompt an interactive session shows before it uses a new folder's configuration ([chapter 8](08-settings-and-permissions.md)). A headless run uses the repository's hooks and MCP servers without asking, so you choose what loads.
+- **Nobody sees a trust dialog.** That is the prompt an interactive session shows before it uses a new folder's configuration ([chapter 9](09-settings-and-permissions.md)). A headless run uses the repository's hooks and MCP servers without asking, so you choose what loads.
 - **A program reads the output.** You pick a format the next step in the script can parse.
 
 There are three ways in and one engine behind them. The docs call `claude -p` "the Agent SDK via the CLI", describe the GitHub Action as "built on the SDK", and say the SDK gives you "the same tools, agent loop, and context management that power Claude Code".
@@ -314,7 +314,7 @@ claude -p "$PROMPT" --bare --setting-sources user \
   --max-turns 15 --max-budget-usd 2
 ```
 
-Least privilege applies to the agent's token as much as to its tools. An agent that can read private data, reads untrusted content and can send data out has all three parts of what one widely cited post calls the "lethal trifecta"; remove one of them per job. In one vendor's 2025 incident, attacker-committed code shipped inside a coding-assistant release, and the stated root cause was an "inappropriately scoped GitHub token". [Chapter 24](24-security-and-guardrails.md) goes deeper.
+Least privilege applies to the agent's token as much as to its tools. An agent that can read private data, reads untrusted content and can send data out has all three parts of what one widely cited post calls the "lethal trifecta"; remove one of them per job. In one vendor's 2025 incident, attacker-committed code shipped inside a coding-assistant release, and the stated root cause was an "inappropriately scoped GitHub token". [Chapter 29](29-security-and-guardrails.md) goes deeper.
 
 ## Cost control in CI
 
@@ -385,4 +385,4 @@ The source comment gives the reason: only user settings load, so "a cloned repo 
 
 ---
 
-[← Previous: Multi-agent orchestration](21-multi-agent-orchestration.md) · [Contents](README.md) · [Next: One repo, many agents: AGENTS.md and cross-tool setups →](23-cross-tool-agents-md-cursor-codex-gemini.md)
+[← Previous: Multi-agent orchestration](26-multi-agent-orchestration.md) · [Contents](README.md) · [Next: One repo, many agents: AGENTS.md and cross-tool setups →](28-cross-tool-agents-md-cursor-codex-gemini.md)

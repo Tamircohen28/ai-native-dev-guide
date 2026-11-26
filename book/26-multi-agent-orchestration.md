@@ -1,4 +1,4 @@
-# 21 — Multi-agent orchestration
+# 26 — Multi-agent orchestration
 
 After this chapter you can decide whether a task needs more than one agent, pick the cheapest pattern that fits, and run a multi-task objective that ends in one reviewed pull request. You will also be able to design the plain-file state that lets an orchestration survive a crash, a compaction or a rate limit.
 
@@ -22,7 +22,7 @@ flowchart LR
     R -->|"approve"| P["One pull request"]
 ```
 
-This chapter builds on [subagents](12-subagents.md) and on worktrees and background tasks from [chapter 20](20-parallel-work-worktrees-and-background-tasks.md).
+This chapter builds on [subagents](14-subagents.md) and on worktrees and background tasks from [chapter 25](25-parallel-work-worktrees-and-background-tasks.md).
 
 ## The four patterns
 
@@ -59,7 +59,7 @@ As of Nov 2026 the docs list five ways to run in parallel: subagents, agent view
 |---|---|---|
 | Subagents | Workers the main session spawns; background by default | 20 concurrent; can nest up to three layers below the main conversation; `isolation: worktree` is opt-in |
 | `/batch <instruction>` | Splits a change into 5 to 30 units, one background subagent per unit in its own worktree | Each unit opens its own PR or reports what happened |
-| Agent view | `claude agents`: monitor and dispatch background sessions | Research preview ([chapter 20](20-parallel-work-worktrees-and-background-tasks.md)) |
+| Agent view | `claude agents`: monitor and dispatch background sessions | Research preview ([chapter 25](25-parallel-work-worktrees-and-background-tasks.md)) |
 | Agent teams | One lead plus teammates (separate Claude Code instances) with a shared task list and a mailbox | Experimental, off by default; one team per session; no nested teams; not in `-p` or the SDK; teammates are **not** isolated in worktrees |
 | Dynamic workflows | A JavaScript script that orchestrates many subagents; Claude writes it, a runtime executes it in the background | 16 concurrent agents by default; 1,000 agents per run; no mid-run user input |
 
@@ -244,9 +244,9 @@ Its routing skill, `/route`, requires a delegation table **before** anything is 
 
 **Agents that wait on CI and die.** A wait inside a subagent is fragile: the docs note that a background command started by a foreground subagent ends when that subagent's run ends, and the author's memory files record agents that "completed" mid-task while waiting on a 20-minute CI gate. Fix: workers do synchronous work and return; the orchestrator owns every wait with one background watcher, and owns the merge.
 
-**Coordination loops.** In the plugin repo, an advisory `SubagentStop` hook that added a note to context re-woke the subagent that had just stopped: 15 to 23 wake-ups and about 200k tokens per read-only helper. Fix: honour `stop_hook_active`, skip read-only roles and speak once per agent ([chapter 14](14-hooks.md)). The same family: a goal phrased as "do not stop" produced 21 consecutive blocks. Phrase a stop condition as a predicate, not an imperative.
+**Coordination loops.** In the plugin repo, an advisory `SubagentStop` hook that added a note to context re-woke the subagent that had just stopped: 15 to 23 wake-ups and about 200k tokens per read-only helper. Fix: honour `stop_hook_active`, skip read-only roles and speak once per agent ([chapter 16](16-hooks.md)). The same family: a goal phrased as "do not stop" produced 21 consecutive blocks. Phrase a stop condition as a predicate, not an imperative.
 
-**Cost.** Multipliers of 7× and 15× arrive as rate limits before they arrive as a bill: in the field data a weekly limit landed in the middle of a multi-day merge queue, and two agents stopped together on a 5-hour limit. Fix: fewer agents, model tiering, concise returns, and a hook that writes a resume record (branch, uncommitted count, next command) when a limit hits. See [chapter 25](25-cost-usage-and-observability.md).
+**Cost.** Multipliers of 7× and 15× arrive as rate limits before they arrive as a bill: in the field data a weekly limit landed in the middle of a multi-day merge queue, and two agents stopped together on a 5-hour limit. Fix: fewer agents, model tiering, concise returns, and a hook that writes a resume record (branch, uncommitted count, next command) when a limit hits. See [chapter 30](30-cost-usage-and-observability.md).
 
 ## From the field
 
@@ -305,4 +305,4 @@ Its routing skill, `/route`, requires a delegation table **before** anything is 
 
 ---
 
-[← Previous: Parallel work: worktrees and background tasks](20-parallel-work-worktrees-and-background-tasks.md) · [Contents](README.md) · [Next: Headless mode, CI and the Agent SDK →](22-headless-ci-and-the-agent-sdk.md)
+[← Previous: Parallel work: worktrees and background tasks](25-parallel-work-worktrees-and-background-tasks.md) · [Contents](README.md) · [Next: Headless mode, CI and the Agent SDK →](27-headless-ci-and-the-agent-sdk.md)

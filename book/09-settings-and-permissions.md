@@ -1,16 +1,16 @@
-# 08 — Settings and permissions
+# 09 — Settings and permissions
 
 After this chapter you can find the settings file that controls a behaviour, write permission rules that match what you mean, and pick a permission mode knowing exactly what it removes. You also get a baseline `settings.json` to adapt for a team repo and a safe way to cut permission prompts.
 
 ## Mental model
 
-[Chapter 07](07-claude-md-and-memory.md) covered text the model reads and may decide not to follow. This chapter covers configuration that Claude Code, the program around the model (the *harness*), executes whatever the model thinks. There are three layers:
+[Chapter 08](08-claude-md-and-memory.md) covered text the model reads and may decide not to follow. This chapter covers configuration that Claude Code, the program around the model (the *harness*), executes whatever the model thinks. There are three layers:
 
 1. **Settings**: JSON files that configure the harness. Model, hooks, environment variables, plugins and the permission rules all live here.
 2. **Permissions**: a decision for every tool call: run it, ask you, or block it. Rules (`deny`, `ask`, `allow`) decide first. The *permission mode* decides everything the rules do not mention.
 3. **Sandbox**: an operating-system boundary around shell commands. Rules decide whether a command starts; the sandbox limits what it can touch while it runs.
 
-The diagram follows one shell command that is not in Claude Code's built-in read-only set. The first check is a `PreToolUse` hook: a command of your own that the harness runs before each tool call ([chapter 14](14-hooks.md)).
+The diagram follows one shell command that is not in Claude Code's built-in read-only set. The first check is a `PreToolUse` hook: a command of your own that the harness runs before each tool call ([chapter 16](16-hooks.md)).
 
 ```mermaid
 flowchart TD
@@ -20,13 +20,14 @@ flowchart TD
     D -- "yes" --> X
     D -- "no" --> K{"Matches an ask rule?"}
     K -- "yes" --> P["You are prompted"]
-    K -- "no" --> W{"Matches an allow rule?"}
-    W -- "yes" --> R["Runs"]
-    W -- "no" --> M{"Permission mode"}
-    M -- "default" --> P
-    M -- "auto" --> C{"Classifier judges it safe?"}
-    M -- "dontAsk" --> X
-    M -- "bypassPermissions" --> R
+    K -- "no" --> M{"Permission mode approves it?"}
+    M -- "bypassPermissions, or acceptEdits for a file edit" --> R["Runs"]
+    M -- "otherwise" --> W{"Matches an allow rule?"}
+    W -- "yes" --> R
+    W -- "no" --> F{"Mode fallback"}
+    F -- "default" --> P
+    F -- "auto" --> C{"Classifier judges it safe?"}
+    F -- "dontAsk" --> X
     C -- "yes" --> R
     C -- "no" --> X
     R --> S["Sandbox limits files and network, if enabled"]
@@ -46,6 +47,23 @@ No single layer is complete, which is why they are stacked. The figure widens th
 | 4 | Shared project | `.claude/settings.json` | Everyone who works in the repo; commit it |
 | 5 | User | `~/.claude/settings.json` | You, in every project |
 
+The five files are not alternatives; Claude Code reads all of them and merges them into one effective configuration:
+
+```mermaid
+flowchart TB
+    M["1 Managed settings: organisation policy"] --> MERGE
+    C["2 --settings flag: this run"] --> MERGE
+    L["3 .claude/settings.local.json: you, this repo"] --> MERGE
+    P["4 .claude/settings.json: the team, this repo"] --> MERGE
+    U["5 ~/.claude/settings.json: you, every repo"] --> MERGE
+    MERGE{"Merge"} --> S["Single values: highest scope wins"]
+    MERGE --> LST["allow, ask, deny lists: combined from every scope"]
+    LST --> DN["A deny at any scope cannot be allowed back"]
+    S --> EFF["Effective configuration for the session"]
+    DN --> EFF
+    EFF --> RULES["Permission check on every tool call, below"]
+```
+
 How the files combine:
 
 - **Scalars override.** "A key set at a higher level overrides the same key set lower down."
@@ -60,7 +78,7 @@ One more file, `~/.claude.json`, is not a settings scope: Claude Code writes it 
 
 To debug, run `claude doctor` in your shell (it prints settings-file validation errors), `/status` in a session (it shows whether managed settings apply), and `/permissions` for the rules in force, listed by scope.
 
-> **Warning:** A repo's `.claude/settings.json` is code you run. Project `allow` rules apply only after you accept the workspace trust dialog, but a `claude -p` run in a folder you never trusted shows no dialog and still uses the project's hooks and `env` block. Read the file before you run an agent in a repo you cloned ([chapter 24](24-security-and-guardrails.md)).
+> **Warning:** A repo's `.claude/settings.json` is code you run. Project `allow` rules apply only after you accept the workspace trust dialog, but a `claude -p` run in a folder you never trusted shows no dialog and still uses the project's hooks and `env` block. Read the file before you run an agent in a repo you cloned ([chapter 29](29-security-and-guardrails.md)).
 
 ## Keys worth knowing
 
@@ -71,10 +89,10 @@ To debug, run `claude doctor` in your shell (it prints settings-file validation 
 | `permissions.additionalDirectories` | File access to directories outside the current one (access only; their configuration does not load) |
 | `permissions.disableBypassPermissionsMode` | Set to the string `"disable"` to stop anyone entering `bypassPermissions`; works from any scope |
 | `env` | Environment variables for every session and its subprocesses |
-| `hooks`, `disableAllHooks` | Your commands at lifecycle points ([chapter 14](14-hooks.md)); the switch that turns them all off |
+| `hooks`, `disableAllHooks` | Your commands at lifecycle points ([chapter 16](16-hooks.md)); the switch that turns them all off |
 | `sandbox` | Isolates shell commands from your filesystem and network |
 | `model`, `effortLevel` | Starting model and default effort level |
-| `enabledMcpjsonServers`, `enableAllProjectMcpServers` | Approve specific MCP servers ([chapter 11](11-mcp-in-practice.md)) from a project `.mcp.json`, or every one without a prompt |
+| `enabledMcpjsonServers`, `enableAllProjectMcpServers` | Approve specific MCP servers ([chapter 13](13-mcp-in-practice.md)) from a project `.mcp.json`, or every one without a prompt |
 | `enabledPlugins`, `extraKnownMarketplaces` | Plugins on or off per scope; marketplaces for a repo or organisation |
 | `autoMemoryEnabled`, `claudeMdExcludes` | Auto memory on or off; `CLAUDE.md` files to skip |
 | `cleanupPeriodDays` | Days transcripts are kept (default `30`, minimum `1`) |
@@ -119,7 +137,7 @@ A rule is `Tool` or `Tool(specifier)`.
 
 ## Evaluation order: deny, ask, allow
 
-"Rules are evaluated in order: deny, then ask, then allow. The first match in that order determines the outcome, and rule specificity doesn't change the order." A narrow allow cannot rescue something a broad deny blocks:
+"Rules are evaluated in order: deny, then ask, then allow. The first match in that order determines the outcome, and rule specificity doesn't change the order." The full check per tool call, as the Agent SDK permissions page lists it, is hooks, deny rules, ask rules, the permission mode, then allow rules; in `default` and `dontAsk` "the call goes on to the allow rules", while `bypassPermissions` and `acceptEdits` (for file edits) approve at the mode step. [Chapter 05](05-inside-the-harness.md) shows where this sits in a turn. A narrow allow cannot rescue something a broad deny blocks:
 
 ```json
 {
@@ -139,7 +157,7 @@ Every push is blocked here, including the one the allow rule names. A broad `ask
 | `allow` | "Allow rules have no effect in `bypassPermissions`", because everything already runs |
 | `PreToolUse` hook | Exit code 2 stops the call before any rule is evaluated. A hook that answers "allow" cannot override a deny or ask rule |
 
-> **Warning:** With `claude -p --bare`, settings and permission rules are still read but hooks never run. A rule enforced only by a hook is not enforced there ([chapter 22](22-headless-ci-and-the-agent-sdk.md)).
+> **Warning:** With `claude -p --bare`, settings and permission rules are still read but hooks never run. A rule enforced only by a hook is not enforced there ([chapter 27](27-headless-ci-and-the-agent-sdk.md)).
 
 ## The six permission modes
 
@@ -147,7 +165,7 @@ Every push is blocked here, including the one the allow rule names. A broad `ask
 |---|---|---|
 | `default` (shown as Manual; the CLI accepts `manual`) | File reads in your working directories | Sensitive work; first weeks with the tool |
 | `acceptEdits` | Reads, file edits and common filesystem commands (`mkdir`, `touch`, `mv`, `cp`) inside the working directory | Iterating while you review the diff |
-| `plan` | Reads and exploration; no edits to your source until you approve the plan | Exploring before changing ([chapter 09](09-plan-mode-checkpoints-and-context-management.md)) |
+| `plan` | Reads and exploration; no edits to your source until you approve the plan | Exploring before changing ([chapter 10](10-plan-mode-checkpoints-and-context-management.md)) |
 | `auto` | "Everything, with background safety checks" | Everyday interactive work |
 | `dontAsk` | Reads and pre-approved tools; "anything that would prompt is denied" | CI and scripts |
 | `bypassPermissions` | "Everything", apart from a short list no mode auto-approves | Isolated containers and VMs only |
@@ -251,7 +269,7 @@ Commit this as `.claude/settings.json` and adapt the command names.
 | No `defaultMode` | `auto` and `bypassPermissions` are ignored from a project file, and `auto` there would also cancel each developer's own choice |
 | No `enableAllProjectMcpServers` | It would approve every server in `.mcp.json` without a prompt |
 
-Personal additions go in `.claude/settings.local.json`. Rules that need logic, such as "no push to `main`", need a hook ([chapter 14](14-hooks.md)).
+Personal additions go in `.claude/settings.local.json`. Rules that need logic, such as "no push to `main`", need a hook ([chapter 16](16-hooks.md)).
 
 ## Cutting permission prompts safely
 
@@ -331,4 +349,4 @@ What it buys: long unattended runs, and no fatigue from prompts that were approv
 
 ---
 
-[← Previous: CLAUDE.md and memory](07-claude-md-and-memory.md) · [Contents](README.md) · [Next: Plan mode, checkpoints and context management →](09-plan-mode-checkpoints-and-context-management.md)
+[← Previous: CLAUDE.md and memory](08-claude-md-and-memory.md) · [Contents](README.md) · [Next: Plan mode, checkpoints and context management →](10-plan-mode-checkpoints-and-context-management.md)

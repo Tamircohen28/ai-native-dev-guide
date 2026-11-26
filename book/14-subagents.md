@@ -1,4 +1,4 @@
-# 12 — Subagents
+# 14 — Subagents
 
 After this chapter you can say exactly what a subagent starts with and what it hands back, write
 an agent definition file with the right tools and model, and brief a subagent so it returns
@@ -71,7 +71,7 @@ details change how you write prompts:
   conversation's permission mode". If the parent runs in `bypassPermissions`, `acceptEdits` or auto
   mode, "your subagent runs in that same mode and Claude Code ignores the `permissionMode` you
   set." A `permissions.deny` Bash rule "applies to the main conversation and to subagents"
-  (see [chapter 8](08-settings-and-permissions.md)).
+  (see [chapter 9](09-settings-and-permissions.md)).
 
 > **Note:** Older write-ups describe every subagent as fully isolated, with nothing going in but
 > the task and nothing coming out but a summary. A fresh-context subagent still gets `CLAUDE.md`, a
@@ -91,7 +91,7 @@ metadata trailer come back." Claude also receives the agent ID, which it needs t
 - **Reports cost context.** "Running many subagents that each return detailed results can consume
   significant context, and each subagent spends tokens of its own while it runs."
 - **Edits are outside your checkpoints.** After `/rewind`, "The subagent's edits to other files
-  stay". Use git to undo them ([chapter 9](09-plan-mode-checkpoints-and-context-management.md)).
+  stay". Use git to undo them ([chapter 10](10-plan-mode-checkpoints-and-context-management.md)).
 
 ## Foreground, background and resume
 
@@ -142,6 +142,8 @@ An agent definition is a Markdown file: YAML frontmatter on top, and the body is
 prompt. Only `name` and `description` are required. You can write the file by hand or ask Claude to
 write it (`/agents` now prints a reminder to do that; up to v2.1.197 it opened an interactive interface).
 
+> **Note:** [Chapter 11](11-the-extension-model.md) helps you decide whether a job needs a subagent at all; [chapter 19](19-guide-write-a-subagent.md) builds one step by step, from a session-only `--agents` test to a linted, committed file.
+
 ### Where the file goes
 
 | Priority | Location | Scope |
@@ -187,10 +189,10 @@ directory wins. Plugin agents are namespaced (`my-plugin:agent`), so `:` is rese
 - **Isolation.** `isolation: worktree` gives the agent "an isolated copy of the repository". Mind
   the base: "By default, the copy branches from your default branch rather than the parent
   session's `HEAD`", so unmerged work in your session is not in it. Instruction files still come
-  "from your main conversation, not from its worktree" ([chapter 20](20-parallel-work-worktrees-and-background-tasks.md)).
+  "from your main conversation, not from its worktree" ([chapter 25](25-parallel-work-worktrees-and-background-tasks.md)).
 - **Preloaded skills.** `skills:` injects each named skill in full, "not only the description", up
   to "the first 32 distinct names". A skill with `disable-model-invocation: true` cannot be
-  preloaded ([chapter 13](13-skills.md)).
+  preloaded ([chapter 15](15-skills.md)).
 
 ## A complete example: a read-only reviewer
 
@@ -307,7 +309,7 @@ phases "share significant context", or it is "a quick, targeted change". What de
   chats" on research tasks, not coding tasks.
 
 Coordinating many agents on one objective (task graphs, handoffs, integration) is the subject of
-[chapter 21](21-multi-agent-orchestration.md).
+[chapter 26](26-multi-agent-orchestration.md).
 
 ## From the field
 
@@ -384,4 +386,4 @@ opens with worktree setup and `git remote -v` as step 0; the plugin also hands w
 
 ---
 
-[← Previous: MCP in practice: using and building servers](11-mcp-in-practice.md) · [Contents](README.md) · [Next: Skills →](13-skills.md)
+[← Previous: MCP in practice: using and building servers](13-mcp-in-practice.md) · [Contents](README.md) · [Next: Skills →](15-skills.md)

@@ -1,6 +1,6 @@
-# 11 — MCP in practice: using and building servers
+# 13 — MCP in practice: using and building servers
 
-After this chapter you can connect an MCP server to Claude Code at the right scope, control what its tools may do, and stop tool definitions and results from flooding your context. You can also build a small server in Python or TypeScript, test it, and register it. [Chapter 10](10-mcp-how-it-works.md) explains the protocol underneath.
+After this chapter you can connect an MCP server to Claude Code at the right scope, control what its tools may do, and stop tool definitions and results from flooding your context. You can also build a small server in Python or TypeScript, test it, and register it. [Chapter 12](12-mcp-how-it-works.md) explains the protocol underneath.
 
 ## Mental model
 
@@ -50,7 +50,7 @@ Short flags are `-s` (`--scope`), `-e` (`--env`), `-t` (`--transport`) and `-H` 
 | User | All your projects | No | `~/.claude.json` |
 
 - **Precedence** when one name is defined twice: local, project, user, plugin-provided, then claude.ai connectors (connectors rank above plugins in `claude -p`, the Agent SDK and VS Code). The whole entry from the winning source is used: "fields are not merged across scopes". An administrator's `managedMcpServers` ranks above all of them (v2.1.259+).
-- **Approval.** An interactive session asks before it uses a server from `.mcp.json`. `claude -p`, the Agent SDK and cloud sessions cannot show that prompt and load project servers without asking. Keep one out with `disabledMcpjsonServers`, `--setting-sources` or `--strict-mcp-config` ([chapter 22](22-headless-ci-and-the-agent-sdk.md)).
+- **Approval.** An interactive session asks before it uses a server from `.mcp.json`. `claude -p`, the Agent SDK and cloud sessions cannot show that prompt and load project servers without asking. Keep one out with `disabledMcpjsonServers`, `--setting-sources` or `--strict-mcp-config` ([chapter 27](27-headless-ci-and-the-agent-sdk.md)).
 - MCP "local scope" is not `.claude/settings.local.json`, and `mcpServers` inside `settings.json` is not read.
 
 ## `.mcp.json` and environment expansion
@@ -89,9 +89,9 @@ A project file that teammates can share without sharing secrets:
 
 ## Tool names and permissions
 
-Claude sees an MCP tool as `mcp__<server>__<tool>`. Dots and spaces in a server name become `_`. A server bundled in a plugin gets `mcp__plugin_<plugin-name>_<server-name>__<tool-name>`, so a hook matcher written against the bare server key never fires for it ([chapter 14](14-hooks.md)). A tool whose full name exceeds 128 characters is not sent to Claude at all.
+Claude sees an MCP tool as `mcp__<server>__<tool>`. Dots and spaces in a server name become `_`. A server bundled in a plugin gets `mcp__plugin_<plugin-name>_<server-name>__<tool-name>`, so a hook matcher written against the bare server key never fires for it ([chapter 16](16-hooks.md)). A tool whose full name exceeds 128 characters is not sent to Claude at all.
 
-Permission rules use the same names. `mcp__puppeteer` or `mcp__puppeteer__*` matches a whole server; a full name matches one tool. In `settings.json` ([chapter 8](08-settings-and-permissions.md)):
+Permission rules use the same names. `mcp__puppeteer` or `mcp__puppeteer__*` matches a whole server; a full name matches one tool. In `settings.json` ([chapter 9](09-settings-and-permissions.md)):
 
 ```json
 {
@@ -303,7 +303,7 @@ claude mcp add --env NOTES_DIR=/absolute/path/to/notes --transport stdio notes -
 claude mcp add --scope project --transport stdio notes-ts -- node /absolute/path/to/notes-ts/build/index.js
 ```
 
-To ship a server inside a plugin ([chapter 15](15-plugins-and-marketplaces.md)), put a `.mcp.json` at the plugin root. `${CLAUDE_PLUGIN_ROOT}` is the installed plugin directory, which changes on every update, and `${user_config.KEY}` reads an option the user set at install time. Options marked `sensitive` are kept in the OS credential store. The author's plugin ships its server in this shape:
+To ship a server inside a plugin ([chapter 17](17-plugins-and-marketplaces.md)), put a `.mcp.json` at the plugin root. `${CLAUDE_PLUGIN_ROOT}` is the installed plugin directory, which changes on every update, and `${user_config.KEY}` reads an option the user set at install time. Options marked `sensitive` are kept in the OS credential store. The author's plugin ships its server in this shape:
 
 ```json
 {
@@ -339,7 +339,7 @@ To ship a server inside a plugin ([chapter 15](15-plugins-and-marketplaces.md)),
 | Wrong tool chosen, context full of definitions | Too many servers and tools | Leave tool search on; `/mcp disable <name>`; use a CLI instead |
 | A call dropped mid-run | Connection lost; the tool may have run | Check before repeating a write; `/mcp reconnect all` |
 
-If you cannot tell which extension is at fault, `claude --safe-mode` starts a session with your customizations disabled ([chapter 27](27-troubleshooting-common-problems.md)).
+If you cannot tell which extension is at fault, `claude --safe-mode` starts a session with your customizations disabled ([chapter 32](32-troubleshooting-common-problems.md)).
 
 ## Checklist
 
@@ -372,4 +372,4 @@ If you cannot tell which extension is at fault, `claude --safe-mode` starts a se
 
 ---
 
-[← Previous: MCP: how the protocol works](10-mcp-how-it-works.md) · [Contents](README.md) · [Next: Subagents →](12-subagents.md)
+[← Previous: MCP: how the protocol works](12-mcp-how-it-works.md) · [Contents](README.md) · [Next: Subagents →](14-subagents.md)

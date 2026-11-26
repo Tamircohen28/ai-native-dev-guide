@@ -1,4 +1,4 @@
-# 10 — MCP: how the protocol works
+# 12 — MCP: how the protocol works
 
 After this chapter you can read a Model Context Protocol exchange on the wire and say what each side is doing: who discovers what, who decides to call a tool, and what comes back when a call fails. You will also know what the 2026-07-28 revision changed, so you can tell whether a server, an SDK or a tutorial describes the current protocol or the older one.
 
@@ -36,7 +36,7 @@ Three ideas carry the rest of the chapter:
 
 A server can offer three kinds of thing, called *primitives*. They differ in who decides when one is used.
 
-| Primitive | Who decides | What it is | Methods | In Claude Code ([chapter 11](11-mcp-in-practice.md)) |
+| Primitive | Who decides | What it is | Methods | In Claude Code ([chapter 13](13-mcp-in-practice.md)) |
 |---|---|---|---|---|
 | **Tools** | The model ("model-controlled") | Functions the model calls to act or fetch data | `tools/list`, `tools/call` | `mcp__<server>__<tool>` |
 | **Resources** | The application ("application-driven") | Data with a URI that the client attaches as context | `resources/list`, `resources/read`, `resources/templates/list` | `@server:protocol://resource/path` |
@@ -314,9 +314,9 @@ Two rules prevent token misuse. The server MUST check that a token was issued fo
 
 ## The human in the loop
 
-Tools are model-controlled, so the spec puts the brake in the host: "there SHOULD always be a human in the loop with the ability to deny tool invocations". Applications SHOULD show which tools are exposed, show when a tool runs, and ask for confirmation. The protocol requires no particular UI; Claude Code implements this with its permission system ([chapter 8](08-settings-and-permissions.md)). Each side has duties. Servers MUST validate all tool inputs, enforce access controls, rate-limit calls and sanitize outputs. Clients SHOULD confirm sensitive operations, show tool inputs before sending them, set timeouts and log tool use. Clients MUST treat tool annotations (a server's hints about a tool's behaviour) as untrusted unless the server is trusted.
+Tools are model-controlled, so the spec puts the brake in the host: "there SHOULD always be a human in the loop with the ability to deny tool invocations". Applications SHOULD show which tools are exposed, show when a tool runs, and ask for confirmation. The protocol requires no particular UI; Claude Code implements this with its permission system ([chapter 9](09-settings-and-permissions.md)). Each side has duties. Servers MUST validate all tool inputs, enforce access controls, rate-limit calls and sanitize outputs. Clients SHOULD confirm sensitive operations, show tool inputs before sending them, set timeouts and log tool use. Clients MUST treat tool annotations (a server's hints about a tool's behaviour) as untrusted unless the server is trusted.
 
-> **Warning:** A tool description is text that the model reads and you usually do not. A malicious server can hide instructions in it (*tool poisoning*), change a description after you approved the server (*rug pull*), or use its descriptions to interfere with another server's tools (*cross-server shadowing*). Anthropic "does not security-audit or manage any MCP server". Treat servers like dependencies: trusted source, pinned version. Defences are in [chapter 24](24-security-and-guardrails.md).
+> **Warning:** A tool description is text that the model reads and you usually do not. A malicious server can hide instructions in it (*tool poisoning*), change a description after you approved the server (*rug pull*), or use its descriptions to interfere with another server's tools (*cross-server shadowing*). Anthropic "does not security-audit or manage any MCP server". Treat servers like dependencies: trusted source, pinned version. Defences are in [chapter 29](29-security-and-guardrails.md).
 
 ## From the field
 
@@ -377,4 +377,4 @@ Tools are model-controlled, so the spec puts the brake in the host: "there SHOUL
 
 ---
 
-[← Previous: Plan mode, checkpoints and context management](09-plan-mode-checkpoints-and-context-management.md) · [Contents](README.md) · [Next: MCP in practice: using and building servers →](11-mcp-in-practice.md)
+[← Previous: The extension model: what each piece is and how to choose](11-the-extension-model.md) · [Contents](README.md) · [Next: MCP in practice: using and building servers →](13-mcp-in-practice.md)

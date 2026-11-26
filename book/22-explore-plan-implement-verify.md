@@ -1,4 +1,4 @@
-# 17 — Explore, plan, implement, verify
+# 22 — Explore, plan, implement, verify
 
 After this chapter you can take any non-trivial task through one repeatable loop: explore the code, agree a plan, implement in small steps, and prove the result with a check the agent can run before anything is committed. You can write a task brief that carries its own definition of done, choose how much ceremony a task deserves, and recover cleanly when a session goes off course.
 
@@ -28,7 +28,7 @@ flowchart TD
 | Plan | Ordered steps, files to touch, the check to run | Plan approval prompt, `Ctrl+G` to edit the plan | The plan (re-injected from disk after compaction) |
 | Implement | One step at a time | Your normal permission mode | Small diffs |
 | Verify | The check runs and its output is read | A proof command, `/goal`, a `Stop` hook, `/verify` | Command plus output |
-| Commit | The step is recorded | Git | A commit, later a pull request ([chapter 19](19-git-prs-and-code-review.md)) |
+| Commit | The step is recorded | Git | A commit, later a pull request ([chapter 24](24-git-prs-and-code-review.md)) |
 
 > **Note:** The loop is for non-trivial work. The official docs say that "in most cases, your first plain prompt in a fresh session already does the right thing, without any setup on your part." A typo fix needs a prompt, not a process. The decision table later in this chapter tells you when to step up.
 
@@ -43,7 +43,7 @@ The official best-practices page has been rewritten, so advice from older tutori
 | "Claude did something that must never happen in this repo, or skipped a step that must always happen" | Enforce the rules that can't have exceptions |
 | "Claude got it right, but it took more time, tokens, or permission prompts than the task was worth" | Change a default |
 
-This chapter covers the first two rows. Rows three and four are [chapter 14](14-hooks.md) and [chapter 8](08-settings-and-permissions.md).
+This chapter covers the first two rows. Rows three and four are [chapter 16](16-hooks.md) and [chapter 9](09-settings-and-permissions.md).
 
 ### Give Claude a check to run
 
@@ -62,7 +62,7 @@ There are four strictness levels, from "Claude decides" to "someone else decides
 | 3. A `Stop` hook | A script runs when Claude tries to stop; exit code 2 sends Claude back | "enforced by Claude Code (the harness)" |
 | 4. "By someone who didn't write the code" | `/code-review`, which runs in "a fresh subagent that never saw your conversation" | An independent reviewer |
 
-Two more tools sit beside the ladder: ask for *evidence* ("the command it ran and its output, or the screenshot"), and `/verify`, a skill that builds and runs the app and looks at the result. [Chapter 18](18-testing-and-verification-loops.md) goes deep on checks, evidence and `Stop` hooks; `/code-review` is in [chapter 19](19-git-prs-and-code-review.md).
+Two more tools sit beside the ladder: ask for *evidence* ("the command it ran and its output, or the screenshot"), and `/verify`, a skill that builds and runs the app and looks at the result. [Chapter 23](23-testing-and-verification-loops.md) goes deep on checks, evidence and `Stop` hooks; `/code-review` is in [chapter 24](24-git-prs-and-code-review.md).
 
 ### What you can stop doing
 
@@ -105,7 +105,7 @@ The third way is `Shift+Tab` until the status bar shows plan mode on. When the p
 | **Yes, manually approve edits** | Approves; you review each edit |
 | **No, keep planning** | Stays in plan mode; tell Claude what to change |
 
-Press `Ctrl+G` to open the plan in your text editor and change it directly. To leave plan mode without approving, press `Esc` first: at the approval prompt `Shift+Tab` approves the plan. The setting `showClearContextOnPlanAccept` (default `false`) adds an option that approves the plan, clears the conversation and implements "from the plan alone". Details are in [chapter 9](09-plan-mode-checkpoints-and-context-management.md).
+Press `Ctrl+G` to open the plan in your text editor and change it directly. To leave plan mode without approving, press `Esc` first: at the approval prompt `Shift+Tab` approves the plan. The setting `showClearContextOnPlanAccept` (default `false`) adds an option that approves the plan, clears the conversation and implements "from the plan alone". Details are in [chapter 10](10-plan-mode-checkpoints-and-context-management.md).
 
 > **Warning:** Plan mode is not a security boundary in every setup. The docs say: "In interactive terminal sessions with bypass permissions available, don't rely on plan mode's blocks."
 
@@ -119,7 +119,7 @@ Do not edit anything yet. For "limit failed logins", list:
 4. questions only I can answer
 ```
 
-For a noisy investigation, hand it to a subagent: "use a subagent to investigate how our auth system handles token refresh". The docs are clear about what that buys: "You get parallelism or a fresh pair of eyes out of it, but not a smarter answer." See [chapter 12](12-subagents.md).
+For a noisy investigation, hand it to a subagent: "use a subagent to investigate how our auth system handles token refresh". The docs are clear about what that buys: "You get parallelism or a fresh pair of eyes out of it, but not a smarter answer." See [chapter 14](14-subagents.md).
 
 Why plan at all? The costs page gives the reason in one line: plan mode helps by "preventing expensive re-work when the initial direction is wrong."
 
@@ -230,7 +230,7 @@ A taxonomy from a martinfowler.com article is useful for deciding how far to go:
 | Small bug with a reproduction | Reproduce it first | In the prompt | None | A test that fails, then passes | One commit or a small PR |
 | Feature across several files | Plan mode | Approved plan | Optional `SPEC.md` from an interview | Tests plus the repo's gate command (the one command that runs every required check) | One PR, several commits |
 | Change in an unfamiliar area or platform | Research first, then plan mode | Approved plan, with a pilot step | Short spec | Gate plus a run of the real feature | Pilot PR, then the rest |
-| Multi-day objective | Research phase | Task breakdown as issues | Spec with acceptance criteria | Gate, CI and a fresh-context review | One PR per task or objective ([chapter 21](21-multi-agent-orchestration.md)) |
+| Multi-day objective | Research phase | Task breakdown as issues | Spec with acceptance criteria | Gate, CI and a fresh-context review | One PR per task or objective ([chapter 26](26-multi-agent-orchestration.md)) |
 
 Step **up** a level when you cannot state "done" in one sentence, when the change touches authentication, schema, infrastructure or money, or after two failed attempts. Step **down** when the spec is longer than the diff will be, or when reviewing the documents takes longer than reviewing the code.
 
@@ -336,4 +336,4 @@ Three warning signs, from an essay on augmented coding: the agent is looping, it
 
 ---
 
-[← Previous: Output styles, status line and keybindings](16-output-styles-statusline-keybindings.md) · [Contents](README.md) · [Next: Testing and verification loops →](18-testing-and-verification-loops.md)
+[← Previous: Guide: build and ship a plugin](21-guide-build-and-ship-a-plugin.md) · [Contents](README.md) · [Next: Testing and verification loops →](23-testing-and-verification-loops.md)

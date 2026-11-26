@@ -1,4 +1,4 @@
-# 13 — Skills
+# 15 — Skills
 
 After this chapter you can package a procedure as a skill that costs one sentence of context until
 it is used, control who may run it and with which tools, and measure whether it triggers and
@@ -36,7 +36,7 @@ flowchart LR
   B -->|"body says run it"| S
 ```
 
-This is the difference from `CLAUDE.md` ([chapter 7](07-claude-md-and-memory.md)), which loads in
+This is the difference from `CLAUDE.md` ([chapter 8](08-claude-md-and-memory.md)), which loads in
 full every session. The docs: "Unlike CLAUDE.md content, a skill's body loads only when it's used,
 so long reference material costs almost nothing until you need it." Stage 1 is not free, though:
 "Every skill in the skill listing adds to your context on every turn."
@@ -44,7 +44,7 @@ so long reference material costs almost nothing until you need it." Stage 1 is n
 The docs say when to make one: "Create a skill when you keep pasting the same instructions,
 checklist, or multi-step procedure into chat, or when a section of CLAUDE.md has grown into a
 procedure rather than a fact." A short fact needed in most tasks stays in `CLAUDE.md`. A rule with
-zero exceptions belongs in a hook ([chapter 14](14-hooks.md)): a skill is text the model reads, so
+zero exceptions belongs in a hook ([chapter 16](16-hooks.md)): a skill is text the model reads, so
 nothing guarantees it is followed.
 
 ## Where skills live and which one wins
@@ -136,7 +136,7 @@ gives it the skill content as its prompt. The name misleads: the docs warn that 
 read-only debugging skill in the author's plugin combines `context: fork`, `agent: Explore`,
 `model: sonnet` and `allowed-tools: [Read, Grep, Glob]`. The inverse also exists: an agent
 definition can preload skills with its `skills` field, and then the full body is injected at
-startup ([chapter 12](12-subagents.md)).
+startup ([chapter 14](14-subagents.md)).
 
 ## Write a description that triggers reliably and cheaply
 
@@ -180,6 +180,8 @@ A body order that works in the author's plugin: why the skill exists, a numbered
 rules, an error table, then references.
 
 ## Worked example: a release-notes skill
+
+> **Note:** For a longer, step-by-step build with a helper script, a delegation step and eval cases, see [chapter 20](20-guide-write-a-skill.md); to decide between a skill and the other extension points, see [chapter 11](11-the-extension-model.md).
 
 ```text
 .claude/skills/release-notes/
@@ -266,7 +268,7 @@ Write the test prompts first. Anthropic's skill-authoring guide says "Create eva
 writing extensive documentation" and suggests three scenarios that show the gap without the skill.
 Its evals guide adds that "20-50 simple tasks drawn from real failures is a great start."
 
-For a skill that ships in a plugin ([chapter 15](15-plugins-and-marketplaces.md)), `claude plugin
+For a skill that ships in a plugin ([chapter 17](17-plugins-and-marketplaces.md)), `claude plugin
 eval` automates the comparison. What the docs confirm, as of Nov 2026:
 
 | Point | Detail |
@@ -313,7 +315,7 @@ Three rules keep a skill portable:
   native on Claude Code, partial on Cursor and unknown on the rest. Expect to type the name there.
 
 `.agents/skills/` is emerging as the neutral directory. Repos in the field data mirror `.claude/skills/`
-into it and check that the copies stay identical ([chapter 23](23-cross-tool-agents-md-cursor-codex-gemini.md)).
+into it and check that the copies stay identical ([chapter 28](28-cross-tool-agents-md-cursor-codex-gemini.md)).
 
 ## From the field
 
@@ -329,7 +331,7 @@ blocks subagent orchestration.
 were never invoked across 953 sessions. A hook was meant to nudge Claude toward them, but it wrote
 to `systemMessage`, which is shown to the user and never to the model, and it fired on `Stop`,
 after the work was done. The fix was `additionalContext` on `UserPromptSubmit`, once per skill per
-session ([chapter 14](14-hooks.md)).
+session ([chapter 16](16-hooks.md)).
 
 **3. Evals are reported as uplift, including the bad news.** The plugin's suite runs each case with
 and without the plugin, so "the headline number is **Δ** (uplift), not raw pass rate". The mean Δ
@@ -386,4 +388,4 @@ would be disabled within a week".
 
 ---
 
-[← Previous: Subagents](12-subagents.md) · [Contents](README.md) · [Next: Hooks →](14-hooks.md)
+[← Previous: Subagents](14-subagents.md) · [Contents](README.md) · [Next: Hooks →](16-hooks.md)

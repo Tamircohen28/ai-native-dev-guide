@@ -39,7 +39,7 @@ sequenceDiagram
 The figure draws the same loop as Claude Code runs it, including the hook and permission gates that
 a later section of this chapter explains.
 
-![The agent loop inside the harness: each tool_use passes PreToolUse hooks, then permission rules and the mode, before the harness runs the tool; PostToolUse hooks run and the tool_result returns to the model; the loop repeats while stop_reason is tool_use and ends with end_turn, where Stop hooks fire](assets/fig-agentic-loop.svg)
+![The agent loop inside the harness: each tool_use passes PreToolUse hooks, then the permission check (deny, ask, the mode, allow), before the harness runs the tool; PostToolUse hooks run and the tool_result returns to the model; the loop repeats while stop_reason is tool_use and ends with end_turn, where Stop hooks fire](assets/fig-agentic-loop.svg)
 
 Two consequences follow, and the rest of the book leans on both:
 
@@ -201,7 +201,7 @@ one result per `tool_use` block and sends them together.
 - For server tools "You never construct a `tool_result` block". The API runs its own inner loop
   ("The default limit is 10 iterations for each request") and returns `pause_turn` when it runs out.
 - Claude Code's shell and file tools (Bash, Read, Edit) run on your machine, and it forwards MCP tool
-  calls to the MCP server ([chapter 10](10-mcp-how-it-works.md)), so it can check every call first.
+  calls to the MCP server ([chapter 12](12-mcp-how-it-works.md)), so it can check every call first.
 
 ## Tool definitions are context
 
@@ -237,7 +237,7 @@ definition stays out of the context window until the model searches for it. A re
 - **Claude Code does this for MCP servers by default**: "Only tool names and server instructions load
   at session start". `ENABLE_TOOL_SEARCH` changes that (`auto` loads definitions up front while they
   total under 10% of the context window, `false` always does), and `"alwaysLoad": true` on a server
-  entry exempts one server ([chapter 11](11-mcp-in-practice.md)).
+  entry exempts one server ([chapter 13](13-mcp-in-practice.md)).
 - Results cost context too, so harnesses cap them: Claude Code keeps Bash output inline "up to roughly
   30,000 characters", and Read returns "at most 25,000 tokens" per call.
 
@@ -251,10 +251,10 @@ rule** is a setting that allows, asks about or denies matching tool calls.
 flowchart TD
     A["Model emits tool_use"] --> B{"PreToolUse hooks"}
     B -->|"exit 2"| X["Blocked: reason goes back as the result"]
-    B -->|"no block"| C{"Permission rules: deny, ask, allow"}
+    B -->|"no block"| C{"deny, then ask rules, then the mode, then allow rules"}
     C -->|"deny"| X
-    C -->|"ask, or the mode prompts"| D{"You approve?"}
-    C -->|"allow, or the mode approves"| E["Harness runs the tool"]
+    C -->|"ask, or nothing matched and the mode prompts"| D{"You approve?"}
+    C -->|"the mode or an allow rule approves"| E["Harness runs the tool"]
     D -->|"no"| X
     D -->|"yes"| E
     E --> F["PostToolUse hooks"]
@@ -266,12 +266,14 @@ flowchart TD
   evaluated". Exit 1 does not block: by default it is a non-blocking error and the call goes ahead.
 - **Then permission rules.** "Rules are evaluated in order: deny, then ask, then allow." A hook cannot
   loosen them: "PreToolUse hook decisions don't bypass permission rules."
-- **Then the permission mode** settles whatever no rule matched: prompt you, approve, or in `auto`
-  mode let a separate classifier model review the action.
+- **The permission mode sits between the ask and the allow rules.** `bypassPermissions`, and
+  `acceptEdits` for file edits, approve at that step; in `default` and `dontAsk` the call goes on to
+  the allow rules. Whatever is still unmatched is settled by the mode: prompt you, deny it (`dontAsk`),
+  or in `auto` let a separate classifier model review it ([chapter 05](05-inside-the-harness.md)).
 - **A block is a result, not a crash.** The refusal returns to the model as the tool result, and the
   model may try another route to the same effect. A guard has to cover every route, not one tool name.
 
-Rules and modes are in [chapter 08](08-settings-and-permissions.md), hooks in [chapter 14](14-hooks.md).
+Rules and modes are in [chapter 09](09-settings-and-permissions.md), hooks in [chapter 16](16-hooks.md).
 
 ## Workflows or agents
 
@@ -295,9 +297,9 @@ In a workflow your code decides the next step; in an agent the model does. The f
 The post's rule is to find "the simplest solution possible, and only increasing complexity when
 needed", because agentic systems "often trade latency and cost for better task performance". Keep
 agents "for open-ended problems where it's difficult or impossible to predict the required number of
-steps". In Claude Code, subagents are orchestrator-workers ([chapter 12](12-subagents.md)) and
+steps". In Claude Code, subagents are orchestrator-workers ([chapter 14](14-subagents.md)) and
 scripted multi-agent runs are workflows in exactly this sense
-([chapter 21](21-multi-agent-orchestration.md)).
+([chapter 26](26-multi-agent-orchestration.md)).
 
 ## From the field
 
@@ -348,7 +350,7 @@ of 76 sessions ran in `bypassPermissions` mode, so stricter permissions may give
 | A 400 error when you force a tool through `tool_choice` | Fable 5.2, Opus 5.5 and Sonnet 5.5 reject forced tool use (as of Nov 2026) | `tool_choice: {"type": "auto"}` plus strict tool use or structured outputs |
 | Wrong tool picked, or a large context before any work starts | Too many definitions loaded up front | Tool search with `defer_loading`; fewer, clearer tools; disconnect MCP servers you do not use |
 | The loop stops early with `pause_turn` | A server tool reached its 10-iteration limit | Resend with the response `content` as an `assistant` message, same `tools`, no new user message |
-| Your guard hook runs but the tool call still happens | The hook exits 1, a non-blocking error | Exit 2 to block ([chapter 14](14-hooks.md)) |
+| Your guard hook runs but the tool call still happens | The hook exits 1, a non-blocking error | Exit 2 to block ([chapter 16](16-hooks.md)) |
 
 ## Checklist
 

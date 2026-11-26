@@ -1,4 +1,4 @@
-# 14 — Hooks
+# 16 — Hooks
 
 After this chapter you can write a hook that blocks a dangerous command, one that injects context when a session starts or a prompt arrives, and one that keeps a turn from ending until a check passes. You will know which exit code and which output field produce each effect, how to test a hook without opening a session, and how to diagnose a guard that does not block.
 
@@ -24,11 +24,11 @@ flowchart TD
     F --> I["Claude changes course or asks you"]
 ```
 
-Look at the third branch. A script that fails with exit code 1 does **not** block anything. That single fact causes most "my guard doesn't work" reports, and the section on exit codes covers it in full. A command hook also runs with your full user permissions, which makes hooks a security topic: see [chapter 24](24-security-and-guardrails.md).
+Look at the third branch. A script that fails with exit code 1 does **not** block anything. That single fact causes most "my guard doesn't work" reports, and the section on exit codes covers it in full. A command hook also runs with your full user permissions, which makes hooks a security topic: see [chapter 29](29-security-and-guardrails.md).
 
 ## The configuration shape
 
-Hooks are defined in JSON settings files (see [chapter 8](08-settings-and-permissions.md)) with three levels of nesting: the **event**, then a **matcher group** that filters when the hooks apply, then one or more **handlers** that do the work. This file registers the four hooks built later in the chapter:
+Hooks are defined in JSON settings files (see [chapter 9](09-settings-and-permissions.md)) with three levels of nesting: the **event**, then a **matcher group** that filters when the hooks apply, then one or more **handlers** that do the work. This file registers the four hooks built later in the chapter:
 
 ```json
 {
@@ -78,8 +78,8 @@ For enforcement the docs recommend the first three: "use a `command`, `http`, or
 | `.claude/settings.json` | One project | Yes, when committed |
 | `.claude/settings.local.json` | One project | No. Claude Code adds it to your global git excludes when it first saves a setting to it |
 | Managed policy settings | The organisation | Set by administrators |
-| A plugin's `hooks/hooks.json` | Wherever the plugin is enabled | Through the plugin ([chapter 15](15-plugins-and-marketplaces.md)) |
-| Skill frontmatter | Defined with the skill | With the skill ([chapter 13](13-skills.md)) |
+| A plugin's `hooks/hooks.json` | Wherever the plugin is enabled | Through the plugin ([chapter 17](17-plugins-and-marketplaces.md)) |
+| Skill frontmatter | Defined with the skill | With the skill ([chapter 15](15-skills.md)) |
 | Subagent frontmatter | Defined with the subagent | With the subagent. Plugin subagents ignore `hooks` |
 
 Type `/hooks` in a session to view the hooks registered under each event. Hooks placed in `~/.claude.json` are ignored: that file is not a settings file. Two settings govern hooks as a whole: `disableAllHooks` turns them off (together with a custom status line), and the managed-only `allowManagedHooksOnly` restricts a machine to the organisation's hooks.
@@ -161,6 +161,8 @@ Two rules keep JSON output from being ignored without notice. `permissionDecisio
 ## Four hooks to copy
 
 Save the scripts in `~/.claude/hooks/` and register them with the configuration shown at the start of this chapter, in `~/.claude/settings.json`. Each script was run with test payloads piped in, as the testing section shows. The shell scripts need `jq`.
+
+> **Note:** [Chapter 21](21-guide-build-and-ship-a-plugin.md) ships a force-push guard like hook 1 inside a plugin, using `${CLAUDE_PLUGIN_ROOT}` and payload tests; [chapter 11](11-the-extension-model.md) shows when a hook, and not an instruction, is the right tool.
 
 ### 1. A `PreToolUse` guard with a named override
 
@@ -274,13 +276,13 @@ fi
 exit 0
 ```
 
-With the guard, this hook buys one more attempt and then lets the turn end. Without it, the only brake is the harness, which overrides a `Stop` hook after eight blocks in a row (`CLAUDE_CODE_STOP_HOOK_BLOCK_CAP`). Treat that cap as a backstop, not a design. One trap follows from the third exit-code exception: if the test output you relay on stderr contains `No such file or directory`, the exit 2 can be read as a non-blocking error and the turn ends. If your check prints such messages, exit 0 and print `{"decision": "block", "reason": "..."}` on stdout instead; that rule covers only an exit 2 with empty stdout. [Chapter 18](18-testing-and-verification-loops.md) shows where a `Stop` hook sits among the other ways to make Claude verify its work.
+With the guard, this hook buys one more attempt and then lets the turn end. Without it, the only brake is the harness, which overrides a `Stop` hook after eight blocks in a row (`CLAUDE_CODE_STOP_HOOK_BLOCK_CAP`). Treat that cap as a backstop, not a design. One trap follows from the third exit-code exception: if the test output you relay on stderr contains `No such file or directory`, the exit 2 can be read as a non-blocking error and the turn ends. If your check prints such messages, exit 0 and print `{"decision": "block", "reason": "..."}` on stdout instead; that rule covers only an exit 2 with empty stdout. [Chapter 23](23-testing-and-verification-loops.md) shows where a `Stop` hook sits among the other ways to make Claude verify its work.
 
 ## Pair every hard rule with an enforcing hook
 
 A rule that lives only in `CLAUDE.md` is a request. The reliable pattern from the field data stores each hard rule three times:
 
-1. **The rule, in prose, with its reason.** Write it in `CLAUDE.md` ([chapter 7](07-claude-md-and-memory.md)) with the date and the incident behind it. The reason helps the model handle cases your pattern misses.
+1. **The rule, in prose, with its reason.** Write it in `CLAUDE.md` ([chapter 8](08-claude-md-and-memory.md)) with the date and the incident behind it. The reason helps the model handle cases your pattern misses.
 2. **The hook that enforces it.** Its deny message says what to do next: stop, ask, and how to override.
 3. **A pointer between them.** The rule names the hook, and a memory note names the hook too, so a later session knows the rule is enforced and by what.
 
@@ -356,7 +358,7 @@ These three come from the author's plugin repository. The counts are that projec
 | Claude never stops, or keeps repeating one failure | A `Stop` hook blocks every turn end | Exit early when `stop_hook_active` is true |
 | Every Bash call is blocked with a timeout reason | A slow or hung guard that has `onFailure: "block"` | Make the guard fast, bound its stdin read, lower `timeout` |
 | The model ignores your reminder | It was sent as `systemMessage`, or as stderr with exit 0 | Use `additionalContext` |
-| The rule is bypassed through another tool | The matcher covers `Edit` and `Write` but not shell redirects | Guard the path in Bash commands too. More cases: [chapter 27](27-troubleshooting-common-problems.md) |
+| The rule is bypassed through another tool | The matcher covers `Edit` and `Write` but not shell redirects | Guard the path in Bash commands too. More cases: [chapter 32](32-troubleshooting-common-problems.md) |
 
 ## Checklist
 
@@ -385,4 +387,4 @@ These three come from the author's plugin repository. The counts are that projec
 
 ---
 
-[← Previous: Skills](13-skills.md) · [Contents](README.md) · [Next: Plugins and marketplaces →](15-plugins-and-marketplaces.md)
+[← Previous: Skills](15-skills.md) · [Contents](README.md) · [Next: Plugins and marketplaces →](17-plugins-and-marketplaces.md)
