@@ -165,7 +165,7 @@ Eleven groups. Each opens with why the problem exists, because a fix you underst
 #!/usr/bin/env bash
 # PreToolUse hook on the Bash tool. The payload arrives as JSON on stdin.
 cmd="$(jq -r '.tool_input.command // empty')"
-if printf '%s' "$cmd" | grep -qE 'git push .*(--force|-f)( |$)'; then
+if printf '%s' "$cmd" | grep -qE 'git push ([^;&|]* )?(--force|-f|\+[^ ]+)( |$)'; then
   echo "Blocked: force push. Stop and ask the user." >&2
   exit 2        # exit 1 here would be a non-blocking error: the push would run
 fi
@@ -291,6 +291,7 @@ A separate qualitative pass sorted the friction in 37 substantive sessions into 
 - https://code.claude.com/docs/en/debug-your-config
 - https://code.claude.com/docs/en/hooks
 - https://code.claude.com/docs/en/hooks-guide
+- https://git-scm.com/docs/git-push
 - https://code.claude.com/docs/en/sub-agents
 - https://code.claude.com/docs/en/worktrees
 - https://code.claude.com/docs/en/tools-reference

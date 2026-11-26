@@ -173,6 +173,7 @@ Revision `2026-07-28` is current as of Nov 2026. Material that mentions an `init
 | [GitHub Copilot code review](https://docs.github.com/en/copilot/concepts/agent-capabilities/agent-powered-workflows-and-operations/code-review) | What an automated review does and does not count for. | [24] |
 | [github/spec-kit](https://github.com/github/spec-kit) · [Spec-driven development with AI (GitHub Blog, Sep 2025)](https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/) | The reference spec-driven toolkit and the reasoning behind it. | [22] |
 | [git-worktree](https://git-scm.com/docs/git-worktree) | The Git feature underneath `--worktree`. | [25] |
+| [git-push](https://git-scm.com/docs/git-push) | A `+` before a refspec forces that update, like `--force`, so a force-push guard must catch it. | [16], [21], [32] |
 | [Z-Shell FAQ, chapter 3](https://zsh.sourceforge.io/FAQ/zshfaq03.html) | Why zsh does not split unquoted variables, and why an unmatched glob is an error. | [32] |
 
 ## Studies, reports and security research

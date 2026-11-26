@@ -1,15 +1,13 @@
 # 20 — Guide: write a skill
 
-You will build `pr-description`, a skill that writes a pull request body from the branch diff,
-hands the review step to the `diff-reviewer` subagent from [chapter 19](19-guide-write-a-subagent.md),
-and ends with a Verification section that lists only commands it really ran.
-[Chapter 21](21-guide-build-and-ship-a-plugin.md) then packages both into a plugin.
+You will build `pr-description`, a skill that writes a pull request body from the branch diff, hands the review step to the `diff-reviewer` subagent from [chapter 19](19-guide-write-a-subagent.md), and ends with a Verification section that lists only commands it really ran. [Chapter 21](21-guide-build-and-ship-a-plugin.md) then packages both into a plugin.
 
-- **Time:** about 60 minutes. **Needs:** the chapter 19 repo with `.claude/agents/diff-reviewer.md`
-  and the planted bug still in place. Commands match Claude Code v2.1.332 (Nov 2026).
+- **Time:** about 60 minutes. **Needs:** the chapter 19 repo with `.claude/agents/diff-reviewer.md` and the planted bug still in place. Commands match Claude Code v2.1.332 (Nov 2026).
 - **Concepts:** frontmatter, invocation and progressive loading are in [chapter 15](15-skills.md).
 
-## What you will build
+## Mental model
+
+What you will build: a skill that runs a script, delegates one step to a subagent and fills a template, loading each piece only when it is needed.
 
 ```mermaid
 flowchart TD
@@ -24,8 +22,7 @@ flowchart TD
   skill --> body["PR body with Verification"]
 ```
 
-Until the skill runs, only its `description` is in context. The body loads on invocation, the
-template only when workflow step 4 reads it, and the script's code never loads; only its output does.
+Until the skill runs, only its `description` is in context. The body loads on invocation, the template only when workflow step 4 reads it, and the script's code never loads; only its output does.
 
 ## Step 1 — Start from the chapter 19 repo
 
@@ -41,8 +38,7 @@ Expect no modified tracked files and `diff-reviewer.md` (if you left the bug fix
 
 ## Step 2 — Decide: skill, CLAUDE.md or subagent
 
-The official guide ties each feature to a trigger. "You paste the same playbook or multi-step
-procedure into chat for the third time" means "Capture it as a skill". The other candidates:
+The official guide ties each feature to a trigger. "You paste the same playbook or multi-step procedure into chat for the third time" means "Capture it as a skill". The other candidates:
 
 | Option | Loads | Fit for "write a PR body" |
 |---|---|---|
@@ -50,34 +46,27 @@ procedure into chat for the third time" means "Capture it as a skill". The other
 | Skill | "On demand, when invoked or relevant" | Good: a repeatable workflow with a script and a template |
 | Subagent | Its own context window | Right for one step only: the review, where fresh eyes matter |
 
-"They can combine", says the guide, which is the plan here. A must-hold rule is a hook (chapter 21
-adds one). The full decision guide is [chapter 11](11-the-extension-model.md).
+"They can combine", says the guide, which is the plan here. A must-hold rule is a hook (chapter 21 adds one). The full decision guide is [chapter 11](11-the-extension-model.md).
 
 **Check:** you can name which part is the skill (the procedure) and which is the subagent (the review).
 
 ## Step 3 — Create the skill folder by hand
 
-Claude Code has no bundled skill creator and no `claude skill` command. The docs' own first skill
-is a `mkdir` and a `SKILL.md`:
+Claude Code has no bundled skill creator and no `claude skill` command. The docs' own first skill is a `mkdir` and a `SKILL.md`:
 
 ```bash
 mkdir -p .claude/skills/pr-description/references .claude/skills/pr-description/scripts
 ```
 
-`/skills` lists skills but does not create them; `/reload-skills` re-scans if a new one does not
-show up. `claude plugin init <name>` scaffolds a skills-directory plugin, but only at
-`~/.claude/skills/<name>/` (your user folder), so this guide stays in the project.
+`/skills` lists skills but does not create them; `/reload-skills` re-scans if a new one does not show up. `claude plugin init <name>` scaffolds a skills-directory plugin, but only at `~/.claude/skills/<name>/` (your user folder), so this guide stays in the project.
 
-The optional official **skill-creator** plugin drafts and evaluates skills
-(`/plugin install skill-creator@claude-plugins-official`). Its `evals/evals.json` format and
-`claude plugin eval`'s format are "not interchangeable", so pick one per skill.
+The optional official **skill-creator** plugin drafts and evaluates skills (`/plugin install skill-creator@claude-plugins-official`). Its `evals/evals.json` format and `claude plugin eval`'s format are "not interchangeable", so pick one per skill.
 
 **Check:** `ls .claude/skills/pr-description` shows `references` and `scripts`.
 
 ## Step 4 — Write a description that triggers and costs little
 
-The description is the only part Claude sees before it decides to load the skill, and it is in
-context on every turn. Compare:
+The description is the only part Claude sees before it decides to load the skill, and it is in context on every turn. Compare:
 
 ```yaml
 # Weak: no trigger words, no boundary
@@ -87,10 +76,8 @@ description: Helps with pull requests.
 description: "Use when the user asks for a PR description, a pull request body or to 'write up this branch'. Drafts the body from the branch diff, has the diff-reviewer subagent review it, and adds a Verification section. Not for commit messages or release notes."
 ```
 
-- Lead with the main use case (`description` plus `when_to_use` is cut at 1,536 characters), quote
-  the phrases people type, and add a `Not for …` line against near-misses.
-- No `disable-model-invocation`: the skill only prints, so Claude may trigger it. Set it to `true`
-  for side effects such as a deploy ([chapter 15](15-skills.md)).
+- Lead with the main use case (`description` plus `when_to_use` is cut at 1,536 characters), quote the phrases people type, and add a `Not for …` line against near-misses.
+- No `disable-model-invocation`: the skill only prints, so Claude may trigger it. Set it to `true` for side effects such as a deploy ([chapter 15](15-skills.md)).
 
 **Check:** the strong description is under three sentences and names a sibling task it should not take.
 
@@ -136,10 +123,8 @@ Why it is written this way:
 
 - **Hard rules first:** after compaction, skill bodies are re-attached with a per-skill cap.
 - **`$ARGUMENTS`** is whatever follows the command: `/pr-description develop` compares with `develop`.
-- **`allowed-tools`** pre-approves these calls "during the turn that invokes the skill"; it is not
-  a sandbox, so no bare `Bash`. `${CLAUDE_SKILL_DIR}` is the skill's folder, from any directory.
-- **Step 2 is a delegation brief** (goal, input, scope, return; [chapter 14](14-subagents.md)).
-  The subagent reads that brief, not this file.
+- **`allowed-tools`** pre-approves these calls "during the turn that invokes the skill"; it is not a sandbox, so no bare `Bash`. `${CLAUDE_SKILL_DIR}` is the skill's folder, from any directory.
+- **Step 2 is a delegation brief** (goal, input, scope, return; [chapter 14](14-subagents.md)). The subagent reads that brief, not this file.
 
 **Check:** `head -1 .claude/skills/pr-description/SKILL.md` prints `---`.
 
@@ -223,9 +208,7 @@ There are three documented ways to combine a skill with a subagent. This guide u
 | `context: fork` with `agent` | The whole skill runs as a new subagent of the type named in `agent` (default `general-purpose`) | Not here: `diff-reviewer` has no `Bash`, so it could not run the script. The docs warn it "doesn't run in a fork of the current conversation" |
 | Preload with `skills:` | An agent definition lists skills whose full body it gets at startup | The reverse direction; useful when the agent is the entry point |
 
-> **Note:** `agent:` takes a built-in agent (`Explore`, `Plan`, `general-purpose`) "or any custom
-> subagent from `.claude/agents/`", so `agent: diff-reviewer` is valid; it is the missing `Bash`
-> that rules it out here.
+> **Note:** `agent:` takes a built-in agent (`Explore`, `Plan`, `general-purpose`) "or any custom subagent from `.claude/agents/`", so `agent: diff-reviewer` is valid; it is the missing `Bash` that rules it out here.
 
 **Check:** `.claude/agents/diff-reviewer.md` exists, and SKILL.md names it exactly `diff-reviewer`.
 
@@ -237,23 +220,18 @@ python3 -c "import sys,yaml; print(sorted(yaml.safe_load(open(sys.argv[1]).read(
   .claude/skills/pr-description/SKILL.md
 ```
 
-This guide's run printed `✔ Validation passed`, then `['allowed-tools', 'argument-hint',
-'description', 'name']` (directory validation needs v2.1.233+; the parse check is there because,
-as chapter 19 found, the validator misses some YAML mistakes).
+This guide's run printed `✔ Validation passed`, then `['allowed-tools', 'argument-hint', 'description', 'name']` (directory validation needs v2.1.233+; the parse check is there because, as chapter 19 found, the validator misses some YAML mistakes).
 
-In a session, `/doctor prompt-audit .claude/skills/pr-description` (v2.1.283+) checks it with your
-`CLAUDE.md`, rules and subagents for outdated or conflicting instructions (not run for this guide).
+In a session, `/doctor prompt-audit .claude/skills/pr-description` (v2.1.283+) checks it with your `CLAUDE.md`, rules and subagents for outdated or conflicting instructions (not run for this guide).
 
 **Check:** validation passes and the YAML field list has no typos.
 
 ## Step 10 — Invoke it by name and by request
 
-Open a **fresh** session in the repo; leftover context from authoring "will mask gaps in the
-written instructions".
+Open a **fresh** session in the repo; leftover context from authoring "will mask gaps in the written instructions".
 
 1. Ask `What skills are available?` and confirm `pr-description` is listed. Then type `/pr-description main`.
-2. In another fresh session ask `Write the PR description for this branch.`, then the near-miss
-   `Write a commit message for my staged changes.`, which the skill should stay out of.
+2. In another fresh session ask `Write the PR description for this branch.`, then the near-miss `Write a commit message for my staged changes.`, which the skill should stay out of.
 
 The shape to expect (illustrative; this guide did not start a session):
 
@@ -270,8 +248,7 @@ VERDICT: request-changes
 - bulk_price(10, 5.0) returns 50.0; expected 45.0 (pricing.py:14).
 ```
 
-**Check:** the transcript shows the script run, a `diff-reviewer(…)` row and one test run, and the
-Verification section lists only that test command.
+**Check:** the transcript shows the script run, a `diff-reviewer(…)` row and one test run, and the Verification section lists only that test command.
 
 ## Step 11 — Check its cost and usage
 
@@ -281,16 +258,13 @@ Verification section lists only that test command.
 | `/context` | The skills section, including bundled skills that `/skills` does not list |
 | `/skill-doctor` | "what each of your skills costs in context and how often it gets used"; needs v2.1.252+ and opens in the `/plugin` manager's **Stats** tab |
 
-`/skill-doctor` neither lints content nor tests triggering. **Check:** `pr-description` appears in
-`/skills` with its token count.
+`/skill-doctor` neither lints content nor tests triggering. **Check:** `pr-description` appears in `/skills` with its token count.
 
 ## Step 12 — Prepare it for evaluation
 
-`claude plugin eval` needs "a plugin directory with a `plugin.json` or `.claude-plugin/plugin.json`
-manifest, or a skills-directory plugin"; a bare skill folder is neither. Chapter 21 adds it. Until then:
+`claude plugin eval` needs "a plugin directory with a `plugin.json` or `.claude-plugin/plugin.json` manifest, or a skills-directory plugin"; a bare skill folder is neither. Chapter 21 adds it. Until then:
 
-- **Baseline by hand:** run your prompts with the skill on, then off, via
-  `"skillOverrides": { "pr-description": "off" }` in `.claude/settings.local.json`.
+- **Baseline by hand:** run your prompts with the skill on, then off, via `"skillOverrides": { "pr-description": "off" }` in `.claude/settings.local.json`.
 - **Write cases now in `claude plugin eval` format**; save `evals/writes-pr-body/prompt.md`:
 
 ```markdown
@@ -321,18 +295,15 @@ input_match: '"skill"\s*:\s*"(?:[\w-]+:)?pr-description"'
 ---
 ```
 
-**Check:** `ls evals/writes-pr-body/graders` shows both files. Chapter 21 runs this case, adds a
-second one (`triggers-on-pr-request`) and a script that rebuilds this repo, since each run starts in an empty folder.
+**Check:** `ls evals/writes-pr-body/graders` shows both files. Chapter 21 runs this case, adds a second one (`triggers-on-pr-request`) and a script that rebuilds this repo, since each run starts in an empty folder.
 
 ## Make it better
 
 Change one thing per round, in a fresh session, and write down the result before and after.
 
-- **Triggering.** Keep 8 to 10 prompts that should trigger and 8 to 10 genuine near-misses ("write
-  release notes"). Add a missed phrase people really type; add a `Not for` line for a false hit.
+- **Triggering.** Keep 8 to 10 prompts that should trigger and 8 to 10 genuine near-misses ("write release notes"). Add a missed phrase people really type; add a `Not for` line for a false hit.
 - **Cost.** Past three sentences, move detail into the body; re-check `/skills` with `t`.
-- **Output.** Compare with the skill off; if the body is as good without it, the skill is not
-  earning its cost. If Verification names a command the transcript lacks, make that rule sharper.
+- **Output.** Compare with the skill off; if the body is as good without it, the skill is not earning its cost. If Verification names a command the transcript lacks, make that rule sharper.
 
 ## Ship it or share it
 
@@ -342,8 +313,7 @@ Change one thing per round, in a fresh session, and write down the result before
 | Project | `.claude/skills/pr-description/SKILL.md` | `/pr-description`, for everyone who clones the repo |
 | Plugin | `<plugin>/skills/pr-description/SKILL.md` | `/<plugin>:pr-description` ([chapter 21](21-guide-build-and-ship-a-plugin.md)) |
 
-Precedence is "managed > user > project for skills". Commit the folder with the script's
-executable bit, on `main` as in chapter 19, so the feature branch diff stays about pricing:
+Precedence is "managed > user > project for skills". Commit the folder with the script's executable bit, on `main` as in chapter 19, so the feature branch diff stays about pricing:
 
 ```bash
 git switch main
@@ -354,10 +324,16 @@ git switch feature/bulk-discount
 git rebase main
 ```
 
-> **Warning:** A project skill's `allowed-tools` applies even in a `-p` run in a folder nobody
-> trusted. Anyone who clones the repo should read it, and you should keep every entry scoped.
+> **Warning:** A project skill's `allowed-tools` applies even in a `-p` run in a folder nobody trusted. Anyone who clones the repo should read it, and you should keep every entry scoped.
 
-## Troubleshooting
+## From the field
+
+Both come from the author's plugin repository; the counts are that project's own records, not benchmarks.
+
+- **The description is both the trigger and the bill.** An ablation attributed about 82% of the plugin's token overhead to skill `description` and `when_to_use` text, against about 9% for all its hooks. Trimming that text by 28% (26,686 to 19,092 characters) *raised* coverage on prompts that should trigger from 84% to 94%.
+- **Skills nobody invoked.** A hook meant to suggest the right skill printed `systemMessage`, which reaches the user's screen and never the model, and it fired on `Stop`, after the moment had passed. Its header records 15 of 25 skills never invoked across 953 sessions. Moving the nudge to `additionalContext` on `UserPromptSubmit` fixed the channel ([chapter 16](16-hooks.md)).
+
+## Common problems
 
 | Symptom | Cause | Fix |
 |---|---|---|
@@ -379,6 +355,12 @@ git rebase main
 - [ ] `/pr-description` and a plain request both produce a body that delegates to `diff-reviewer`.
 - [ ] The Verification section lists only commands that ran.
 - [ ] Eval cases are drafted under `evals/` for chapter 21.
+
+## Try it
+
+1. Set `disable-model-invocation: true`, then confirm in a fresh session that a plain request no longer triggers the skill while `/pr-description` still works. Remove the line again.
+2. Write a sibling skill, `release-notes`, that reuses the same script with its own template. Run your trigger and near-miss prompts again and check that neither skill takes the other's requests.
+3. Cut the description to one sentence, compare the token count in `/skills` (press `t`), and rerun the trigger prompts to see what the shorter text costs in triggering.
 
 ## Sources
 

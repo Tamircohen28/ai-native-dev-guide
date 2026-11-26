@@ -168,10 +168,10 @@ Save the scripts in `~/.claude/hooks/` and register them with the configuration 
 
 ```python
 #!/usr/bin/env python3
-"""PreToolUse guard: block `git push --force`. Override: ALLOW_FORCE_PUSH=1 (env or prefix)."""
+"""PreToolUse guard: block `git push --force`, `-f` or a `+refspec`. Override: ALLOW_FORCE_PUSH=1 (env or prefix)."""
 import json, os, re, sys
 SEPARATORS = re.compile(r"&&|\|\||;|\||\n")          # split a compound command into segments
-FORCE = re.compile(r"\bgit\b.*\bpush\b.*\s(--force(?!-with-lease|-if-includes)|-f)\b")
+FORCE = re.compile(r"\bgit\b.*\bpush\b.*\s(--force(?!-with-lease|-if-includes)\b|-f\b|\+\S)")  # +ref = --force
 OVERRIDE = re.compile(r"\bALLOW_FORCE_PUSH=1\b")
 
 def main():
@@ -330,6 +330,7 @@ Write one payload for each branch, and keep them as a test file next to the scri
 
 | Payload | Expected |
 |---|---|
+| `git push origin +HEAD:main` | The JSON deny, exit 0 (a `+` before a refspec forces it, like `--force`) |
 | `git push origin feature && rm -f tmp.txt` | No output, exit 0 (the `-f` belongs to `rm`) |
 | `git push --force-with-lease origin feature` | No output, exit 0 |
 | `git push --force-with-lease --force-if-includes origin feature` | No output, exit 0 |
@@ -382,6 +383,7 @@ These three come from the author's plugin repository. The counts are that projec
 - Hooks guide: https://code.claude.com/docs/en/hooks-guide
 - Best practices, "Enforce the rules that can't have exceptions": https://code.claude.com/docs/en/best-practices
 - Debug your configuration: https://code.claude.com/docs/en/debug-your-config
+- Git `push` reference (a `+` refspec forces the update): https://git-scm.com/docs/git-push
 - Settings reference (`disableAllHooks`) and managed settings (`allowManagedHooksOnly`): https://code.claude.com/docs/en/settings-reference · https://code.claude.com/docs/en/managed-settings
 - Field data: the author's plugin repository, machine-level configuration and session transcripts (a rolling window of about four weeks)
 

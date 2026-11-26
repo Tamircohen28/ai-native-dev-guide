@@ -4,9 +4,9 @@ In this last workshop guide you package the `diff-reviewer` subagent from [chapt
 
 **Prerequisites:** the demo repo from chapters 19 and 20 (`~/scratch/pr-helper-demo`, with `.claude/agents/diff-reviewer.md`, `.claude/skills/pr-description/` and `evals/` committed on `main`), Claude Code v2.1.269 or later (`claude plugin eval` needs it; this guide was run on v2.1.332, as of Nov 2026), `git`, `bash`, `python3` and `jq`, and the concepts from [Hooks](16-hooks.md) and [Plugins and marketplaces](17-plugins-and-marketplaces.md). This guide uses the built-in tooling wherever it exists and links to those chapters for the theory.
 
-## What you will build
+## Mental model
 
-The plugin is one folder. Only the manifest goes in `.claude-plugin/`; every component sits at the plugin root. The development loop runs from the shell (validate, details, eval) and from a session started with `--plugin-dir` (reload, inspect).
+What you will build: one plugin folder. Only the manifest goes in `.claude-plugin/`; every component sits at the plugin root. The development loop runs from the shell (validate, details, eval) and from a session started with `--plugin-dir` (reload, inspect). Commands were run in a scratch directory; a block says so when its output is illustrative.
 
 ```mermaid
 flowchart LR
@@ -22,8 +22,6 @@ flowchart LR
     L --> X["plugin eval"] --> T["bump version, plugin tag"]
     T --> K["marketplace.json"] --> U["team install --scope project"]
 ```
-
-Commands were run in a scratch directory; a block says so when its output is illustrative.
 
 ## Step 1 — Scaffold with `claude plugin init`
 
@@ -90,23 +88,25 @@ Now the hook. A plugin's hooks live in `hooks/hooks.json`, under a top-level `"h
 
 ```json
 { "hooks": { "PreToolUse": [ { "matcher": "Bash", "hooks": [
-  { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/guard-force-push.sh\"" }
-] } ] } }
+  { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/guard-force-push.sh\"" } ] } ] } }
 ```
 
-The script blocks with `exit 2` and writes the reason to stderr, which becomes the block message ([chapter 16](16-hooks.md#output-the-exit-code-comes-first) explains why `exit 1` would not block). The named override variable, `PR_HELPER_ALLOW_FORCE_PUSH`, is a consent channel: the message tells Claude to stop and ask you first.
+The script blocks with `exit 2` and writes the reason to stderr, which becomes the block message ([chapter 16](16-hooks.md#output-the-exit-code-comes-first) explains why `exit 1` would not block). The named override variable, `PR_HELPER_ALLOW_FORCE_PUSH`, is a consent channel: the message tells Claude to stop and ask you first. A `+` in front of a refspec forces that one ref ("The `+` is optional and does the same thing as `--force`", says the git push reference), so `git push origin +HEAD:main` counts as a force-push too.
 
 ```bash
 #!/usr/bin/env bash
 # hooks/guard-force-push.sh — PreToolUse guard: block a force-push to the default branch.
 # Override, only after the user says yes: PR_HELPER_ALLOW_FORCE_PUSH=1 (env or command prefix).
 input=$(cat)
-cmd=$(jq -r '.tool_input.command // empty' <<<"$input" 2>/dev/null) || exit 0
+cmd=$(jq -r '.tool_input.command // empty' <<<"$input" 2>/dev/null) \
+  || { echo "pr-helper: unreadable hook payload, blocking" >&2; exit 2; }   # fail closed
 dir=$(jq -r '.cwd // "."' <<<"$input" 2>/dev/null)
 default=${PR_HELPER_DEFAULT_BRANCH:-main}
 
 [[ "$PR_HELPER_ALLOW_FORCE_PUSH" == 1 || "$cmd" == *PR_HELPER_ALLOW_FORCE_PUSH=1* ]] && exit 0
-grep -Eq 'git[^;&|]*push[^;&|]*(--force([^-]|$)|[[:space:]]-f([[:space:]]|$))' <<<"$cmd" || exit 0
+# A leading + on a refspec (+HEAD:main, +main) forces that ref exactly like --force.
+grep -Eq 'git[^;&|]*push[^;&|]*(--force([^-]|$)|[[:space:]]-f([[:space:]]|$)|[[:space:]]\+[^[:space:]])' \
+  <<<"$cmd" || exit 0
 
 current=$(git -C "$dir" branch --show-current 2>/dev/null)
 if grep -Eq "(^|[[:space:]:+/])$default([[:space:]]|$)" <<<"$cmd" || [[ "$current" == "$default" ]]; then
@@ -128,12 +128,14 @@ echo '{"tool_name":"Bash","tool_input":{"command":"git push --force origin main"
 |---|---|
 | `git push --force origin main` | stderr `pr-helper: force-push to 'main' blocked. …`, `exit=2` |
 | `git push -f origin main` | blocked, `exit=2` |
-| `git push --force origin feature/login` | `exit=0` |
+| `git push origin +HEAD:main`, `+main` or `+refs/heads/main` | blocked, `exit=2` (a `+` refspec is a force-push) |
+| `git push --force origin feature/login` or `git push origin +HEAD:feature` | `exit=0` |
 | `git push --force-with-lease origin main` | `exit=0` (a lease is allowed by design) |
 | `git push origin main && rm -f tmp.txt` | `exit=0` (the `-f` belongs to `rm`) |
 | `PR_HELPER_ALLOW_FORCE_PUSH=1 git push --force origin main` | `exit=0` (override) |
+| `{not json` (malformed payload) | stderr `pr-helper: unreadable hook payload, blocking`, `exit=2` |
 
-**Check:** both block cases exit 2 and every allow case exits 0. Keep the payloads as a test file next to the script. A crashed or timed-out `PreToolUse` hook does not block, so add `onFailure: "block"` (v2.1.295+) if this guard must fail closed ([chapter 16](16-hooks.md#the-configuration-shape)). `find . -type f | sort` now lists the manifest, `agents/diff-reviewer.md`, the three skill files, the eval files, `hooks/hooks.json` and `hooks/guard-force-push.sh`.
+**Check:** every block case exits 2 and every allow case exits 0. Keep the payloads as a test file next to the script. A crashed or timed-out `PreToolUse` hook does not block, so add `onFailure: "block"` (v2.1.295+) if this guard must fail closed ([chapter 16](16-hooks.md#the-configuration-shape)). `find . -type f | sort` now lists the manifest, `agents/diff-reviewer.md`, the three skill files, the eval files, `hooks/hooks.json` and `hooks/guard-force-push.sh`.
 
 ## Step 3 — Load it locally and iterate
 
@@ -167,7 +169,6 @@ Hosts not declared: list what these parts reach under "network.hosts" in plugin.
   ❯ README.md: README missing (README_MISSING). …
 ⚠ Found 1 plugin directory warning:
   ❯ .claude-plugin/plugin.json icon: No icon (ICON_MISSING). …
-These plugin directory checks do not change the result below. …
 ✔ Validation passed
 ```
 
@@ -206,9 +207,7 @@ PASS if the reply is a pull request body with Summary, Changes, Review and Verif
 FAIL if it writes a commit message, opens a PR, or lists a check in Verification that was not run.
 ```
 
-Then reuse chapter 20's trigger grader, whose optional prefix in the pattern already matches the namespaced name `pr-helper:pr-description`: `cp evals/writes-pr-body/graders/skill-fired.md evals/triggers-on-pr-request/graders/`.
-
-Each run starts in an empty folder with only your plugin loaded, so both cases need the sample repo rebuilt first. Save this as `evals/writes-pr-body/fixture.sh`; it repeats chapter 19's Step 1:
+Then reuse chapter 20's trigger grader, whose optional prefix in the pattern already matches the namespaced name `pr-helper:pr-description`: `cp evals/writes-pr-body/graders/skill-fired.md evals/triggers-on-pr-request/graders/`. Each run starts in an empty folder with only your plugin loaded, so both cases need the sample repo rebuilt first. Save this as `evals/writes-pr-body/fixture.sh`; it repeats chapter 19's Step 1:
 
 ```bash
 #!/usr/bin/env bash
@@ -253,13 +252,9 @@ sed 's/writes-pr-body/triggers-on-pr-request/' evals/writes-pr-body/case.yaml > 
 t=$(mktemp -d) && (cd "$t" && "$OLDPWD/evals/writes-pr-body/fixture.sh" && git log --oneline && python3 -m unittest -q)
 ```
 
-You should see two commits and `OK`. The script runs only when you pass `--scaffold`, as you and outside the sandbox, so pass it only for suites you wrote.
+You should see two commits and `OK`. The script runs only when you pass `--scaffold`, as you and outside the sandbox, so pass it only for suites you wrote. Free graders are `regex`, `tool_used`, `tool_order` and `file_exists`; `llm` and `baseline` are judge-scored. There are no custom-code graders. Under the default two arms, a `tool_used: Skill` grader is a "plugin-fired indicator", not part of the score, which is why the trigger case also has an `llm` grader.
 
-Free graders are `regex`, `tool_used`, `tool_order` and `file_exists`; `llm` and `baseline` are judge-scored. There are no custom-code graders. Under the default two arms, a `tool_used: Skill` grader is a "plugin-fired indicator", not part of the score, which is why the trigger case also has an `llm` grader.
-
-`claude plugin eval` calls the model and costs money, so it was not run for this guide. Runs never stop to ask permission, and `Bash` is removed unless you grant it with `--allow-tools`; a granted `Bash` runs in Claude Code's OS sandbox (on Linux, install `bubblewrap` and `socat` first). The other options you will use: `--ablation <none|with-without>` (default `with-without`), `--runs <n>` (default `case.runs ?? 3`), `--judge-model <model>` (CLI help says default `haiku`; the docs say the background-task model), `--threshold <0..1>` (default 1.0; exit 1 if any case scores below it), `--max-cost-usd <usd>` (exit 2 with partial results), `--json [path]` and `--case <glob>`. Put the target (`.`) before the list-taking flags.
-
-For fast iteration on one case: `claude plugin eval . --scaffold --allow-tools Bash --case triggers-on-pr-request --runs 1 --ablation none`. A full run looks like `claude plugin eval . --scaffold --allow-tools Bash --runs 3 --threshold 0.8 --max-cost-usd 5 --json results.json`.
+`claude plugin eval` calls the model and costs money, so it was not run for this guide. Runs never stop to ask permission, and `Bash` is removed unless you grant it with `--allow-tools`; a granted `Bash` runs in Claude Code's OS sandbox (on Linux, install `bubblewrap` and `socat` first). The other options you will use: `--ablation <none|with-without>` (default `with-without`), `--runs <n>` (default `case.runs ?? 3`), `--judge-model <model>` (CLI help says default `haiku`; the docs say the background-task model), `--threshold <0..1>` (default 1.0; exit 1 if any case scores below it), `--max-cost-usd <usd>` (exit 2 with partial results), `--json [path]` and `--case <glob>`. Put the target (`.`) before the list-taking flags. For fast iteration on one case: `claude plugin eval . --scaffold --allow-tools Bash --case triggers-on-pr-request --runs 1 --ablation none`. A full run looks like `claude plugin eval . --scaffold --allow-tools Bash --runs 3 --threshold 0.8 --max-cost-usd 5 --json results.json`.
 
 **Reading the report.** A run's score is the fraction of graders it passed; Δ is WITH minus WITHOUT. Results go to `evals/results/<timestamp>/aggregate-result.json` plus a self-contained `report.html` (also published as a private claude.ai artifact when your account allows; `--no-publish` keeps it local). A row such as `writes-pr-body  WITH 1.00  W/OUT 0.33  Δ +0.67` (illustrative, not a real run) means the plugin earns its place; a Δ near zero means the model already does this without it. **Check:** `find evals -type f | sort` lists, for each case, `case.yaml`, `fixture.sh`, `prompt.md` and two graders.
 
@@ -279,10 +274,7 @@ Component inventory
   Hooks (1)  PreToolUse  (harness-only — no model context cost)
 Projected token cost
   Always-on:   ~126 tok   added to every session
-Per-component (rounded)
-  component       always-on  on-invoke
-  pr-description        ~70       ~280
-  diff-reviewer         ~60       ~300
+Per-component (rounded): pr-description ~70 always-on, ~280 on-invoke; diff-reviewer ~60, ~300
 ```
 
 **Check:** the always-on cost is what every session of every teammate pays; keep descriptions short.
@@ -293,9 +285,7 @@ A marketplace is one JSON file, `.claude-plugin/marketplace.json`, at the root o
 
 ```json
 {
-  "name": "team-tools",
-  "description": "PR tooling for our team",
-  "owner": { "name": "Your Team" },
+  "name": "team-tools", "description": "PR tooling for our team", "owner": { "name": "Your Team" },
   "plugins": [
     { "name": "pr-helper", "source": "./pr-helper", "description": "PR descriptions, diff review, force-push guard" }
   ]
@@ -332,13 +322,7 @@ Commit the marketplace and the plugin choice to the team repo's `.claude/setting
 }
 ```
 
-`claude plugin marketplace add your-org/team-tools --scope project`, run once in the repo, writes that file for you. Check what it wrote before committing: from a local path, the real run wrote `"source": "directory"` with an absolute path that exists only on your machine. Enabling does not install. Each contributor runs, once (in the real run it also added the `enabledPlugins` entry if missing):
-
-```bash
-claude plugin install pr-helper@team-tools --scope project
-```
-
-Auto-update is off by default for your own marketplace; `autoUpdate: true` turns it on.
+`claude plugin marketplace add your-org/team-tools --scope project`, run once in the repo, writes that file for you. Check what it wrote before committing: from a local path, the real run wrote `"source": "directory"` with an absolute path that exists only on your machine. Enabling does not install. Each contributor runs, once (in the real run it also added the `enabledPlugins` entry if missing): `claude plugin install pr-helper@team-tools --scope project`. Auto-update is off by default for your own marketplace; `autoUpdate: true` turns it on.
 
 Gate the plugin repo in CI. Validation is free; the eval costs money, so cap it. A GitHub Actions job (action pinned by SHA, as in [chapter 27](27-headless-ci-and-the-agent-sdk.md)):
 
@@ -361,13 +345,21 @@ jobs:
 
 Eval exit codes: `0` pass, `1` below threshold or error, `2` partial (cost ceiling or auth). In CI, `claude plugin eval init` needs a terminal, so author cases locally or with `--bare`.
 
-## Troubleshooting
+## From the field
+
+These come from the author's own repositories; the numbers are those projects' records, not benchmarks.
+
+- **The version string is the delivery mechanism.** In the author's plugin repo, a release without a version bump never reached installed users, so the bump became a written rule with one source file for the version, and tags are created only after the squash merge lands, not before.
+- **Evals cost money, so they live outside the fast gate.** A smaller plugin repo keeps behavioural eval cases (refusing to print a secret, not inventing spend, and a case that must *not* trigger on a general question) behind a separate `make eval`, deliberately left out of the everyday check because each run spends tokens.
+
+## Common problems
 
 | Symptom | Cause | Fix |
 |---|---|---|
 | `plugin list` says "Not loaded — the name … is already taken" | The `plugin init` copy still sits in the skills directory next to your `--plugin-dir` copy | Delete the scaffold copy or rename one plugin |
 | Skill or agent missing from `Provides:` | It sits inside `.claude-plugin/`, or a manifest path lacks `./` | Move it to the plugin root; rerun validate |
 | The guard never blocks | Script not executable, or it exits 1 | `chmod +x`; block with `exit 2`; pipe a payload to test |
+| `git push origin +HEAD:main` gets through a guard | The pattern looks only for `--force` and `-f` | Treat a `+` refspec as a force-push and check its destination |
 | Teammates never get your fix | `version` unchanged | Bump `version` every release ([chapter 17](17-plugins-and-marketplaces.md#versions-and-updates)) |
 | CI eval exits 2 | Hit `--max-cost-usd` or missing auth | Raise the cap, cut `--runs`, check the secret |
 | Committed settings point at `/Users/…` | Marketplace added from a local path with `--scope project` | Use the GitHub source in `extraKnownMarketplaces` |
@@ -383,6 +375,12 @@ Eval exit codes: `0` pass, `1` below threshold or error, `2` partial (cost ceili
 - [ ] `version` is bumped per release and `claude plugin tag --dry-run` agrees.
 - [ ] The team repo commits `extraKnownMarketplaces` and `enabledPlugins`, and CI runs validate and a cost-capped eval.
 
+## Try it
+
+1. Add a third eval case, `ignores-commit-message`, whose prompt asks for a commit message and whose `llm` grader fails if a PR body appears. Run it alone with `--case` and `--runs 1`.
+2. Add `onFailure: "block"` and `"timeout": 10` to the guard in `hooks/hooks.json`, rerun `claude plugin validate --strict`, then add a `sleep 15` to the script and watch any Bash command get blocked; remove the sleep afterwards.
+3. Bump `version` to `0.2.0`, run `claude plugin tag --dry-run ./pr-helper`, and confirm that the tag name and the marketplace entry agree.
+
 ## Sources
 
 - Create a plugin, test and debug: https://code.claude.com/docs/en/plugins/create
@@ -390,6 +388,7 @@ Eval exit codes: `0` pass, `1` below threshold or error, `2` partial (cost ceili
 - Publish, host a marketplace, organisations: https://code.claude.com/docs/en/plugins/publish · https://code.claude.com/docs/en/plugins/host-marketplace · https://code.claude.com/docs/en/plugins/create-marketplace · https://code.claude.com/docs/en/plugins/org
 - Plugin evals: https://code.claude.com/docs/en/plugin-evals
 - Hooks guide and reference: https://code.claude.com/docs/en/hooks-guide · https://code.claude.com/docs/en/hooks
+- Git `push` reference (a `+` refspec forces the update): https://git-scm.com/docs/git-push
 - Official marketplace and `plugin-dev`: https://code.claude.com/docs/en/plugins/anthropic-marketplaces · https://github.com/anthropics/claude-plugins-official
 - CLI help of Claude Code v2.1.332: `claude plugin init|validate|eval init|details|tag --help`, and real runs of those commands in a scratch directory (2026-11-26)
 
