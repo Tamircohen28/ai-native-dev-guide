@@ -1,0 +1,19 @@
+{
+  "name": "ai-native-dev-guide",
+  "private": true,
+  "description": "Tooling that builds the AI-Native Development book as a PDF (make pdf). The book itself is plain Markdown.",
+  "license": "CC-BY-NC-SA-4.0",
+  "type": "module",
+  "scripts": {
+    "pdf": "node scripts/pdf/build.mjs"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "12.2.0",
+    "markdown-it": "15.0.3",
+    "pagedjs": "0.4.3",
+    "puppeteer": "25.17.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

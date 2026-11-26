@@ -1,7 +1,45 @@
 version: 2
 updates:
-  # Documentation-only repo: no package.json and no pyproject.toml, so there is
-  # no npm or pip block.
+  # The book is plain Markdown. The only packages are the PDF build's tools
+  # (make pdf): package.json for Node and requirements-pdf.txt for Python.
+
+  # npm — the PDF build (markdown-it, mermaid-cli, Paged.js, puppeteer). Weekly, grouped.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    groups:
+      npm:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    labels:
+      - chore
+
+  # pip — requirements-pdf.txt (pypdf for the PDF metadata). Weekly, grouped.
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    groups:
+      pip:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    labels:
+      - chore
 
   # GitHub Actions — always present, monthly cadence, grouped.
   - package-ecosystem: "github-actions"

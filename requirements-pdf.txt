@@ -1,0 +1,3 @@
+# Python dependencies of the PDF build (make pdf): scripts/pdf/metadata.py.
+# Exact pins; Dependabot proposes minor and patch updates weekly.
+pypdf==6.19.0

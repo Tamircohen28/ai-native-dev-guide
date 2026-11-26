@@ -18,7 +18,7 @@ Thumbs.db
 __pycache__/
 *.pyc
 
-# Node (only ever present if the Mermaid CLI is installed locally)
+# Node (the PDF build's tools: npm ci, make pdf)
 node_modules/
 
 # Claude Code and agent worktrees
