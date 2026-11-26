@@ -88,7 +88,7 @@ python3 scripts/check-book.py book/14-hooks.md book/D-sources.md
 
 ## Using the material
 
-The book is MIT-licensed. The templates in [Appendix C](../../book/C-templates.md) are meant to be copied into your own repository and edited. Treat any version-sensitive value in them as dated, and check it against your installed tool.
+The book is licensed under [CC BY-NC-SA 4.0](../../LICENSE): you may share and adapt it for non-commercial purposes, with credit, and adaptations you publish must use the same license. Copying a template into your own project for your own use is fine. The templates in [Appendix C](../../book/C-templates.md) are meant to be copied into your own repository and edited. Treat any version-sensitive value in them as dated, and check it against your installed tool.
 
 ---
 

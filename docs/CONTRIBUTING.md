@@ -123,7 +123,7 @@ bash scripts/check-doc-standards.sh --fix .
 
 ## Licence
 
-By contributing you agree that your contribution is released under the [MIT License](../LICENSE).
+By contributing you agree that your contribution is released under the [CC BY-NC-SA 4.0 license](../LICENSE), the same license as the rest of the repository.
 
 ---
 

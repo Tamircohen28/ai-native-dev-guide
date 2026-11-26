@@ -168,6 +168,10 @@ Any Markdown viewer that supports Mermaid will do: GitHub, VS Code's preview wit
 - Incidents in the case studies are told generically. Names, hosts and repositories are omitted on purpose.
 - [Appendix D](D-sources.md) lists every source and explains how the book was put together.
 
+## License
+
+© 2026 Tamir Cohen. The book, its figures, scripts and code examples are licensed under [CC BY-NC-SA 4.0](../LICENSE). You may share and adapt them for non-commercial purposes, with credit to the author, and anything you publish that builds on them must use the same license.
+
 ---
 
 [Start reading: Chapter 1 — What AI-native development is →](01-what-is-ai-native-development.md)
