@@ -27,6 +27,15 @@ jobs:
             --generate-notes \
             --draft=false
 
-      - name: Update stable branch
+      # stable only moves forward: a tag on an older commit must not rewind it,
+      # and shared history is never rewritten (AGENTS.md hard constraints).
+      - name: Update stable branch (fast-forward only)
         run: |
-          git push origin HEAD:stable --force-with-lease
+          if git ls-remote --exit-code --heads origin stable >/dev/null; then
+            git fetch origin stable
+            if ! git merge-base --is-ancestor FETCH_HEAD HEAD; then
+              echo "::error::${{ github.ref_name }} is not a descendant of stable; refusing to rewind it."
+              exit 1
+            fi
+          fi
+          git push origin HEAD:refs/heads/stable
