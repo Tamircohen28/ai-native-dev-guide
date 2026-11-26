@@ -13,7 +13,7 @@
 
 A field guide to building software *with* coding agents rather than next to them. The book starts from what a token is and ends with unattended agents running behind gates in CI, using Claude Code as the worked example and showing how the same ideas carry to other agentic tools. It explains how the machinery works, shows configuration that holds up in daily use, and gives as much room to what went wrong as to what went right.
 
-**[Start reading: the book's cover and contents page](book/README.md)** · **[Download the PDF](https://tamircohen28.github.io/ai-native-dev-guide/)**, rebuilt from `main` on every push
+**[Start reading: the book's cover and contents page](book/README.md)** · **[Read the PDF online](https://tamircohen28.github.io/ai-native-dev-guide/ai-native-development.pdf)** · **[Download the PDF](https://tamircohen28.github.io/ai-native-dev-guide/)**, rebuilt from `main` on every push
 
 ## What is in the book
 

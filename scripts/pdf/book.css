@@ -7,6 +7,7 @@
   --accent: #09736a;
   --rule: #d9d2c2;
   --code-bg: #f5f2ea;
+  --link-line: rgba(9, 115, 106, 0.4);
   --sans: "Helvetica Neue", Helvetica, Arial, "Liberation Sans", "DejaVu Sans", sans-serif;
   --serif: Charter, "Bitstream Charter", Georgia, "DejaVu Serif", serif;
   --mono: Menlo, "SF Mono", Consolas, "DejaVu Sans Mono", "Liberation Mono", monospace;
@@ -54,15 +55,21 @@ body {
 .toc h1 { font-size: 22pt; margin: 0 0 6mm; }
 .toc ul { list-style: none; margin: 0; padding: 0; }
 .toc li { margin: 0; break-inside: avoid; }
+.toc-hint { font-size: 9pt; color: var(--muted); margin: -4mm 0 5mm; }
+/* Entries are links: teal label with a light underline; dot leaders and page numbers stay. */
 .toc a { display: flex; align-items: baseline; color: var(--ink); text-decoration: none; padding: 0.6mm 0; }
-.toc a::after { content: target-counter(attr(href), page); min-width: 8mm; text-align: right; font-variant-numeric: tabular-nums; }
+.toc a::after { content: target-counter(attr(href), page); min-width: 8mm; text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
+.toc .toc-label { max-width: 85%; color: var(--accent); text-decoration: underline; text-decoration-color: var(--link-line); text-decoration-thickness: 0.5pt; text-underline-offset: 1.2pt; }
 .toc .toc-dots { flex: 1; border-bottom: 1px dotted #9aa1ab; margin: 0 2mm; transform: translateY(-1mm); }
-.toc .toc-label { max-width: 85%; }
 .toc .toc-front a { font-weight: 700; }
 .toc .toc-part { margin-top: 3.5mm; break-after: avoid; }
-.toc .toc-part a { font-weight: 700; color: var(--accent); font-size: 10.5pt; }
+.toc .toc-part a { font-weight: 700; font-size: 10.5pt; }
+.toc .toc-part-online > .toc-label { font-weight: 700; text-decoration: none; display: block; padding: 0.6mm 0; }
 .toc .toc-group { font-style: italic; color: var(--muted); margin: 1.2mm 0 0 5mm; font-size: 9pt; break-after: avoid; }
 .toc .toc-chapter a { padding-left: 5mm; font-size: 9.5pt; }
+/* Online appendices: an external link with "github.com ↗" in place of a page number. */
+.toc .toc-online a::after { content: none; }
+.toc .toc-where { font-size: 8pt; color: var(--muted); white-space: nowrap; }
 
 /* --- Parts and chapters -------------------------------------------------------- */
 .part-title { break-before: page; break-after: page; padding-top: 80mm; text-align: center; }
@@ -77,7 +84,20 @@ h4 { font-size: 10.5pt; margin: 4mm 0 1.5mm; }
 p { margin: 0 0 2.6mm; orphans: 2; widows: 2; }
 ul, ol { margin: 0 0 2.6mm; padding-left: 6mm; }
 li { margin: 0 0 0.8mm; }
-a { color: var(--accent); text-decoration: none; overflow-wrap: anywhere; }
+/* Links look like links on paper: teal with a light underline. */
+a { color: var(--accent); text-decoration: underline; text-decoration-color: var(--link-line); text-decoration-thickness: 0.5pt; text-underline-offset: 1.5pt; overflow-wrap: anywhere; }
+a.online::after { content: "\2009↗"; font-size: 0.8em; }
+
+/* --- Citations and the numbered reference list --------------------------------- */
+sup.cite { font-family: var(--sans); font-size: 0.68em; line-height: 0; vertical-align: super; margin-left: 0.1em; hyphens: none; white-space: nowrap; }
+sup.cite a { text-decoration: none; }
+.references { list-style: none; padding: 0; margin: 0 0 3mm; font-family: var(--sans); font-size: 8.3pt; line-height: 1.35; }
+.references li { margin: 0 0 1mm; break-inside: avoid; }
+.references a { display: flex; gap: 2mm; color: var(--ink); text-decoration: none; }
+.references .ref-n { flex: 0 0 7mm; color: var(--accent); font-variant-numeric: tabular-nums; text-align: right; }
+.references .ref-body { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.references .ref-host { color: var(--accent); white-space: nowrap; }
+.source-notes { font-size: 8.8pt; color: var(--muted); }
 hr { border: 0; border-top: 1px solid var(--rule); margin: 5mm 0; }
 blockquote {
   margin: 3mm 0;

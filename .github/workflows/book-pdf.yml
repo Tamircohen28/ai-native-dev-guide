@@ -94,7 +94,7 @@ jobs:
           <body>
             <h1>AI-Native Development</h1>
             <p>Zero to Hero: a field guide to building software with coding agents. By Tamir Cohen.</p>
-            <p><a href="AI-Native%20Development.pdf"><strong>Download the PDF</strong></a> (latest build of <code>main</code>, commit <code>${short}</code>).</p>
+            <p><a href="ai-native-development.pdf"><strong>Read the PDF online</strong></a> · <a href="AI-Native%20Development.pdf" download="AI-Native Development.pdf"><strong>Download the PDF</strong></a> (latest build of <code>main</code>, commit <code>${short}</code>).</p>
             <p>Read it as Markdown in the <a href="https://github.com/Tamircohen28/ai-native-dev-guide">repository</a>. Licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
           </body>
           </html>
