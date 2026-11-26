@@ -1,0 +1,161 @@
+{
+  "schema_version": 2,
+  "last_reviewed": "2026-11-26",
+  "reviewed_by_skill": "tamirs-superpowers@6.1.1",
+  "capability_source": "core/capabilities/platforms.json",
+  "capability_source_note": "targets.<key>.capabilities and capability_gaps are DERIVED from the capability registry. Regenerate with `bash scripts/check-platform-targets.sh . --sync-capabilities`.",
+  "supported_targets": [
+    "claude_code",
+    "codex",
+    "cursor",
+    "gemini_cli",
+    "opencode"
+  ],
+  "targets": {
+    "claude_code": {
+      "platform": "claude",
+      "supported_min": "unknown",
+      "validated_against": "unknown",
+      "latest_known": "unknown",
+      "doc_urls": [
+        "https://code.claude.com/docs/en/skills"
+      ],
+      "features_adopted": [
+        "agents-md-import",
+        "project-skills"
+      ],
+      "capabilities": [
+        "agent_teams",
+        "artifacts",
+        "ask_user_question",
+        "background_tasks",
+        "git",
+        "github_cli",
+        "parallel_subagents",
+        "session_transcripts",
+        "shell",
+        "skill_auto_invocation",
+        "skills",
+        "slash_commands",
+        "subagents",
+        "worktree_isolation"
+      ],
+      "capability_gaps": {
+        "extension_install": "Claude installs plugins, not git-URL extensions.",
+        "hooks": "No hooks are shipped: there is no .claude/settings.json (reserved for the owner) and no hooks/ directory. Claude Code supports hooks; book chapter 14 shows how to add them.",
+        "mcp": "No .mcp.json is shipped, so this repo declares no MCP servers. Book chapters 10 and 11 cover adding one.",
+        "plugin_marketplace": "This repo is a book, not a plugin: it ships no plugin manifest and is not listed in any marketplace.",
+        "statusline": "No status line script is shipped. Book chapter 16 covers configuring one."
+      }
+    },
+    "codex": {
+      "platform": "codex",
+      "supported_min": "unknown",
+      "validated_against": "unknown",
+      "latest_known": "unknown",
+      "doc_urls": [
+        "https://developers.openai.com/codex/guides/agents-md"
+      ],
+      "features_adopted": [
+        "agents-md"
+      ],
+      "capabilities": [
+        "git",
+        "github_cli",
+        "shell",
+        "worktree_isolation"
+      ],
+      "capability_gaps": {
+        "artifacts": "No artifact publishing surface.",
+        "extension_install": "Codex installs plugins, not git-URL extensions.",
+        "hooks": "No hooks are shipped for Codex.",
+        "mcp": "No MCP config is shipped for Codex (no .codex/config.toml).",
+        "plugin_marketplace": "This repo is a book, not a plugin: it ships no plugin manifest and is not listed in any marketplace.",
+        "skill_auto_invocation": "No skill is shipped for Codex (see skills).",
+        "skills": "Codex reads AGENTS.md natively. This repo ships no .agents/skills/ tree, so Codex does not see the project skill in .claude/skills/.",
+        "slash_commands": "No Codex commands or skills are shipped.",
+        "statusline": "Not a declared Codex capability."
+      }
+    },
+    "cursor": {
+      "platform": "cursor",
+      "supported_min": "unknown",
+      "validated_against": "unknown",
+      "latest_known": "unknown",
+      "doc_urls": [
+        "https://cursor.com/docs/rules"
+      ],
+      "features_adopted": [
+        "mdc-rules"
+      ],
+      "capabilities": [
+        "git",
+        "github_cli",
+        "shell",
+        "worktree_isolation"
+      ],
+      "capability_gaps": {
+        "artifacts": "No artifact publishing surface.",
+        "extension_install": "Cursor installs plugins, not git-URL extensions.",
+        "hooks": "No hooks are shipped for Cursor (no .cursor/hooks.json).",
+        "mcp": "No MCP config is shipped for Cursor (no .mcp.json, no .cursor/mcp.json).",
+        "plugin_marketplace": "This repo is a book, not a plugin: it ships no plugin manifest and is not listed in any marketplace.",
+        "skill_auto_invocation": "No skill is shipped for Cursor (see skills).",
+        "skills": "This repo ships no Cursor skill. .cursor/rules/000-project.mdc points the agent at AGENTS.md, which carries the same working rules.",
+        "slash_commands": "No Cursor commands or skills are shipped.",
+        "statusline": "No plugin-declared statusline."
+      }
+    },
+    "gemini_cli": {
+      "platform": "gemini",
+      "supported_min": "unknown",
+      "validated_against": "unknown",
+      "latest_known": "unknown",
+      "doc_urls": [
+        "https://google-gemini.github.io/gemini-cli/docs/extensions/"
+      ],
+      "features_adopted": [],
+      "capabilities": [
+        "git",
+        "github_cli",
+        "shell",
+        "worktree_isolation"
+      ],
+      "capability_gaps": {
+        "artifacts": "No artifact publishing surface.",
+        "extension_install": "This repo is not a Gemini extension: it ships no gemini-extension.json.",
+        "hooks": "No hooks are shipped for Gemini.",
+        "mcp": "No MCP server config is shipped for Gemini.",
+        "plugin_marketplace": "Gemini installs extensions from a git URL; there is no marketplace listing, and this repo is not an extension.",
+        "skill_auto_invocation": "No skill is shipped for Gemini (see skills).",
+        "skills": "This repo ships no Gemini adapter: no gemini-extension.json, no .gemini/ mirror, no GEMINI.md. Gemini CLI reads GEMINI.md by default; set context.fileName in Gemini settings to include AGENTS.md to load this repo's instructions.",
+        "slash_commands": "No Gemini commands are shipped.",
+        "statusline": "Not provided by this repo."
+      }
+    },
+    "opencode": {
+      "platform": "opencode",
+      "supported_min": "unknown",
+      "validated_against": "unknown",
+      "latest_known": "unknown",
+      "doc_urls": [
+        "https://opencode.ai/docs/skills/"
+      ],
+      "features_adopted": [],
+      "capabilities": [
+        "git",
+        "github_cli",
+        "shell",
+        "worktree_isolation"
+      ],
+      "capability_gaps": {
+        "artifacts": "No artifact publishing surface.",
+        "extension_install": "No git-URL extension install.",
+        "hooks": "No hooks are shipped: OpenCode's lifecycle mechanism is its JS/TS plugin API, and this repo ships no plugin module.",
+        "mcp": "No opencode.json or other MCP config is shipped.",
+        "plugin_marketplace": "OpenCode has no plugin marketplace; this repo is cloned, not installed.",
+        "statusline": "No plugin-declared statusline."
+      }
+    }
+  }
+}

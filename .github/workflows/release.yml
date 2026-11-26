@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+
+      # Nothing to build: the book is the Markdown in book/. The release is the
+      # tag plus generated notes.
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create ${{ github.ref_name }} \
+            --title "${{ github.ref_name }}" \
+            --generate-notes \
+            --draft=false
+
+      # stable only moves forward: a tag on an older commit must not rewind it,
+      # and shared history is never rewritten (AGENTS.md hard constraints).
+      - name: Update stable branch (fast-forward only)
+        run: |
+          if git ls-remote --exit-code --heads origin stable >/dev/null; then
+            git fetch origin stable
+            if ! git merge-base --is-ancestor FETCH_HEAD HEAD; then
+              echo "::error::${{ github.ref_name }} is not a descendant of stable; refusing to rewind it."
+              exit 1
+            fi
+          fi
+          git push origin HEAD:refs/heads/stable

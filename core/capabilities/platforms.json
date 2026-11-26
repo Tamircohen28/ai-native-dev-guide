@@ -1,0 +1,963 @@
+{
+  "schema_version": 2,
+  "last_reviewed": "2026-11-26",
+  "capability_definitions": {
+    "skills": {
+      "summary": "Discovers and loads SKILL.md files shipped by this repo.",
+      "degradation": "None possible \u2014 a target without skills is not a supported target."
+    },
+    "skill_auto_invocation": {
+      "summary": "Selects a skill from its description without the user naming it.",
+      "degradation": "Document the explicit invocation form (slash command or 'use the X skill') in the install guide."
+    },
+    "subagents": {
+      "summary": "Delegates a bounded task to a separate agent with its own context.",
+      "degradation": "Run the role inline in the main session, sequentially, with a narrowed scope."
+    },
+    "parallel_subagents": {
+      "summary": "Runs two or more subagents concurrently.",
+      "degradation": "Fan out sequentially; the task graph still holds, only wall-clock time changes."
+    },
+    "agent_teams": {
+      "summary": "Long-lived named agents that message each other during a session.",
+      "degradation": "Use one-shot subagents plus files under session-files/ as the message bus."
+    },
+    "hooks": {
+      "summary": "Runs THIS REPO'S declared hook scripts on that platform's lifecycle events. Like every row here, this describes this repo's artifacts on that platform, not the platform's abstract feature set: the question is 'if I install this plugin there, do my hooks run?', not 'is that product hooks-capable?'",
+      "degradation": "Move the guard into the skill body as an explicit step, and into CI as a check."
+    },
+    "mcp": {
+      "summary": "Connects Model Context Protocol servers declared by the repo.",
+      "degradation": "Use the equivalent CLI (gh, curl) through the shell capability."
+    },
+    "statusline": {
+      "summary": "Renders a repo-provided status line in the session chrome.",
+      "degradation": "Purely cosmetic \u2014 omit it. Never make a skill depend on it."
+    },
+    "shell": {
+      "summary": "Executes arbitrary shell commands in the workspace.",
+      "degradation": "Emit the commands for the user to run and wait for pasted output."
+    },
+    "git": {
+      "summary": "Git is on PATH and the workspace is a repository.",
+      "degradation": "Skip branch/commit/worktree workflows; skills that need them declare git as required."
+    },
+    "github_cli": {
+      "summary": "The gh CLI is installed and authenticated.",
+      "degradation": "Optional feature dependency. Fall back to printing the PR/issue body for the user to file manually."
+    },
+    "background_tasks": {
+      "summary": "Runs a long command detached and reports its exit later.",
+      "degradation": "Run in the foreground with a bounded timeout."
+    },
+    "worktree_isolation": {
+      "summary": "Each task gets its own git worktree so concurrent agents do not collide.",
+      "degradation": "Single checkout, one task at a time; the orchestrator serializes writes."
+    },
+    "plugin_marketplace": {
+      "summary": "Installs and updates this plugin from a hosted marketplace listing.",
+      "degradation": "Document a direct install path (git clone plus a local plugin/extension link)."
+    },
+    "extension_install": {
+      "summary": "Installs the repo directly as an extension from a git URL.",
+      "degradation": "Use the platform's own install path; this is not a universal mechanism."
+    },
+    "slash_commands": {
+      "summary": "Exposes repo-provided commands as /name.",
+      "degradation": "Users invoke the skill by describing it in prose."
+    },
+    "ask_user_question": {
+      "summary": "Presents a structured multiple-choice question mid-run.",
+      "degradation": "Ask in prose and stop for a free-text reply."
+    },
+    "artifacts": {
+      "summary": "Publishes a rendered HTML/Markdown page as a shareable artifact.",
+      "degradation": "Write the same content to a file in the repo and tell the user the path."
+    },
+    "session_transcripts": {
+      "summary": "Session history is readable on disk in a documented format.",
+      "degradation": "Usage analytics (session-report) are unavailable; say so rather than reporting zeros."
+    },
+    "dynamic_workflows": {
+      "summary": "Runs a Workflow tool script that can pause, branch, and resume mid-execution driven by model output.",
+      "degradation": "Achieve the same result with sequential subagent orchestration driven by the main session."
+    },
+    "mods": {
+      "summary": "Loads a hooks module shipped by this repo as in-process function hooks (a Claude Code mod).",
+      "degradation": "This repo ships no mod, so nothing may depend on one having loaded."
+    }
+  },
+  "platforms": {
+    "claude": {
+      "display_name": "Claude",
+      "vendor": "Anthropic",
+      "aliases": [
+        "anthropic"
+      ],
+      "primary_surface": "claude_code",
+      "doc_urls": [
+        "https://code.claude.com/docs/en/plugin-marketplaces",
+        "https://code.claude.com/docs/en/plugins-reference",
+        "https://code.claude.com/docs/en/skills"
+      ],
+      "surfaces": {
+        "claude_code": {
+          "display_name": "Claude Code",
+          "kind": "cli",
+          "support": "supported",
+          "aliases": [
+            "claude-code"
+          ],
+          "doc_urls": [
+            "https://code.claude.com/docs/en/plugins-reference",
+            "https://code.claude.com/docs/en/plugin-marketplaces",
+            "https://code.claude.com/docs/en/skills"
+          ],
+          "install": {
+            "type": "manual",
+            "command": "git clone https://github.com/TamirCohen28/ai-native-dev-guide.git && cd ai-native-dev-guide"
+          },
+          "validation": {
+            "command": "test -d .claude/skills && ls .claude/skills/*/SKILL.md >/dev/null 2>&1"
+          },
+          "capabilities": {
+            "skills": {
+              "status": "native",
+              "since": "2.0.0",
+              "validation": "ls .claude/skills/*/SKILL.md >/dev/null 2>&1",
+              "notes": "This repo ships one project skill, .claude/skills/run-ai-native-dev-guide/SKILL.md. Claude Code discovers project skills from .claude/skills/ with no plugin manifest."
+            },
+            "skill_auto_invocation": {
+              "status": "native",
+              "since": "2.0.0",
+              "validation": "ls .claude/skills/*/SKILL.md >/dev/null 2>&1",
+              "notes": "Description-driven selection over the same .claude/skills/ tree."
+            },
+            "subagents": {
+              "status": "native",
+              "since": "2.0.0",
+              "validation": "command -v claude",
+              "notes": "Claude Code's built-in Agent tool. This repo ships no .claude/agents/ definitions, so only the built-in subagent types are available; book chapter 12 shows how to add one. The validation only proves the CLI is present."
+            },
+            "parallel_subagents": {
+              "status": "native",
+              "since": "2.0.0",
+              "validation": "command -v claude",
+              "notes": "Multiple Agent calls in one message run concurrently. This is a Claude Code session behaviour, not something this repo's shape gates, so validation only proves the CLI is present rather than requiring a plugin manifest that has nothing to do with the claim."
+            },
+            "agent_teams": {
+              "status": "native-experimental",
+              "validation": "command -v claude",
+              "notes": "Teammate messaging is available but documented as evolving; skills must not require it. Session behaviour, not gated by this repo's shape \u2014 validation proves the CLI is present rather than requiring a plugin manifest unrelated to the claim."
+            },
+            "hooks": {
+              "status": "unsupported",
+              "notes": "No hooks are shipped: there is no .claude/settings.json (reserved for the owner) and no hooks/ directory. Claude Code supports hooks; book chapter 14 shows how to add them.",
+              "fallback": "The rules live in AGENTS.md (and .claude/rules/constraints.md for Claude Code); CI runs make agent:check."
+            },
+            "mcp": {
+              "status": "unsupported",
+              "notes": "No .mcp.json is shipped, so this repo declares no MCP servers. Book chapters 10 and 11 cover adding one.",
+              "fallback": "Use gh or another CLI through the shell."
+            },
+            "statusline": {
+              "status": "unsupported",
+              "notes": "No status line script is shipped. Book chapter 16 covers configuring one.",
+              "fallback": "Cosmetic only; nothing depends on it."
+            },
+            "shell": {
+              "status": "native",
+              "validation": "command -v bash"
+            },
+            "git": {
+              "status": "native",
+              "validation": "git rev-parse --is-inside-work-tree"
+            },
+            "github_cli": {
+              "status": "native",
+              "validation": "gh auth status",
+              "notes": "Platform imposes no limit, but gh is an optional host dependency \u2014 presence is environment-dependent, so skills treat it as optional."
+            },
+            "background_tasks": {
+              "status": "native",
+              "validation": "command -v bash",
+              "notes": "Bash tool supports detached execution with completion callback."
+            },
+            "worktree_isolation": {
+              "status": "emulated",
+              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 20 covers the workflow.",
+              "fallback": "Explicit git worktree add/remove steps."
+            },
+            "plugin_marketplace": {
+              "status": "unsupported",
+              "notes": "This repo is a book, not a plugin: it ships no plugin manifest and is not listed in any marketplace.",
+              "fallback": "Clone the repo directly; see the install command above."
+            },
+            "extension_install": {
+              "status": "unsupported",
+              "notes": "Claude installs plugins, not git-URL extensions.",
+              "fallback": "Clone the repo directly; see the install command above."
+            },
+            "slash_commands": {
+              "status": "native",
+              "since": "2.0.0",
+              "validation": "ls .claude/skills/*/SKILL.md >/dev/null 2>&1",
+              "notes": "Claude Code exposes each discovered project-level skill as /name; this repo ships no separate commands/ directory or manifest `commands` field, so the claim rests on skill discovery itself, checked the same way as the skills row above."
+            },
+            "ask_user_question": {
+              "status": "native",
+              "validation": "command -v claude",
+              "notes": "Structured choice prompts are available in interactive sessions only; headless runs must not block on one. Session behaviour, not gated by this repo's shape."
+            },
+            "artifacts": {
+              "status": "partial",
+              "notes": "Artifact publishing is present on some Claude Code surfaces and account configurations, not guaranteed by the CLI itself. No shipped skill requires it.",
+              "fallback": "Write the page to a file in the repo and report the path."
+            },
+            "session_transcripts": {
+              "status": "native",
+              "since": "2.0.0",
+              "validation": "command -v claude",
+              "notes": "Claude Code writes JSONL transcripts under ~/.claude/projects. This repo ships no tool that reads them; the validation only proves the CLI is present."
+            },
+            "dynamic_workflows": {
+              "status": "unknown",
+              "notes": "Row added 2026-11-26 because schema.json requires this key and the app registry template omits it. This repo ships no Workflow script and nothing was measured on this surface.",
+              "fallback": "Sequential subagent orchestration driven by the main session."
+            },
+            "mods": {
+              "status": "unknown",
+              "notes": "Row added 2026-11-26 because schema.json requires this key and the app registry template omits it. This repo ships no mod and nothing was measured on this surface.",
+              "fallback": "None needed: nothing in this repo depends on a mod."
+            }
+          }
+        },
+        "claude_desktop": {
+          "display_name": "Claude Desktop",
+          "kind": "desktop",
+          "support": "supported",
+          "aliases": [
+            "claude-desktop",
+            "desktop"
+          ],
+          "doc_urls": [
+            "https://code.claude.com/docs/en/plugins-reference",
+            "https://code.claude.com/docs/en/skills"
+          ],
+          "runtime_surface_of": "claude_code",
+          "install": {
+            "type": "manual",
+            "command": "Not distributed as an installable plugin. Whether Claude Desktop surfaces a non-plugin project checkout's .claude/skills/ the same way Claude Code CLI does has not been verified by this repo."
+          },
+          "validation": {
+            "command": "test -f CLAUDE.md && test -f AGENTS.md",
+            "requires_cli": false
+          },
+          "capabilities": {
+            "skills": {
+              "status": "unknown",
+              "notes": "Desktop's documented path is the Claude Code plugin format, and this repo ships no plugin manifest. Whether Desktop discovers a plain checkout's .claude/skills/ has not been measured.",
+              "fallback": "Use Claude Code CLI in this project directory, where project-level skill discovery is verified."
+            },
+            "skill_auto_invocation": {
+              "status": "unknown",
+              "notes": "Depends on skills, which is unmeasured on Desktop (see skills).",
+              "fallback": "Use Claude Code CLI in this project directory, where project-level skill discovery is verified."
+            },
+            "subagents": {
+              "status": "unknown",
+              "notes": "Not exercised on Desktop by this repo. Treat as unavailable until a Desktop run is recorded."
+            },
+            "parallel_subagents": {
+              "status": "unknown",
+              "notes": "Depends on subagents, which is itself unverified here."
+            },
+            "agent_teams": {
+              "status": "unknown",
+              "notes": "No Desktop evidence."
+            },
+            "hooks": {
+              "status": "unsupported",
+              "notes": "No hooks are shipped by this repo: no .claude/settings.json and no hooks/ directory.",
+              "fallback": "The rules live in AGENTS.md (and .claude/rules/constraints.md for Claude Code); CI runs make agent:check."
+            },
+            "mcp": {
+              "status": "unsupported",
+              "notes": "This repo ships no MCP server config. Desktop's own MCP servers are configured in the app, not here.",
+              "fallback": "Use gh or another CLI through the shell."
+            },
+            "statusline": {
+              "status": "unsupported",
+              "notes": "No terminal chrome to render into.",
+              "fallback": "Cosmetic only; nothing depends on it."
+            },
+            "shell": {
+              "status": "partial",
+              "notes": "Desktop coding sessions can run commands; other Desktop surfaces (plain chat) cannot.",
+              "fallback": "Print commands for the user to run."
+            },
+            "git": {
+              "status": "partial",
+              "notes": "Follows shell \u2014 available only in the coding-session surface.",
+              "fallback": "Skip git workflows."
+            },
+            "github_cli": {
+              "status": "unknown",
+              "notes": "Depends on the Desktop session's shell environment; not measured.",
+              "fallback": "Print the PR/issue body for manual filing."
+            },
+            "background_tasks": {
+              "status": "unknown",
+              "notes": "No Desktop evidence.",
+              "fallback": "Run in the foreground."
+            },
+            "worktree_isolation": {
+              "status": "unknown",
+              "notes": "Requires shell plus git, both only partially confirmed here.",
+              "fallback": "Single checkout, serialized tasks."
+            },
+            "plugin_marketplace": {
+              "status": "unsupported",
+              "notes": "This repo is a book, not a plugin: it ships no plugin manifest and is not listed in any marketplace.",
+              "fallback": "Clone the repo directly; see the install command above."
+            },
+            "extension_install": {
+              "status": "unsupported",
+              "notes": "Not a Claude mechanism.",
+              "fallback": "Use the marketplace listing."
+            },
+            "slash_commands": {
+              "status": "unknown",
+              "notes": "Depends on skills, which is unmeasured on Desktop (see skills).",
+              "fallback": "Use Claude Code CLI in this project directory, where project-level skill discovery is verified."
+            },
+            "ask_user_question": {
+              "status": "unknown",
+              "notes": "Not verified on Desktop.",
+              "fallback": "Ask in prose."
+            },
+            "artifacts": {
+              "status": "partial",
+              "notes": "Artifacts are a first-class Desktop feature, but nothing in this repo can validate or drive one, and no shipped skill depends on it.",
+              "fallback": "Write the page to a file in the repo and report the path."
+            },
+            "session_transcripts": {
+              "status": "unknown",
+              "notes": "No documented on-disk transcript format for Desktop; session-report should refuse rather than guess.",
+              "fallback": "Report that usage analytics are unavailable on this surface."
+            },
+            "dynamic_workflows": {
+              "status": "unknown",
+              "notes": "Row added 2026-11-26 because schema.json requires this key and the app registry template omits it. This repo ships no Workflow script and nothing was measured on this surface.",
+              "fallback": "Sequential subagent orchestration driven by the main session."
+            },
+            "mods": {
+              "status": "unknown",
+              "notes": "Row added 2026-11-26 because schema.json requires this key and the app registry template omits it. This repo ships no mod and nothing was measured on this surface.",
+              "fallback": "None needed: nothing in this repo depends on a mod."
+            }
+          }
+        }
+      }
+    },
+    "codex": {
+      "display_name": "Codex",
+      "vendor": "OpenAI",
+      "primary_surface": "codex",
+      "doc_urls": [
+        "https://developers.openai.com/codex/config-basic",
+        "https://developers.openai.com/codex/guides/agents-md"
+      ],
+      "surfaces": {
+        "codex": {
+          "display_name": "Codex CLI",
+          "kind": "cli",
+          "support": "supported",
+          "aliases": [
+            "codex-cli",
+            "openai-codex"
+          ],
+          "doc_urls": [
+            "https://developers.openai.com/codex/guides/agents-md",
+            "https://developers.openai.com/codex/config-basic"
+          ],
+          "install": {
+            "type": "manual",
+            "command": "git clone https://github.com/TamirCohen28/ai-native-dev-guide.git && cd ai-native-dev-guide"
+          },
+          "validation": {
+            "command": "test -f AGENTS.md",
+            "requires_cli": false
+          },
+          "capabilities": {
+            "skills": {
+              "status": "unsupported",
+              "notes": "Codex reads AGENTS.md natively. This repo ships no .agents/skills/ tree, so Codex does not see the project skill in .claude/skills/.",
+              "fallback": "AGENTS.md carries the same working rules as the skill."
+            },
+            "skill_auto_invocation": {
+              "status": "unsupported",
+              "notes": "No skill is shipped for Codex (see skills).",
+              "fallback": "Follow AGENTS.md."
+            },
+            "subagents": {
+              "status": "unknown",
+              "notes": "Codex has a subagent feature, but this repo ships no Codex agent definitions and has not measured it.",
+              "fallback": "Run the role inline in the main session, sequentially, with a narrowed scope."
+            },
+            "parallel_subagents": {
+              "status": "unknown",
+              "notes": "Concurrency behaviour unverified.",
+              "fallback": "Fan out sequentially."
+            },
+            "agent_teams": {
+              "status": "unknown",
+              "notes": "No evidence of inter-agent messaging.",
+              "fallback": "Use session-files/ as the message bus."
+            },
+            "hooks": {
+              "status": "unsupported",
+              "notes": "No hooks are shipped for Codex.",
+              "fallback": "The rules live in AGENTS.md (and .claude/rules/constraints.md for Claude Code); CI runs make agent:check."
+            },
+            "mcp": {
+              "status": "unsupported",
+              "notes": "No MCP config is shipped for Codex (no .codex/config.toml).",
+              "fallback": "Use gh or another CLI through the shell."
+            },
+            "statusline": {
+              "status": "unsupported",
+              "notes": "Not a declared Codex capability.",
+              "fallback": "Cosmetic only; omit."
+            },
+            "shell": {
+              "status": "native",
+              "validation": "command -v bash"
+            },
+            "git": {
+              "status": "native",
+              "validation": "git rev-parse --is-inside-work-tree"
+            },
+            "github_cli": {
+              "status": "native",
+              "validation": "gh auth status",
+              "notes": "Optional host dependency, as everywhere."
+            },
+            "background_tasks": {
+              "status": "unknown",
+              "notes": "Not measured.",
+              "fallback": "Foreground with a bounded timeout."
+            },
+            "worktree_isolation": {
+              "status": "emulated",
+              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 20 covers the workflow.",
+              "fallback": "Explicit git worktree add/remove steps."
+            },
+            "plugin_marketplace": {
+              "status": "unsupported",
+              "notes": "This repo is a book, not a plugin: it ships no plugin manifest and is not listed in any marketplace.",
+              "fallback": "Clone the repo directly; see the install command above."
+            },
+            "extension_install": {
+              "status": "unsupported",
+              "notes": "Codex installs plugins, not git-URL extensions.",
+              "fallback": "Clone the repo; see the install command above."
+            },
+            "slash_commands": {
+              "status": "unsupported",
+              "notes": "No Codex commands or skills are shipped.",
+              "fallback": "Users invoke skills by describing them in prose."
+            },
+            "ask_user_question": {
+              "status": "unknown",
+              "notes": "No structured-question primitive verified.",
+              "fallback": "Ask in prose."
+            },
+            "artifacts": {
+              "status": "unsupported",
+              "notes": "No artifact publishing surface.",
+              "fallback": "Write to a file in the repo."
+            },
+            "session_transcripts": {
+              "status": "unknown",
+              "notes": "Transcript format not documented for this repo's tooling; session-report targets the Claude JSONL format only.",
+              "fallback": "Report analytics as unavailable."
+            },
+            "dynamic_workflows": {
+              "status": "unknown",
+              "notes": "Row added 2026-11-26 because schema.json requires this key and the app registry template omits it. This repo ships no Workflow script and nothing was measured on this surface.",
+              "fallback": "Sequential subagent orchestration driven by the main session."
+            },
+            "mods": {
+              "status": "unknown",
+              "notes": "Row added 2026-11-26 because schema.json requires this key and the app registry template omits it. This repo ships no mod and nothing was measured on this surface.",
+              "fallback": "None needed: nothing in this repo depends on a mod."
+            }
+          }
+        },
+        "codex_ide": {
+          "display_name": "Codex IDE extension",
+          "kind": "ide",
+          "support": "unverified",
+          "unverified_reason": "The IDE extension reads the same AGENTS.md as the CLI, but this repo has never been exercised there. No capability is claimed for this surface in either direction.",
+          "aliases": [
+            "codex-ide"
+          ],
+          "doc_urls": [
+            "https://developers.openai.com/codex/ide"
+          ]
+        }
+      }
+    },
+    "cursor": {
+      "display_name": "Cursor",
+      "vendor": "Anysphere",
+      "primary_surface": "cursor",
+      "doc_urls": [
+        "https://cursor.com/docs/context/rules",
+        "https://cursor.com/docs/hooks",
+        "https://cursor.com/docs/plugins",
+        "https://cursor.com/docs/reference/third-party-hooks"
+      ],
+      "surfaces": {
+        "cursor": {
+          "display_name": "Cursor IDE",
+          "kind": "ide",
+          "support": "supported",
+          "doc_urls": [
+            "https://cursor.com/docs/plugins",
+            "https://cursor.com/docs/context/rules",
+            "https://cursor.com/docs/hooks",
+            "https://cursor.com/docs/reference/third-party-hooks"
+          ],
+          "install": {
+            "type": "manual",
+            "command": "git clone https://github.com/TamirCohen28/ai-native-dev-guide.git && cd ai-native-dev-guide"
+          },
+          "validation": {
+            "command": "test -d .cursor/rules && ls .cursor/rules/*.mdc >/dev/null 2>&1"
+          },
+          "capabilities": {
+            "skills": {
+              "status": "unsupported",
+              "notes": "This repo ships no Cursor skill. .cursor/rules/000-project.mdc points the agent at AGENTS.md, which carries the same working rules.",
+              "fallback": "Follow AGENTS.md through the Cursor rule."
+            },
+            "skill_auto_invocation": {
+              "status": "unsupported",
+              "notes": "No skill is shipped for Cursor (see skills).",
+              "fallback": "Follow AGENTS.md through the Cursor rule."
+            },
+            "subagents": {
+              "status": "unknown",
+              "notes": "This repo ships no Cursor agent definitions, and Cursor subagent behaviour has not been measured here.",
+              "fallback": "Run the role inline in the main session, sequentially, with a narrowed scope."
+            },
+            "parallel_subagents": {
+              "status": "unknown",
+              "notes": "Not measured by this repo.",
+              "fallback": "Fan out sequentially."
+            },
+            "agent_teams": {
+              "status": "unknown",
+              "notes": "No evidence of inter-agent messaging.",
+              "fallback": "Use session-files/ as the message bus."
+            },
+            "hooks": {
+              "status": "unsupported",
+              "notes": "No hooks are shipped for Cursor (no .cursor/hooks.json).",
+              "fallback": "The rules live in AGENTS.md (and .claude/rules/constraints.md for Claude Code); CI runs make agent:check."
+            },
+            "mcp": {
+              "status": "unsupported",
+              "notes": "No MCP config is shipped for Cursor (no .mcp.json, no .cursor/mcp.json).",
+              "fallback": "Use gh or another CLI through the shell."
+            },
+            "statusline": {
+              "status": "unsupported",
+              "notes": "No plugin-declared statusline.",
+              "fallback": "Cosmetic only; omit."
+            },
+            "shell": {
+              "status": "native",
+              "validation": "command -v bash"
+            },
+            "git": {
+              "status": "native",
+              "validation": "git rev-parse --is-inside-work-tree"
+            },
+            "github_cli": {
+              "status": "native",
+              "validation": "gh auth status",
+              "notes": "Optional host dependency."
+            },
+            "background_tasks": {
+              "status": "unknown",
+              "notes": "Cloud Agent Builds run work remotely, which is not the same primitive; not measured.",
+              "fallback": "Foreground with a bounded timeout."
+            },
+            "worktree_isolation": {
+              "status": "emulated",
+              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 20 covers the workflow.",
+              "fallback": "Explicit git worktree add/remove steps."
+            },
+            "plugin_marketplace": {
+              "status": "unsupported",
+              "notes": "This repo is a book, not a plugin: it ships no plugin manifest and is not listed in any marketplace.",
+              "fallback": "Clone the repo directly; see the install command above."
+            },
+            "extension_install": {
+              "status": "unsupported",
+              "notes": "Cursor installs plugins, not git-URL extensions.",
+              "fallback": "Clone the repo; see the install command above."
+            },
+            "slash_commands": {
+              "status": "unsupported",
+              "notes": "No Cursor commands or skills are shipped.",
+              "fallback": "Users invoke skills by describing them in prose."
+            },
+            "ask_user_question": {
+              "status": "unknown",
+              "notes": "No structured-question primitive verified.",
+              "fallback": "Ask in prose."
+            },
+            "artifacts": {
+              "status": "unsupported",
+              "notes": "No artifact publishing surface.",
+              "fallback": "Write to a file in the repo."
+            },
+            "session_transcripts": {
+              "status": "unknown",
+              "notes": "Transcript format not documented for this repo's tooling.",
+              "fallback": "Report analytics as unavailable."
+            },
+            "dynamic_workflows": {
+              "status": "unknown",
+              "notes": "Row added 2026-11-26 because schema.json requires this key and the app registry template omits it. This repo ships no Workflow script and nothing was measured on this surface.",
+              "fallback": "Sequential subagent orchestration driven by the main session."
+            },
+            "mods": {
+              "status": "unknown",
+              "notes": "Row added 2026-11-26 because schema.json requires this key and the app registry template omits it. This repo ships no mod and nothing was measured on this surface.",
+              "fallback": "None needed: nothing in this repo depends on a mod."
+            }
+          }
+        },
+        "cursor_cli": {
+          "display_name": "Cursor CLI",
+          "kind": "cli",
+          "support": "unverified",
+          "unverified_reason": "The CLI reads the same .cursor/rules/ as the IDE, but no CLI run has been recorded here, so the cursor rows are not carried over.",
+          "aliases": [
+            "cursor-cli"
+          ],
+          "doc_urls": [
+            "https://cursor.com/docs/cli/changelog"
+          ]
+        }
+      }
+    },
+    "gemini": {
+      "display_name": "Gemini",
+      "vendor": "Google",
+      "primary_surface": "gemini_cli",
+      "doc_urls": [
+        "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/skills.md",
+        "https://github.com/google-gemini/gemini-cli/blob/main/docs/core/subagents.md",
+        "https://github.com/google-gemini/gemini-cli/blob/main/docs/extensions/reference.md"
+      ],
+      "surfaces": {
+        "gemini_cli": {
+          "display_name": "Gemini CLI",
+          "kind": "cli",
+          "support": "supported",
+          "aliases": [
+            "gemini-cli"
+          ],
+          "doc_urls": [
+            "https://github.com/google-gemini/gemini-cli/blob/main/docs/extensions/reference.md",
+            "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/skills.md",
+            "https://github.com/google-gemini/gemini-cli/blob/main/docs/core/subagents.md"
+          ],
+          "install": {
+            "type": "manual",
+            "command": "git clone https://github.com/TamirCohen28/ai-native-dev-guide.git && cd ai-native-dev-guide"
+          },
+          "validation": {
+            "command": "test -f AGENTS.md",
+            "requires_cli": false
+          },
+          "capabilities": {
+            "skills": {
+              "status": "unsupported",
+              "notes": "This repo ships no Gemini adapter: no gemini-extension.json, no .gemini/ mirror, no GEMINI.md. Gemini CLI reads GEMINI.md by default; set context.fileName in Gemini settings to include AGENTS.md to load this repo's instructions.",
+              "fallback": "AGENTS.md carries the same working rules as the skill."
+            },
+            "skill_auto_invocation": {
+              "status": "unsupported",
+              "notes": "No skill is shipped for Gemini (see skills).",
+              "fallback": "Follow AGENTS.md."
+            },
+            "subagents": {
+              "status": "unknown",
+              "notes": "No Gemini agent definitions are shipped, and Gemini subagent behaviour has not been measured here.",
+              "fallback": "Run the role inline in the main session, sequentially, with a narrowed scope."
+            },
+            "parallel_subagents": {
+              "status": "unknown",
+              "notes": "Concurrency behaviour undocumented here.",
+              "fallback": "Fan out sequentially."
+            },
+            "agent_teams": {
+              "status": "unknown",
+              "notes": "No evidence.",
+              "fallback": "Use session-files/ as the message bus."
+            },
+            "hooks": {
+              "status": "unsupported",
+              "notes": "No hooks are shipped for Gemini.",
+              "fallback": "The rules live in AGENTS.md (and .claude/rules/constraints.md for Claude Code); CI runs make agent:check."
+            },
+            "mcp": {
+              "status": "unsupported",
+              "notes": "No MCP server config is shipped for Gemini.",
+              "fallback": "Use gh or another CLI through the shell."
+            },
+            "statusline": {
+              "status": "unsupported",
+              "notes": "Not provided by this repo.",
+              "fallback": "Cosmetic only; omit."
+            },
+            "shell": {
+              "status": "native",
+              "validation": "command -v bash"
+            },
+            "git": {
+              "status": "native",
+              "validation": "git rev-parse --is-inside-work-tree"
+            },
+            "github_cli": {
+              "status": "native",
+              "validation": "gh auth status",
+              "notes": "Optional host dependency."
+            },
+            "background_tasks": {
+              "status": "unknown",
+              "notes": "Not measured.",
+              "fallback": "Foreground with a bounded timeout."
+            },
+            "worktree_isolation": {
+              "status": "emulated",
+              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 20 covers the workflow.",
+              "fallback": "Explicit git worktree add/remove steps."
+            },
+            "plugin_marketplace": {
+              "status": "unsupported",
+              "notes": "Gemini installs extensions from a git URL; there is no marketplace listing, and this repo is not an extension.",
+              "fallback": "Clone the repo; see the install command above."
+            },
+            "extension_install": {
+              "status": "unsupported",
+              "notes": "This repo is not a Gemini extension: it ships no gemini-extension.json.",
+              "fallback": "Clone the repo; see the install command above."
+            },
+            "slash_commands": {
+              "status": "unsupported",
+              "notes": "No Gemini commands are shipped.",
+              "fallback": "Users invoke skills by describing them in prose."
+            },
+            "ask_user_question": {
+              "status": "unknown",
+              "notes": "No structured-question primitive documented.",
+              "fallback": "Ask in prose."
+            },
+            "artifacts": {
+              "status": "unsupported",
+              "notes": "No artifact publishing surface.",
+              "fallback": "Write to a file in the repo."
+            },
+            "session_transcripts": {
+              "status": "unknown",
+              "notes": "Transcript format not documented for this repo's tooling.",
+              "fallback": "Report analytics as unavailable."
+            },
+            "dynamic_workflows": {
+              "status": "unknown",
+              "notes": "Row added 2026-11-26 because schema.json requires this key and the app registry template omits it. This repo ships no Workflow script and nothing was measured on this surface.",
+              "fallback": "Sequential subagent orchestration driven by the main session."
+            },
+            "mods": {
+              "status": "unknown",
+              "notes": "Row added 2026-11-26 because schema.json requires this key and the app registry template omits it. This repo ships no mod and nothing was measured on this surface.",
+              "fallback": "None needed: nothing in this repo depends on a mod."
+            }
+          }
+        },
+        "gemini_code_assist": {
+          "display_name": "Gemini Code Assist",
+          "kind": "ide",
+          "support": "unverified",
+          "unverified_reason": "Code Assist is a different host from the Gemini CLI. This repo ships no Gemini adapter and has never been exercised there. Listed because users will ask about it, not because it is known to work.",
+          "aliases": [
+            "gemini-code-assist"
+          ],
+          "doc_urls": [
+            "https://developers.google.com/gemini-code-assist/docs/overview"
+          ]
+        }
+      }
+    },
+    "opencode": {
+      "display_name": "OpenCode",
+      "vendor": "SST",
+      "primary_surface": "opencode",
+      "doc_urls": [
+        "https://opencode.ai/config.json",
+        "https://opencode.ai/docs/agents/",
+        "https://opencode.ai/docs/plugins/",
+        "https://opencode.ai/docs/skills/"
+      ],
+      "surfaces": {
+        "opencode": {
+          "display_name": "OpenCode CLI",
+          "kind": "cli",
+          "support": "supported",
+          "aliases": [
+            "open-code"
+          ],
+          "doc_urls": [
+            "https://opencode.ai/docs/skills/",
+            "https://opencode.ai/docs/agents/",
+            "https://opencode.ai/docs/plugins/",
+            "https://opencode.ai/config.json"
+          ],
+          "install": {
+            "type": "manual",
+            "command": "git clone https://github.com/TamirCohen28/ai-native-dev-guide.git && cd ai-native-dev-guide"
+          },
+          "validation": {
+            "command": "test -f AGENTS.md",
+            "requires_cli": false
+          },
+          "capabilities": {
+            "skills": {
+              "status": "unknown",
+              "notes": "OpenCode reads AGENTS.md natively. Its docs list .claude/skills/ as a compatible skill location, so the project skill may be discovered, but this repo has not measured it.",
+              "fallback": "AGENTS.md carries the same working rules as the skill."
+            },
+            "skill_auto_invocation": {
+              "status": "unknown",
+              "notes": "Not measured; skill discovery itself is unverified here (see skills).",
+              "fallback": "Name the skill explicitly."
+            },
+            "subagents": {
+              "status": "unknown",
+              "notes": "This repo ships no OpenCode agent definitions, and subagent behaviour has not been measured here.",
+              "fallback": "Run the role inline in the main session, sequentially, with a narrowed scope."
+            },
+            "parallel_subagents": {
+              "status": "unknown",
+              "notes": "Unmeasured: the evidence conflicts and no live v2 run has settled it. Against: foreground task calls issued in one turn ran serially on v1 (sst/opencode#29638, re-reporting #14195; closed not planned), and subagent_depth defaults to 1 (opencode.ai/docs/config; `experimental.subagent_depth` in OpenCode 2), so subagents cannot nest. For: the v2 tools docs (dev.opencode.ai/v2/docs/tools) document background: true, which returns immediately and notifies the parent. Docs and issues rechecked 2026-10-16. Until a v2 run exercises the background path, treat parallel fan-out as unavailable.",
+              "fallback": "Fan out sequentially."
+            },
+            "agent_teams": {
+              "status": "unknown",
+              "notes": "No evidence of inter-agent messaging.",
+              "fallback": "Use session-files/ as the message bus."
+            },
+            "hooks": {
+              "status": "unsupported",
+              "notes": "No hooks are shipped: OpenCode's lifecycle mechanism is its JS/TS plugin API, and this repo ships no plugin module.",
+              "fallback": "Guards become explicit in-skill steps plus CI checks."
+            },
+            "mcp": {
+              "status": "unsupported",
+              "notes": "No opencode.json or other MCP config is shipped.",
+              "fallback": "Use gh or another CLI through the shell."
+            },
+            "statusline": {
+              "status": "unsupported",
+              "notes": "No plugin-declared statusline.",
+              "fallback": "Cosmetic only; omit."
+            },
+            "shell": {
+              "status": "native",
+              "validation": "command -v bash"
+            },
+            "git": {
+              "status": "native",
+              "validation": "git rev-parse --is-inside-work-tree"
+            },
+            "github_cli": {
+              "status": "native",
+              "validation": "gh auth status",
+              "notes": "Optional host dependency."
+            },
+            "background_tasks": {
+              "status": "unknown",
+              "notes": "Not measured.",
+              "fallback": "Foreground with a bounded timeout."
+            },
+            "worktree_isolation": {
+              "status": "emulated",
+              "notes": "No worktree hooks are shipped. Worktrees are created and removed by hand with git worktree add/remove; book chapter 20 covers the workflow.",
+              "fallback": "Explicit git worktree add/remove steps."
+            },
+            "plugin_marketplace": {
+              "status": "unsupported",
+              "notes": "OpenCode has no plugin marketplace; this repo is cloned, not installed.",
+              "fallback": "Clone the repo; see the install command above."
+            },
+            "extension_install": {
+              "status": "unsupported",
+              "notes": "No git-URL extension install.",
+              "fallback": "Clone the repo; see the install command above."
+            },
+            "slash_commands": {
+              "status": "unknown",
+              "notes": "Command surface not verified against the shipped skills.",
+              "fallback": "Invoke skills in prose."
+            },
+            "ask_user_question": {
+              "status": "unknown",
+              "notes": "No structured-question primitive verified.",
+              "fallback": "Ask in prose."
+            },
+            "artifacts": {
+              "status": "unsupported",
+              "notes": "No artifact publishing surface.",
+              "fallback": "Write to a file in the repo."
+            },
+            "session_transcripts": {
+              "status": "unknown",
+              "notes": "Transcript format not documented for this repo's tooling.",
+              "fallback": "Report analytics as unavailable."
+            },
+            "dynamic_workflows": {
+              "status": "unknown",
+              "notes": "Row added 2026-11-26 because schema.json requires this key and the app registry template omits it. This repo ships no Workflow script and nothing was measured on this surface.",
+              "fallback": "Sequential subagent orchestration driven by the main session."
+            },
+            "mods": {
+              "status": "unknown",
+              "notes": "Row added 2026-11-26 because schema.json requires this key and the app registry template omits it. This repo ships no mod and nothing was measured on this surface.",
+              "fallback": "None needed: nothing in this repo depends on a mod."
+            }
+          }
+        },
+        "opencode_desktop": {
+          "display_name": "OpenCode desktop app",
+          "kind": "desktop",
+          "support": "unverified",
+          "unverified_reason": "OpenCode ships a desktop client alongside the terminal one. This repo has never been exercised there, so the opencode rows are not carried over.",
+          "aliases": [
+            "opencode-desktop"
+          ],
+          "doc_urls": [
+            "https://opencode.ai/docs/"
+          ]
+        }
+      }
+    }
+  }
+}
