@@ -1,4 +1,4 @@
-# 15 — Plugins and marketplaces
+# 17 — Plugins and marketplaces
 
 After this chapter you can read a plugin's directory and say what it will add to your sessions, build a small plugin with one skill, one hook and one subagent, test and validate it locally, and publish it through a marketplace that your team installs from. You will also know why an update can fail to reach your users, and what to read before you install someone else's plugin.
 
@@ -49,7 +49,7 @@ Four rules catch most first-time mistakes:
 
 - "Only `plugin.json` goes inside `.claude-plugin/`. Components saved there don't load." A `skills/` folder inside `.claude-plugin/` is ignored without an error.
 - "A `CLAUDE.md` at the plugin root isn't loaded as context". Put standing guidance in a skill.
-- Plugin subagents ignore the `permissionMode`, `mcpServers` and `hooks` frontmatter fields ([chapter 12](12-subagents.md)).
+- Plugin subagents ignore the `permissionMode`, `mcpServers` and `hooks` frontmatter fields ([chapter 14](14-subagents.md)).
 - Monitors are not started in `claude -p` runs.
 
 A plugin can also ship a hooks module (a "mod": JavaScript or TypeScript handlers that draw panes and add commands) and channels. This chapter stays with the four components you already know.
@@ -165,7 +165,9 @@ Three more facts about updates, as of Nov 2026:
 
 ## Build a small plugin, step by step
 
-You will package the force-push guard from [chapter 14](14-hooks.md) with one skill and one subagent, inside a repository that is also a marketplace.
+You will package the force-push guard from [chapter 16](16-hooks.md) with one skill and one subagent, inside a repository that is also a marketplace.
+
+> **Note:** [Chapter 21](21-guide-build-and-ship-a-plugin.md) is the full workshop version: it starts from `claude plugin init`, adds an eval suite with `claude plugin eval` and tags a release. [Chapter 11](11-the-extension-model.md) covers when a plugin is worth it at all.
 
 **1. Create the layout and the manifest.** Save the `plugin.json` shown above into `.claude-plugin/`.
 
@@ -175,7 +177,7 @@ mkdir -p team-plugins/plugins/team-kit/{.claude-plugin,skills/changelog-entry,ag
 cd team-plugins
 ```
 
-**2. Add the skill** as `plugins/team-kit/skills/changelog-entry/SKILL.md` ([chapter 13](13-skills.md)):
+**2. Add the skill** as `plugins/team-kit/skills/changelog-entry/SKILL.md` ([chapter 15](15-skills.md)):
 
 ```markdown
 ---
@@ -206,7 +208,7 @@ You review a diff; you never edit files.
 3. An empty list is a valid result. Do not invent findings to look thorough.
 ```
 
-`Bash` is there so the agent can run `git diff`. As [chapter 12](12-subagents.md) warns, that makes it read-only by instruction, not by tool list: drop `Bash` and name the files in the brief if you need a hard guarantee.
+`Bash` is there so the agent can run `git diff`. As [chapter 14](14-subagents.md) warns, that makes it read-only by instruction, not by tool list: drop `Bash` and name the files in the brief if you need a hard guarantee.
 
 **4. Add the hook.** Copy `force-push-guard.py` into `plugins/team-kit/hooks/` and wire it in `plugins/team-kit/hooks/hooks.json`. The file has the same shape as the `hooks` key in settings, and it reaches the script through `${CLAUDE_PLUGIN_ROOT}`:
 
@@ -259,7 +261,7 @@ claude plugin install team-kit@team-plugins
 
 For every later release, change `version` in `plugin.json` first. `claude plugin tag` creates a `{name}--v{version}` git tag and checks that the manifest and the marketplace entry agree (run it with `--dry-run` to see what it would do).
 
-**8. Measure it (optional).** `claude plugin eval` (v2.1.269+) runs a suite from the plugin's `evals/` folder: each case is a prompt plus graders. Each case runs three times by default and again without the plugin, because "A high score on its own doesn't tell you the plugin helped". `claude plugin eval init` drafts a suite, `--threshold` (default 1.0) turns it into a gate with exit code 1 on failure, and the run writes a self-contained `report.html`. [Chapter 18](18-testing-and-verification-loops.md) places evals among the other verification loops.
+**8. Measure it (optional).** `claude plugin eval` (v2.1.269+) runs a suite from the plugin's `evals/` folder: each case is a prompt plus graders. Each case runs three times by default and again without the plugin, because "A high score on its own doesn't tell you the plugin helped". `claude plugin eval init` drafts a suite, `--threshold` (default 1.0) turns it into a gate with exit code 1 on failure, and the run writes a self-contained `report.html`. [Chapter 23](23-testing-and-verification-loops.md) places evals among the other verification loops.
 
 ## Team distribution
 
@@ -276,7 +278,7 @@ For a team, commit the marketplace and the plugin choice to the repository's `.c
 }
 ```
 
-Enabling does not download. Each collaborator still runs `claude plugin install team-kit@team-plugins --scope project` once. An organisation can go further in managed settings: `strictKnownMarketplaces` and `blockedMarketplaces` control which marketplaces may be added, and a managed `enabledPlugins` entry forces a plugin on or off. [Chapter 26](26-repo-standards-and-team-adoption.md) covers rollout.
+Enabling does not download. Each collaborator still runs `claude plugin install team-kit@team-plugins --scope project` once. An organisation can go further in managed settings: `strictKnownMarketplaces` and `blockedMarketplaces` control which marketplaces may be added, and a managed `enabledPlugins` entry forces a plugin on or off. [Chapter 31](31-repo-standards-and-team-adoption.md) covers rollout.
 
 Keep the shared set small. Every enabled plugin adds descriptions to every turn, so a plugin that only one person needs belongs in that person's user scope. `claude plugin details <name>` shows a plugin's component inventory and projected token cost.
 
@@ -292,13 +294,13 @@ The plugin security page is blunt: "A Claude Code plugin you install can execute
 | `skills/` and `agents/` | The model follows these instructions. Look for steps that fetch or run remote content |
 | The marketplace entry's `source` | A branch `ref` means the content can change after your review |
 
-The risk is measured. A Snyk scan of 3,984 agent skills reported that "36.82% (1,467 skills) have at least one security flaw". Pinning has had bugs too: CVE-2026-86063 let a branch named like a commit SHA bypass a plugin's pinned SHA until v2.1.179, which is one more reason to keep Claude Code updated. For a quick scan of skills, the Snyk write-up gives `uvx mcp-scan@latest --skills`. Community collections are useful to learn from, but nobody audits them for you. [Chapter 24](24-security-and-guardrails.md) covers the wider supply-chain picture.
+The risk is measured. A Snyk scan of 3,984 agent skills reported that "36.82% (1,467 skills) have at least one security flaw". Pinning has had bugs too: CVE-2026-86063 let a branch named like a commit SHA bypass a plugin's pinned SHA until v2.1.179, which is one more reason to keep Claude Code updated. For a quick scan of skills, the Snyk write-up gives `uvx mcp-scan@latest --skills`. Community collections are useful to learn from, but nobody audits them for you. [Chapter 29](29-security-and-guardrails.md) covers the wider supply-chain picture.
 
 ## From the field
 
 **The version string is the delivery mechanism.** The author's plugin holds 30 skills, 10 subagents and 31 hook wirings over 15 events, and describes itself as Markdown, JSON and Bash with no build step. It is installed on several tools, so its version appears in six manifests and a README badge. One file is the single source of that version and lists every consumer, a `--sync` script rewrites them, and a "version truth" check in the validation gate fails when they disagree. The contributor rule reads: "Pushing commits **without** bumping `version` does **not** deliver changes to installed users." A related lesson from the same repository: tag after the squash merge, not before.
 
-**One source, generated adapters.** The same repository targets Cursor, Codex, Gemini CLI and OpenCode from one canonical set of skills, agents and hooks. Each per-tool file is produced by a generator and committed with a `GENERATED FILE — DO NOT EDIT` header. Every generator has a `--check` mode that regenerates into a temporary directory and diffs, plus a test that plants drift to prove the check fires. The marketplace repository works the same way: one catalogue is edited by hand, the others are generated, and validation ends with `git diff --exit-code`. [Chapter 23](23-cross-tool-agents-md-cursor-codex-gemini.md) expands on this pattern.
+**One source, generated adapters.** The same repository targets Cursor, Codex, Gemini CLI and OpenCode from one canonical set of skills, agents and hooks. Each per-tool file is produced by a generator and committed with a `GENERATED FILE — DO NOT EDIT` header. Every generator has a `--check` mode that regenerates into a temporary directory and diffs, plus a test that plants drift to prove the check fires. The marketplace repository works the same way: one catalogue is edited by hand, the others are generated, and validation ends with `git diff --exit-code`. [Chapter 28](28-cross-tool-agents-md-cursor-codex-gemini.md) expands on this pattern.
 
 **Promotion leaves copies behind.** The author's hooks began as scripts in `~/.claude/hooks` and later moved into the plugin. A survey of the machine found two hooks registered twice, once in user settings and once by the plugin (whether both copies run was not tested). It also found 18 older scripts that the user settings no longer register, 13 of them with same-named copies in the plugin. Elsewhere that configuration follows a clear pattern, where each move deletes the old copy or leaves a pointer; these were the leftovers. The same survey found 18 of 21 installed plugins switched off: installing is cheap, and enabling is what costs context.
 
@@ -354,4 +356,4 @@ The risk is measured. A Snyk scan of 3,984 agent skills reported that "36.82% (1
 
 ---
 
-[← Previous: Hooks](14-hooks.md) · [Contents](README.md) · [Next: Output styles, status line and keybindings →](16-output-styles-statusline-keybindings.md)
+[← Previous: Hooks](16-hooks.md) · [Contents](README.md) · [Next: Output styles, status line and keybindings →](18-output-styles-statusline-keybindings.md)

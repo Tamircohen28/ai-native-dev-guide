@@ -1,4 +1,4 @@
-# 07 — CLAUDE.md and memory
+# 08 — CLAUDE.md and memory
 
 After this chapter you can put an instruction in the right file, predict when Claude Code loads it, and check that it reached the model. You can also write a short `CLAUDE.md` that changes behaviour, and recognise the rules that do not belong in it at all.
 
@@ -55,12 +55,12 @@ The table is also the load order, broadest first. The mechanics that follow from
 - **Subdirectory files are lazy.** Claude Code loads each one "once Claude reads, writes, or edits another file in that subdirectory". A Bash `cat` or `head` on a single file counts as a read.
 - **HTML comments are free.** Block-level comments such as `<!-- maintainer notes -->` are stripped before the text reaches the model.
 - **Extra directories are opt-in.** A directory added with `--add-dir` does not contribute its `CLAUDE.md` unless you set `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1`.
-- **Monorepos can exclude files.** The `claudeMdExcludes` setting takes glob patterns matched against absolute paths (settings are covered in [chapter 08](08-settings-and-permissions.md)).
+- **Monorepos can exclude files.** The `claudeMdExcludes` setting takes glob patterns matched against absolute paths (settings are covered in [chapter 09](09-settings-and-permissions.md)).
 - **Size limits.** Aim for under 200 lines per file. A launch-loaded file over 4 MiB is skipped entirely. On-demand files are cut at 40,000 characters on a 200K window, and at 150,000 or 200,000 on a 1M window depending on the model (as of Nov 2026).
 
 To see what loaded, run `/context all` and read the **Memory files** list, or run `/memory`.
 
-> **Note:** A subagent starts with a fresh context window (unless it is a *fork*, which inherits your whole conversation) but still loads the same `CLAUDE.md` hierarchy as the main conversation; the built-in Explore, Plan and `web-fetch` agents skip it ([chapter 12](12-subagents.md)). A headless run with `claude -p --bare` skips `CLAUDE.md` and auto memory ([chapter 22](22-headless-ci-and-the-agent-sdk.md)).
+> **Note:** A subagent starts with a fresh context window (unless it is a *fork*, which inherits your whole conversation) but still loads the same `CLAUDE.md` hierarchy as the main conversation; the built-in Explore, Plan and `web-fetch` agents skip it ([chapter 14](14-subagents.md)). A headless run with `claude -p --bare` skips `CLAUDE.md` and auto memory ([chapter 27](27-headless-ci-and-the-agent-sdk.md)).
 
 ## Imports with `@path`
 
@@ -113,7 +113,7 @@ paths:
 
 ## How `AGENTS.md` is handled
 
-`AGENTS.md` is the tool-neutral instruction file that other coding agents read ([chapter 23](23-cross-tool-agents-md-cursor-codex-gemini.md)). Older tutorials say Claude Code ignores it. That is no longer true.
+`AGENTS.md` is the tool-neutral instruction file that other coding agents read ([chapter 28](28-cross-tool-agents-md-cursor-codex-gemini.md)). Older tutorials say Claude Code ignores it. That is no longer true.
 
 - From v2.1.277, Claude Code reads `AGENTS.md` natively, but by default "only when you have no `CLAUDE.md` in your working directory or above it".
 - A `CLAUDE.md`, `.claude/CLAUDE.md` or `CLAUDE.local.md` on the path suppresses it. Your `~/.claude/CLAUDE.md`, the managed file and `.claude/rules/` keep loading alongside it.
@@ -205,7 +205,7 @@ Five habits make the lines land:
 | IMPORTANT: ALWAYS RUN THE TESTS | Run `make check` before every commit. CI runs the same target, so a local pass predicts a green build. |
 | The project is organised into controllers, services and models | (delete it: "Claude reads the repo itself. Only write down what isn't in there.") |
 
-Add a line when Claude makes the same mistake a second time, when a code review catches something Claude should have known, or when a new teammate would need the same context. Send everything else to a better home: a multi-step procedure becomes a skill ([chapter 13](13-skills.md)), a rule for one part of the codebase becomes a path-scoped rule, and a personal preference goes in `CLAUDE.local.md`.
+Add a line when Claude makes the same mistake a second time, when a code review catches something Claude should have known, or when a new teammate would need the same context. Send everything else to a better home: a multi-step procedure becomes a skill ([chapter 15](15-skills.md)), a rule for one part of the codebase becomes a path-scoped rule, and a personal preference goes in `CLAUDE.local.md`.
 
 ## A complete example
 
@@ -263,7 +263,7 @@ flowchart TD
     Q4 -- "no" --> C["Project CLAUDE.md"]
 ```
 
-In the example file, "never commit to `main`" and "use `pnpm`" are guidelines. If breaking them would cost you a bad deploy, back them with enforcement: a `deny` permission rule ([chapter 08](08-settings-and-permissions.md)) or a `PreToolUse` hook that exits with code 2 ([chapter 14](14-hooks.md)). Keep the prose line too, because it tells Claude why the call was blocked and what to do instead.
+In the example file, "never commit to `main`" and "use `pnpm`" are guidelines. If breaking them would cost you a bad deploy, back them with enforcement: a `deny` permission rule ([chapter 09](09-settings-and-permissions.md)) or a `PreToolUse` hook that exits with code 2 ([chapter 16](16-hooks.md)). Keep the prose line too, because it tells Claude why the call was blocked and what to do instead.
 
 ## From the field
 
@@ -279,7 +279,7 @@ The numbers below come from one developer's repos and a window of about four wee
 |---|---|---|
 | Agent goes silent during long waits; the owner types "status?" | Two project memories | Pokes were 13–17% of prompts in October and 21–22% in November. The likely reason (an inference): a per-project note does not transfer to other projects. |
 | Bash idioms that fail in zsh | Memory notes in three projects, then a global rule | Still recurred, including after compaction. A `PreToolUse` hook (early November) and a shell-profile change (late November) followed; errors of that class numbered 19 in the first half of November and 4 in the second. Volume differed, so treat it as weak evidence. |
-| Permission prompts keep interrupting | "All approved" typed into the chat, 33 times in 17 of 37 substantive sessions | Prompts continued. They came from the harness (a guard's ask list, a protected path, leftover ask rules), which no sentence can change. The fix was configuration ([chapter 08](08-settings-and-permissions.md)). |
+| Permission prompts keep interrupting | "All approved" typed into the chat, 33 times in 17 of 37 substantive sessions | Prompts continued. They came from the harness (a guard's ask list, a protected path, leftover ask rules), which no sentence can change. The fix was configuration ([chapter 09](09-settings-and-permissions.md)). |
 
 > **Field note:** The same machine holds 413 auto memory files in 32 project directories (by type: 223 `project`, 165 `feedback`, 20 `reference`, 3 `user`). Each memory is one sentence of rule, then why (the dated incident), then how to apply it. One project with 206 memories keeps its index at 79 lines by listing a lead file and folding related ones into it. Lessons get promoted: memory, then `CLAUDE.md`, then a hook, and each move deletes the old copy or leaves a pointer.
 
@@ -293,7 +293,7 @@ The numbers below come from one developer's repos and a window of about four wee
 | An `@import` does not load | Quoted path, path inside a code span, a declined approval dialog, or more than four hops | Remove the quotes, move it out of the code span, flatten the chain |
 | Claude follows one of two conflicting lines at random | Files are concatenated, not overridden | Run `/doctor prompt-audit`; delete the duplicate |
 | Claude "forgot" something it saved to memory | The `MEMORY.md` index passed 200 lines or 25KB, or you are on another machine or inside a subagent | Prune the index; move team knowledge into `CLAUDE.md` |
-| Adding capitals and "IMPORTANT" does not help | The file is advisory; emphasis makes Claude over-apply | Move the rule to a hook ([chapter 14](14-hooks.md)) |
+| Adding capitals and "IMPORTANT" does not help | The file is advisory; emphasis makes Claude over-apply | Move the rule to a hook ([chapter 16](16-hooks.md)) |
 
 ## Checklist
 
@@ -326,4 +326,4 @@ The numbers below come from one developer's repos and a window of about four wee
 
 ---
 
-[← Previous: CLI, slash commands and shortcuts](06-cli-slash-commands-and-shortcuts.md) · [Contents](README.md) · [Next: Settings and permissions →](08-settings-and-permissions.md)
+[← Previous: CLI, slash commands and shortcuts](07-cli-slash-commands-and-shortcuts.md) · [Contents](README.md) · [Next: Settings and permissions →](09-settings-and-permissions.md)

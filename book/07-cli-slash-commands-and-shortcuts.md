@@ -1,4 +1,4 @@
-# 06 — CLI, slash commands and shortcuts
+# 07 — CLI, slash commands and shortcuts
 
 After this chapter you can start Claude Code in the right form for the job (interactive, one-shot, piped, resumed), find a built-in command by what it is for, and drive the prompt from the keyboard. Treat it as a reference: skim it once, then return when you need a name.
 
@@ -10,7 +10,7 @@ You give Claude Code instructions in three places, and each one reaches a differ
 2. **In the prompt box:** the start of the message routes it. `/` runs a command or a skill, `!` runs a shell command yourself, and anything else is a prompt for the model.
 3. **On the keyboard:** keys act on the interface (interrupt, switch mode, send work to the background) without adding anything to the conversation.
 
-Two kinds of `/name` exist. Most are built-in commands "whose behavior is coded into the CLI". The rest are *skills*: "a prompt handed to Claude", the same mechanism as the skills you write yourself in [chapter 13](13-skills.md).
+Two kinds of `/name` exist. Most are built-in commands "whose behavior is coded into the CLI". The rest are *skills*: "a prompt handed to Claude", the same mechanism as the skills you write yourself in [chapter 15](15-skills.md).
 
 ```mermaid
 flowchart TD
@@ -44,8 +44,8 @@ Everything below is from the CLI reference as of Nov 2026 (the docs mention buil
 | `claude auth login`, `claude auth logout`, `claude auth status` | Sign in, sign out, show authentication status as JSON (`--text` for readable output) | Checking who you are and who is billed |
 | `claude setup-token` | Generate a long-lived OAuth token for CI and scripts | Headless runs on a subscription |
 | `claude doctor` | Print read-only installation and settings diagnostics | Claude Code will not start, or behaves oddly |
-| `claude mcp` | Configure MCP servers | [Chapter 11](11-mcp-in-practice.md) |
-| `claude plugin` | Manage plugins (alias `claude plugins`) | [Chapter 15](15-plugins-and-marketplaces.md) |
+| `claude mcp` | Configure MCP servers | [Chapter 13](13-mcp-in-practice.md) |
+| `claude plugin` | Manage plugins (alias `claude plugins`) | [Chapter 17](17-plugins-and-marketplaces.md) |
 | `claude agents` | Open agent view to monitor and dispatch parallel background sessions | Several sessions at once |
 | `claude attach <id\|name>`, `claude logs <id\|name>`, `claude stop <id>`, `claude rm <id>` | Attach to a background session, print its recent output, stop it, remove it from the list | Managing sessions started with `--bg` |
 | `claude import [source]` | Start a session that runs `/import` to bring configuration from other coding agents | Moving from Codex, Gemini CLI or Cursor |
@@ -76,14 +76,14 @@ Everything below is from the CLI reference as of Nov 2026 (the docs mention buil
 | `--max-turns`, `--max-budget-usd` | Cap agentic turns; stop at an estimated spend (both print mode only) | Limits on an unattended run |
 | `--bare` | Minimal mode: skip auto-discovery of hooks, skills, subagents, plugins, MCP servers, auto memory and `CLAUDE.md` | Faster scripted calls |
 | `--safe-mode` | Start with all customizations disabled | Find out whether your configuration is the problem |
-| `--worktree`, `-w` | Start in an isolated git worktree at `<repo>/.claude/worktrees/<name>` | Parallel work ([chapter 20](20-parallel-work-worktrees-and-background-tasks.md)) |
+| `--worktree`, `-w` | Start in an isolated git worktree at `<repo>/.claude/worktrees/<name>` | Parallel work ([chapter 25](25-parallel-work-worktrees-and-background-tasks.md)) |
 | `--bg`, `--background` | Start the session as a background agent and return immediately | Start it now, check it later |
 | `--from-pr` | Open the session picker filtered to sessions linked to a pull request | `claude --from-pr 1234` |
 | `--mcp-config`, `--strict-mcp-config` | Load MCP servers from JSON; skip servers configured elsewhere | Reproducible CI runs |
 | `--plugin-dir` | Load a plugin from a directory for this session only | Testing a plugin you are writing |
 | `--settings` | A settings JSON file or inline JSON for this session | One-off overrides |
 | `--verbose`, `--debug` | Full turn-by-turn output; debug mode with a category filter | `--debug='mcp,startup'` |
-| `--dangerously-skip-permissions` | "Equivalent to `--permission-mode bypassPermissions`" | Disposable sandboxes only ([chapter 24](24-security-and-guardrails.md)) |
+| `--dangerously-skip-permissions` | "Equivalent to `--permission-mode bypassPermissions`" | Disposable sandboxes only ([chapter 29](29-security-and-guardrails.md)) |
 
 > **Warning:** `--system-prompt` replaces the whole default prompt, "including tool guidance and safety instructions". Prefer `--append-system-prompt` unless you are building a different product on top of the CLI.
 
@@ -114,7 +114,7 @@ Print mode differs from an interactive session in four ways that surprise people
 - **Its sessions are hidden from `claude -c`**, which skips sessions created with `claude -p`. Use `claude -p --continue` to include them.
 - **Some flags only exist here** (`--max-turns`, `--max-budget-usd`, `--json-schema`), and `--bg` cannot be combined with `-p`.
 
-[Chapter 22](22-headless-ci-and-the-agent-sdk.md) builds real automation on these flags.
+[Chapter 27](27-headless-ci-and-the-agent-sdk.md) builds real automation on these flags.
 
 ## Slash commands by purpose
 
@@ -233,7 +233,7 @@ An `@` file is included "when it fits the Read tool's token limit, 25,000 tokens
 | Paste | Any terminal; a paste over 800 characters or three lines collapses to a placeholder such as `[Pasted text #1 +120 lines]` |
 | `Ctrl+G` | Opens the prompt in your default text editor |
 
-To rebind keys, `/keybindings` opens `~/.claude/keybindings.json` (the newline and submit actions are `chat:newline` and `chat:submit`). [Chapter 16](16-output-styles-statusline-keybindings.md) covers the file format, tmux settings and Vim mode.
+To rebind keys, `/keybindings` opens `~/.claude/keybindings.json` (the newline and submit actions are `chat:newline` and `chat:submit`). [Chapter 18](18-output-styles-statusline-keybindings.md) covers the file format, tmux settings and Vim mode.
 
 ### Keyboard shortcuts
 
@@ -288,7 +288,7 @@ The docs describe a single `Esc` like this: "Stop the current response or tool c
 | `--enable-auto-mode` | Listed as removed in v2.1.111 | `--permission-mode auto` |
 | `--remote` | "Deprecated alias for `--cloud`" | `--cloud` |
 | The `Task` tool | Renamed to `Agent` in v2.1.63 | `Agent` in permission rules and hooks |
-| Custom commands in `.claude/commands/` | Merged into skills; existing files keep working, and a skill wins a name clash | A skill ([chapter 13](13-skills.md)) |
+| Custom commands in `.claude/commands/` | Merged into skills; existing files keep working, and a skill wins a name clash | A skill ([chapter 15](15-skills.md)) |
 
 ## Ten commands to learn first
 
@@ -341,7 +341,7 @@ Numbers are from about four weeks of one developer's transcripts. Slash-command 
 ## Try it
 
 1. **Pipe something real.** In any repository, run `git log --oneline -20 | claude -p "summarize these recent commits"`. Then add `--output-format json` and look at what a program would receive.
-2. **Drive a session from the keyboard.** In the sample project from [chapter 05](05-install-and-first-session.md), ask for something slow, press `Esc` mid-turn, redirect, then use `Esc` twice to open the rewind menu and go back one step.
+2. **Drive a session from the keyboard.** In the sample project from [chapter 06](06-install-and-first-session.md), ask for something slow, press `Esc` mid-turn, redirect, then use `Esc` twice to open the rewind menu and go back one step.
 3. **Find your ten.** After a day of work, run `/insights` and `/usage`, then write down the commands you actually used. Compare them with the table above.
 
 ## Sources
@@ -361,4 +361,4 @@ Numbers are from about four weeks of one developer's transcripts. Slash-command 
 
 ---
 
-[← Previous: Install and first session](05-install-and-first-session.md) · [Contents](README.md) · [Next: CLAUDE.md and memory →](07-claude-md-and-memory.md)
+[← Previous: Install and first session](06-install-and-first-session.md) · [Contents](README.md) · [Next: CLAUDE.md and memory →](08-claude-md-and-memory.md)

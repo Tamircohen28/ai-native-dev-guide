@@ -1,4 +1,4 @@
-# 25 — Cost, usage and observability
+# 30 — Cost, usage and observability
 
 After this chapter you can say what a session cost and why, pick a model and effort level per task, and tell which limit you hit when work stops. You can also export usage with OpenTelemetry, build a report from your own transcripts, and run a monthly review that finds the few sessions that matter.
 
@@ -38,7 +38,7 @@ The mechanics of caching and compaction are in [Prompt caching, compaction and c
 | `/usage`, subscription | Plan usage bars plus an attribution breakdown by skills, subagents, plugins and MCP servers, with recommendations | The Session cost block "is intended for API users" |
 | `/usage`, cache line | A `Prompt cache (main)` line with a likely cause when the cache missed | First place to look after a surprisingly slow or costly turn. It covers the main conversation only, not subagents |
 | `/context` or `/context all` | "Visualize current context usage as a colored grid" | Also suggests fixes for context-heavy tools and memory bloat; `all` expands the per-item breakdown |
-| `claude -p … --output-format json` | `total_cost_usd` and a per-model cost breakdown in the result | Both are client-side estimates. See [chapter 22](22-headless-ci-and-the-agent-sdk.md) |
+| `claude -p … --output-format json` | `total_cost_usd` and a per-model cost breakdown in the result | Both are client-side estimates. See [chapter 27](27-headless-ci-and-the-agent-sdk.md) |
 | Organisation views | Teams and Enterprise spend report; Console workspaces and the Claude Code Analytics API; OpenTelemetry | For anything beyond one person |
 
 A baseline to compare yourself against, from the costs page as of Nov 2026: "around $13 per developer per active day and $150-250 per developer per month, with costs remaining below $30 per active day for 90% of users".
@@ -61,7 +61,7 @@ A baseline to compare yourself against, from the costs page as of Nov 2026: "aro
 
 **Cache invalidators.** The prompt-caching page lists actions that discard the cache mid-session: "Switching models", "Changing effort level", "Connecting or removing an MCP server", "Compacting the conversation" and "Upgrading Claude Code". Each is fine at the start of a task and expensive in the middle of a long one. `/compact` is itself "a large request".
 
-**Fan-out multipliers.** Anthropic's figures: agents use "about 4× more tokens than chat interactions, and multi-agent systems use about 15× more tokens than chats"; agent teams (several full sessions working as teammates, see [Multi-agent orchestration](21-multi-agent-orchestration.md)) use "approximately 7x more tokens than standard sessions when teammates run in plan mode". The best-practices page is blunt about what you buy: "You get parallelism or a fresh pair of eyes out of it, but not a smarter answer."
+**Fan-out multipliers.** Anthropic's figures: agents use "about 4× more tokens than chat interactions, and multi-agent systems use about 15× more tokens than chats"; agent teams (several full sessions working as teammates, see [Multi-agent orchestration](26-multi-agent-orchestration.md)) use "approximately 7x more tokens than standard sessions when teammates run in plan mode". The best-practices page is blunt about what you buy: "You get parallelism or a fresh pair of eyes out of it, but not a smarter answer."
 
 ## Reduce it: the documented list
 
@@ -69,7 +69,7 @@ These come from the Claude Code costs page. None needs a tool you do not already
 
 1. **`/clear` between unrelated tasks.** A focused context is cheaper and gives better answers.
 2. **`/compact` with a focus**, for example `/compact Focus on code samples and API usage`, and add a `# Compact instructions` section to `CLAUDE.md` so automatic compaction keeps the right things.
-3. **Keep `CLAUDE.md` short.** "Aim to keep CLAUDE.md under 200 lines." Move procedures into skills, which load only when used, and path-specific rules into `.claude/rules/` with a `paths:` filter (that last tip is from the memory page; see [CLAUDE.md and memory](07-claude-md-and-memory.md)).
+3. **Keep `CLAUDE.md` short.** "Aim to keep CLAUDE.md under 200 lines." Move procedures into skills, which load only when used, and path-specific rules into `.claude/rules/` with a `paths:` filter (that last tip is from the memory page; see [CLAUDE.md and memory](08-claude-md-and-memory.md)).
 4. **Prefer CLI tools** (`gh`, `aws`, `gcloud`) over MCP servers where both exist, and disable unused servers in `/mcp`.
 5. **Pre-filter noisy output** with a hook, so a failing test run contributes the failures and not the whole log.
 6. **Install code-intelligence plugins**, which report type errors after edits instead of leaving Claude to discover them by running things.
@@ -142,7 +142,7 @@ Work can stop for four different reasons. Know which one you hit before you chan
 
 Caps you set yourself:
 
-- **Unattended runs:** `--max-turns` and `--max-budget-usd` in print mode (`claude -p`, see [chapter 22](22-headless-ci-and-the-agent-sdk.md)). The docs warn: "Spend can pass the cap, so leave headroom".
+- **Unattended runs:** `--max-turns` and `--max-budget-usd` in print mode (`claude -p`, see [chapter 27](27-headless-ci-and-the-agent-sdk.md)). The docs warn: "Spend can pass the cap, so leave headroom".
 - **Organisations on the API:** workspace spend limits and per-member limits.
 - **Plans:** weekly caps were introduced on Pro and Max plans in August 2025 for heavy background use; they are a reason to schedule large fan-outs, not to run them on a whim.
 
@@ -337,4 +337,4 @@ The numbers below come from one developer's transcripts over a rolling window of
 
 ---
 
-[← Previous: Security and guardrails](24-security-and-guardrails.md) · [Contents](README.md) · [Next: Repo standards and team adoption →](26-repo-standards-and-team-adoption.md)
+[← Previous: Security and guardrails](29-security-and-guardrails.md) · [Contents](README.md) · [Next: Repo standards and team adoption →](31-repo-standards-and-team-adoption.md)

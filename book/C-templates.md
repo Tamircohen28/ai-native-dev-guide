@@ -4,7 +4,7 @@ Copy-ready starting points for the files and messages this book uses most, each 
 
 ## 1. Project instruction file
 
-**When to use:** a repository that an agent will work in has no instruction file yet. Save it as `AGENTS.md` so that every tool reads it. Explained in [chapter 7](07-claude-md-and-memory.md), [chapter 23](23-cross-tool-agents-md-cursor-codex-gemini.md) and [chapter 26](26-repo-standards-and-team-adoption.md).
+**When to use:** a repository that an agent will work in has no instruction file yet. Save it as `AGENTS.md` so that every tool reads it. Explained in [chapter 8](08-claude-md-and-memory.md), [chapter 28](28-cross-tool-agents-md-cursor-codex-gemini.md) and [chapter 31](31-repo-standards-and-team-adoption.md).
 
 ```markdown
 # <PROJECT_NAME>
@@ -45,7 +45,7 @@ Keep the file under 200 lines and leave out anything an agent can learn by readi
 
 ## 2. Team baseline `.claude/settings.json`
 
-**When to use:** a team shares a repository and wants the same guard rails for everyone. Commit it as `.claude/settings.json`; personal additions go in `.claude/settings.local.json`. Explained in [chapter 8](08-settings-and-permissions.md).
+**When to use:** a team shares a repository and wants the same guard rails for everyone. Commit it as `.claude/settings.json`; personal additions go in `.claude/settings.local.json`. Explained in [chapter 9](09-settings-and-permissions.md).
 
 ```json
 {
@@ -70,7 +70,7 @@ Keep the file under 200 lines and leave out anything an agent can learn by readi
 
 ## 3. `PreToolUse` guard hook with a named override
 
-**When to use:** a hard rule must hold even when the model forgets it. Save the script as `.claude/hooks/<GUARD_NAME>.py`. For a rule with no exceptions, remove `OVERRIDE` and every line that uses it. Explained in [chapter 14](14-hooks.md); guard patterns are in [chapter 24](24-security-and-guardrails.md).
+**When to use:** a hard rule must hold even when the model forgets it. Save the script as `.claude/hooks/<GUARD_NAME>.py`. For a rule with no exceptions, remove `OVERRIDE` and every line that uses it. Explained in [chapter 16](16-hooks.md); guard patterns are in [chapter 29](29-security-and-guardrails.md).
 
 ```python
 #!/usr/bin/env python3
@@ -99,7 +99,7 @@ sys.stderr.write(
 sys.exit(2)                               # exit 2 blocks; stderr goes back to the model
 ```
 
-Register it in `.claude/settings.json`, next to the keys from template 2. `onFailure` (v2.1.295 or later) makes a crash or a timeout block instead of letting the command through. This template blocks with `exit 2` and a reason on stderr, and it also blocks a payload it cannot read; chapter 14's guard uses the other documented form, exit 0 with a JSON `deny`, and lets an unreadable payload through. Use one form per hook. Test the guard before you trust it: pipe in one payload that must block and one that must pass, as chapter 14 shows, then confirm that `/hooks` lists it.
+Register it in `.claude/settings.json`, next to the keys from template 2. `onFailure` (v2.1.295 or later) makes a crash or a timeout block instead of letting the command through. This template blocks with `exit 2` and a reason on stderr, and it also blocks a payload it cannot read; chapter 16's guard uses the other documented form, exit 0 with a JSON `deny`, and lets an unreadable payload through. Use one form per hook. Test the guard before you trust it: pipe in one payload that must block and one that must pass, as chapter 16 shows, then confirm that `/hooks` lists it.
 
 ```json
 {
@@ -115,7 +115,7 @@ Register it in `.claude/settings.json`, next to the keys from template 2. `onFai
 
 ## 4. `Stop` hook that requires the check to pass
 
-**When to use:** a turn must not end while the gate fails. The hook runs the check itself, so "done" cannot rest on a check that never ran. With the loop guard it buys one more attempt and then lets the turn end, so keep CI as the gate that counts. One documented exception: when a `Stop` hook exits 2 with nothing on stdout and its stderr says a file is missing (such as `No such file or directory`), the run counts as a non-blocking error and the turn ends; if your check can print that message, exit 0 and print `{"decision": "block", "reason": "..."}` on stdout instead. Save the script as `.claude/hooks/require-check.sh`, make it executable (`chmod +x`), install `jq`, and register it with the JSON below. Explained in [chapter 14](14-hooks.md) and [chapter 18](18-testing-and-verification-loops.md).
+**When to use:** a turn must not end while the gate fails. The hook runs the check itself, so "done" cannot rest on a check that never ran. With the loop guard it buys one more attempt and then lets the turn end, so keep CI as the gate that counts. One documented exception: when a `Stop` hook exits 2 with nothing on stdout and its stderr says a file is missing (such as `No such file or directory`), the run counts as a non-blocking error and the turn ends; if your check can print that message, exit 0 and print `{"decision": "block", "reason": "..."}` on stdout instead. Save the script as `.claude/hooks/require-check.sh`, make it executable (`chmod +x`), install `jq`, and register it with the JSON below. Explained in [chapter 16](16-hooks.md) and [chapter 23](23-testing-and-verification-loops.md).
 
 ```bash
 #!/usr/bin/env bash
@@ -147,7 +147,7 @@ exit 0
 
 ## 5. `SKILL.md`
 
-**When to use:** you have explained the same multi-step procedure twice. Save it as `.claude/skills/<skill-name>/SKILL.md`; the skill is then also the command `/<skill-name>`. Add `disable-model-invocation: true` to the frontmatter when the skill has side effects. Explained in [chapter 13](13-skills.md).
+**When to use:** you have explained the same multi-step procedure twice. Save it as `.claude/skills/<skill-name>/SKILL.md`; the skill is then also the command `/<skill-name>`. Add `disable-model-invocation: true` to the frontmatter when the skill has side effects. Explained in [chapter 15](15-skills.md).
 
 ```markdown
 ---
@@ -173,7 +173,7 @@ allowed-tools:
 
 ## 6. Subagent definition: a read-only reviewer
 
-**When to use:** you want a review from a context that did not write the code. Save it as `.claude/agents/reviewer.md`. With only `Read, Grep, Glob` it cannot run `git diff`, so name the files and the goal when you ask for it. Explained in [chapter 12](12-subagents.md).
+**When to use:** you want a review from a context that did not write the code. Save it as `.claude/agents/reviewer.md`. With only `Read, Grep, Glob` it cannot run `git diff`, so name the files and the goal when you ask for it. Explained in [chapter 14](14-subagents.md).
 
 ```markdown
 ---
@@ -204,7 +204,7 @@ finding: severity, confidence, path:line, evidence, recommended fix. End with th
 
 ## 7. Plugin manifest and marketplace entry
 
-**When to use:** a skill, agent or hook should travel to other repositories or teammates. The manifest is `plugins/<plugin-name>/.claude-plugin/plugin.json`; only `name` is required, and no skills, agents or hooks go inside that `.claude-plugin/` folder. The catalogue is `.claude-plugin/marketplace.json` at the root of the same repository. Check both with `claude plugin validate`. Explained in [chapter 15](15-plugins-and-marketplaces.md).
+**When to use:** a skill, agent or hook should travel to other repositories or teammates. The manifest is `plugins/<plugin-name>/.claude-plugin/plugin.json`; only `name` is required, and no skills, agents or hooks go inside that `.claude-plugin/` folder. The catalogue is `.claude-plugin/marketplace.json` at the root of the same repository. Check both with `claude plugin validate`. Explained in [chapter 17](17-plugins-and-marketplaces.md).
 
 ```json
 {
@@ -227,7 +227,7 @@ finding: severity, confidence, path:line, evidence, recommended fix. End with th
 
 ## 8. Project `.mcp.json` with environment expansion
 
-**When to use:** teammates should share MCP server definitions without sharing secrets. Save it as `.mcp.json` in the project root, not under `.claude/`. Explained in [chapter 11](11-mcp-in-practice.md).
+**When to use:** teammates should share MCP server definitions without sharing secrets. Save it as `.mcp.json` in the project root, not under `.claude/`. Explained in [chapter 13](13-mcp-in-practice.md).
 
 ```json
 {
@@ -250,7 +250,7 @@ finding: severity, confidence, path:line, evidence, recommended fix. End with th
 
 ## 9. GitHub Actions workflow for pull-request review
 
-**When to use:** you want Claude to review every pull request inside your own GitHub Actions. Save it as `.github/workflows/claude-code-review.yml` and store `ANTHROPIC_API_KEY` as a repository secret. This is the documented workflow. Keep it advisory, not a required check. Explained in [chapter 22](22-headless-ci-and-the-agent-sdk.md) and [chapter 19](19-git-prs-and-code-review.md).
+**When to use:** you want Claude to review every pull request inside your own GitHub Actions. Save it as `.github/workflows/claude-code-review.yml` and store `ANTHROPIC_API_KEY` as a repository secret. This is the documented workflow. Keep it advisory, not a required check. Explained in [chapter 27](27-headless-ci-and-the-agent-sdk.md) and [chapter 24](24-git-prs-and-code-review.md).
 
 ```yaml
 name: Code Review
@@ -282,7 +282,7 @@ jobs:
 
 ## 10. Task brief
 
-**When to use:** any task that touches more than one file or runs longer than a few minutes. Paste it as the prompt or keep it in the issue. Goal, constraints, definition of done and proof command are required; delete the context and budget sections when they do not apply. Explained in [chapter 17](17-explore-plan-implement-verify.md); shorter prompt forms are in [chapter 29](29-prompt-cookbook-and-anti-patterns.md).
+**When to use:** any task that touches more than one file or runs longer than a few minutes. Paste it as the prompt or keep it in the issue. Goal, constraints, definition of done and proof command are required; delete the context and budget sections when they do not apply. Explained in [chapter 22](22-explore-plan-implement-verify.md); shorter prompt forms are in [chapter 34](34-prompt-cookbook-and-anti-patterns.md).
 
 ```markdown
 ## Goal
@@ -308,7 +308,7 @@ jobs:
 
 ## 11. Subagent delegation brief
 
-**When to use:** you ask Claude to hand work to a subagent. A subagent that is not a fork starts without your conversation, so the request must carry all four parts. Explained in [chapter 12](12-subagents.md).
+**When to use:** you ask Claude to hand work to a subagent. A subagent that is not a fork starts without your conversation, so the request must carry all four parts. Explained in [chapter 14](14-subagents.md).
 
 ```text
 Use a subagent to <TASK>.
@@ -320,7 +320,7 @@ Return: <FORMAT>, under <N> words, with file:line evidence. If you are blocked, 
 
 ## 12. Handoff note for a fresh session
 
-**When to use:** before a break, near a usage limit, or when the context has drifted. Ask Claude to write `HANDOFF.md` in this shape and to check every claim against git and the test output first. Start the next session with `claude "Read HANDOFF.md, check the State section against git, then continue from Next steps."` Explained in [chapter 9](09-plan-mode-checkpoints-and-context-management.md).
+**When to use:** before a break, near a usage limit, or when the context has drifted. Ask Claude to write `HANDOFF.md` in this shape and to check every claim against git and the test output first. Start the next session with `claude "Read HANDOFF.md, check the State section against git, then continue from Next steps."` Explained in [chapter 10](10-plan-mode-checkpoints-and-context-management.md).
 
 ```markdown
 # Handoff: <TASK_TITLE>
@@ -348,7 +348,7 @@ Return: <FORMAT>, under <N> words, with file:line evidence. If you are blocked, 
 
 ## 13. Pull-request body with a verification section
 
-**When to use:** every pull request, and above all one an agent wrote. Save it as `pr-body.md` and pass it with `gh pr create --body-file pr-body.md`. A reviewer should be able to rerun your proof. Explained in [chapter 19](19-git-prs-and-code-review.md).
+**When to use:** every pull request, and above all one an agent wrote. Save it as `pr-body.md` and pass it with `gh pr create --body-file pr-body.md`. A reviewer should be able to rerun your proof. Explained in [chapter 24](24-git-prs-and-code-review.md).
 
 ```markdown
 ## What and why
@@ -367,7 +367,7 @@ Return: <FORMAT>, under <N> words, with file:line evidence. If you are blocked, 
 
 ## 14. Incident-to-rule record
 
-**When to use:** after an incident, or a correction you have made twice. Fill in the top part first and agree the fix layer before anything is written; "none" is a valid answer. A hard rule then exists three times: the rule, the hook that enforces it, and a memory note that names the hook. Explained in [chapter 14](14-hooks.md) and [chapter 26](26-repo-standards-and-team-adoption.md); worked cases are in [chapter 28](28-case-studies-from-real-work.md).
+**When to use:** after an incident, or a correction you have made twice. Fill in the top part first and agree the fix layer before anything is written; "none" is a valid answer. A hard rule then exists three times: the rule, the hook that enforces it, and a memory note that names the hook. Explained in [chapter 16](16-hooks.md) and [chapter 31](31-repo-standards-and-team-adoption.md); worked cases are in [chapter 33](33-case-studies-from-real-work.md).
 
 ```markdown
 ## Incident: <DATE>, <ONE_LINE_TITLE>

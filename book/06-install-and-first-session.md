@@ -1,4 +1,4 @@
-# 05 — Install and first session
+# 06 — Install and first session
 
 After this chapter you have Claude Code installed, signed in and health-checked, and you know which surface to open for which job. You will also have run one complete session on a tiny project: explain the code, fix a failing test, verify the fix, commit it, leave, and come back.
 
@@ -91,7 +91,7 @@ flowchart TD
 | Claude subscription | `claude`, then sign in (Pro, Max, Ultra, Team, Enterprise) | You work interactively and want usage to count against your plan |
 | Claude Console | `/login`, then "Sign in with your Console account"; or `claude auth login --console` | You want API usage billing instead of a subscription |
 | Cloud provider | Set `CLAUDE_CODE_USE_BEDROCK`, `CLAUDE_CODE_USE_VERTEX` or `CLAUDE_CODE_USE_FOUNDRY` plus the provider's own variables, or pick **3rd-party platform** at the login prompt | Your company buys Claude through Amazon Bedrock, Google Cloud's Agent Platform or Microsoft Foundry |
-| Long-lived token | `claude setup-token` prints a one-year OAuth token; export it as `CLAUDE_CODE_OAUTH_TOKEN` | Scripts and CI on a subscription ([chapter 22](22-headless-ci-and-the-agent-sdk.md)) |
+| Long-lived token | `claude setup-token` prints a one-year OAuth token; export it as `CLAUDE_CODE_OAUTH_TOKEN` | Scripts and CI on a subscription ([chapter 27](27-headless-ci-and-the-agent-sdk.md)) |
 | API key variable | `ANTHROPIC_API_KEY` in the environment | Scripts on API billing |
 
 When several credentials exist, the first match wins: (1) cloud provider credentials when a `CLAUDE_CODE_USE_*` variable is set, (2) `ANTHROPIC_AUTH_TOKEN`, (3) `ANTHROPIC_API_KEY`, (4) `apiKeyHelper` script output, (5) `CLAUDE_CODE_OAUTH_TOKEN`, (6) Anthropic profile and federation credentials, (7) subscription credentials from `/login`. A signed-in corporate Claude apps gateway session, if you have one, outranks the whole list.
@@ -251,7 +251,7 @@ A permission prompt is the harness asking you, not the model: it shows the exact
 | File edits | Yes | "Until session end" |
 | Shell commands | Yes, except a built-in set of read-only commands | "Permanently per repository and command", saved to `.claude/settings.local.json` |
 
-The starting mode is resolved in this order: the `--permission-mode` flag, then `permissions.defaultMode` in a settings file, then the built-in default (`auto` for interactive sessions, `default` for `claude -p`). For your first week, `claude --permission-mode default` is a reasonable way to watch every step. [Chapter 08](08-settings-and-permissions.md) covers rules and modes in depth.
+The starting mode is resolved in this order: the `--permission-mode` flag, then `permissions.defaultMode` in a settings file, then the built-in default (`auto` for interactive sessions, `default` for `claude -p`). For your first week, `claude --permission-mode default` is a reasonable way to watch every step. [Chapter 09](09-settings-and-permissions.md) covers rules and modes in depth.
 
 ### Step 4 — verify it yourself
 
@@ -288,7 +288,7 @@ Claude stages the file and runs `git commit` (in Manual mode you approve each co
 - Never edit a test to make it pass; fix the code.
 ```
 
-[Chapter 07](07-claude-md-and-memory.md) explains where these files live and how they load.
+[Chapter 08](08-claude-md-and-memory.md) explains where these files live and how they load.
 
 ### Step 7 — end, continue, resume
 
@@ -313,7 +313,7 @@ flowchart LR
 
 Transcripts are stored as JSONL under `~/.claude/projects/<project>/` and kept for 30 days by default (`cleanupPeriodDays`). Resuming restores the conversation, the model and the permission mode. It does not restore background shell tasks, and startup flags such as `--add-dir` or `--allowedTools` must be passed again.
 
-> **Warning:** `/rewind` restores files that Claude changed with its edit tools. A file that only a shell command changed "isn't tracked and stays as it is". Git is your real undo ([chapter 09](09-plan-mode-checkpoints-and-context-management.md)).
+> **Warning:** `/rewind` restores files that Claude changed with its edit tools. A file that only a shell command changed "isn't tracked and stays as it is". Git is your real undo ([chapter 10](10-plan-mode-checkpoints-and-context-management.md)).
 
 ## Five habits for day one
 
@@ -323,7 +323,7 @@ All five come from the official best-practices page, which has been rewritten si
 2. **Give it a check to run.** "Give Claude something it can run that comes back pass or fail." Without one, "looks done" is all it has, and you become the test suite.
 3. **Watch the first minute.** Then "press `Esc` the moment Claude drifts, and after two failed corrections run `/clear` and write a better prompt instead of a third."
 4. **`/clear` between unrelated tasks.** Running out of context is rare now, but "a focused context gets you better answers and costs less". Name sessions with `/rename` so you can return.
-5. **Keep `CLAUDE.md` short, and enforce what must never bend.** Write down only what is not in the repo. "If something has to happen every time, make it a hook, a deny rule, or a managed setting" ([chapter 14](14-hooks.md)).
+5. **Keep `CLAUDE.md` short, and enforce what must never bend.** Write down only what is not in the repo. "If something has to happen every time, make it a hook, a deny rule, or a managed setting" ([chapter 16](16-hooks.md)).
 
 > **Note:** The same page lists advice you can stop following: ALL CAPS emphasis, "think hard" phrases, "don't be lazy" lines, and describing your file layout in `CLAUDE.md`. Use `/effort` for depth and let Claude read the repo.
 
@@ -332,7 +332,7 @@ All five come from the official best-practices page, which has been rewritten si
 Field numbers come from about four weeks of one developer's Claude Code transcripts. They describe one working style, not a benchmark; frequency counts are rough.
 
 - **Short prompts are normal; the long ones pay.** About 72% of human prompts in that window were under 50 characters, and the median was 27. The prompts that produced the best sessions were the exceptions, and they shared four ingredients: an observable end state, the constraint that rules out the obvious answer, what is already approved, and how success will be shown. One example, paraphrased: "Why is X happening when we already have Y? Understand why it happened and fix it so it won't happen again." It produced a cause analysis, a migration and a guard hook.
-- **Name the verification method.** Another paraphrased prompt, "use the browser tools and do real UI testing: look at the web UI and use it", found nine bugs in one pass. A follow-up question, "how did you determine it costs that much a night?", made the agent admit the figure came from a code comment, not a measurement. More templates are in [chapter 29](29-prompt-cookbook-and-anti-patterns.md).
+- **Name the verification method.** Another paraphrased prompt, "use the browser tools and do real UI testing: look at the web UI and use it", found nine bugs in one pass. A follow-up question, "how did you determine it costs that much a night?", made the agent admit the figure came from a code comment, not a measurement. More templates are in [chapter 34](34-prompt-cookbook-and-anti-patterns.md).
 - **Sessions outlive a sitting.** Of 44 interactive sessions, more than half (54.5%) spanned over 24 hours of wall-clock time, with activity on a median of 2 distinct days (small sample). That is why resume is a day-one skill. The author's global instructions add a resume protocol: before writing code in a continued session, run `git log origin/main -5` and list open pull requests, because the conversation may be older than the repository.
 
 ## Common problems
@@ -383,4 +383,4 @@ Field numbers come from about four weeks of one developer's Claude Code transcri
 
 ---
 
-[← Previous: Prompt caching, compaction and cost](04-prompt-caching-compaction-and-cost.md) · [Contents](README.md) · [Next: CLI, slash commands and shortcuts →](06-cli-slash-commands-and-shortcuts.md)
+[← Previous: Inside the harness: architecture and what happens under the hood](05-inside-the-harness.md) · [Contents](README.md) · [Next: CLI, slash commands and shortcuts →](07-cli-slash-commands-and-shortcuts.md)

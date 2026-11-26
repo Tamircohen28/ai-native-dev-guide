@@ -1,4 +1,4 @@
-# 16 — Output styles, status line and keybindings
+# 18 — Output styles, status line and keybindings
 
 After this chapter you can change how Claude Code answers you, what it shows under the prompt and what your keys do. None of this gives the agent a new capability. It makes the interface fit the way you work, which matters once you spend hours a day in it.
 
@@ -30,10 +30,10 @@ Only the output style reaches the model. The status line and the keybindings are
 
 An **output style** is a named set of instructions about how Claude should respond: tone, format, how much it explains. Four documented properties decide when a style is the right tool:
 
-- It applies for the whole session and still applies after a compaction ([chapter 09](09-plan-mode-checkpoints-and-context-management.md)).
+- It applies for the whole session and still applies after a compaction ([chapter 10](10-plan-mode-checkpoints-and-context-management.md)).
 - A custom style drops Claude Code's built-in software-engineering instructions unless you set `keep-coding-instructions: true`.
 - It reaches the main conversation and forks only. The docs: other subagents "run their own system prompt, so styles don't change how they respond".
-- It is guidance, not enforcement: "It doesn't guarantee that something always happens". For a guarantee, use a hook ([chapter 14](14-hooks.md)).
+- It is guidance, not enforcement: "It doesn't guarantee that something always happens". For a guarantee, use a hook ([chapter 16](16-hooks.md)).
 
 ### Built-in styles
 
@@ -84,7 +84,7 @@ Lead with the result, then the evidence, then the next step. No preamble.
 
 Save it as `~/.claude/output-styles/receipts.md`, start a new session (the terminal reads style files only when Claude Code starts), then run `/output-style Receipts`.
 
-The frontmatter keys are all optional: `name`, `description`, `keep-coding-instructions` (default `false`) and `force-for-plugin` (plugin styles only: `true` applies the style whenever the plugin is enabled and overrides the user's `outputStyle`). A plugin ships its styles in an `output-styles/` folder ([chapter 15](15-plugins-and-marketplaces.md)).
+The frontmatter keys are all optional: `name`, `description`, `keep-coding-instructions` (default `false`) and `force-for-plugin` (plugin styles only: `true` applies the style whenever the plugin is enabled and overrides the user's `outputStyle`). A plugin ships its styles in an `output-styles/` folder ([chapter 17](17-plugins-and-marketplaces.md)).
 
 > **Warning:** Without `keep-coding-instructions: true`, your style replaces the built-in coding instructions. That suits a style for writing or research work. For a coding style it is almost never what you want.
 
@@ -93,10 +93,10 @@ The frontmatter keys are all optional: `name`, `description`, `keep-coding-instr
 | You want | Use | Why |
 |---|---|---|
 | A different voice or format in every reply | Output style | Applies all session and survives compaction |
-| Project facts and conventions | CLAUDE.md | Loaded for every task in that project ([chapter 07](07-claude-md-and-memory.md)) |
-| A procedure that is needed only sometimes | Skill | Its body loads only when it is used ([chapter 13](13-skills.md)) |
+| Project facts and conventions | CLAUDE.md | Loaded for every task in that project ([chapter 08](08-claude-md-and-memory.md)) |
+| A procedure that is needed only sometimes | Skill | Its body loads only when it is used ([chapter 15](15-skills.md)) |
 | Something that must happen every time | Hook | A style "doesn't guarantee that something always happens" |
-| The same behaviour inside subagents | The subagent's own definition | Styles do not reach non-fork subagents ([chapter 12](12-subagents.md)) |
+| The same behaviour inside subagents | The subagent's own definition | Styles do not reach non-fork subagents ([chapter 14](14-subagents.md)) |
 
 ## Status line
 
@@ -121,7 +121,7 @@ The quick way is to describe what you want: `/statusline` "accepts natural langu
 - It gets one JSON object on stdin and prints text on stdout. Several lines, ANSI colours and OSC 8 links are supported. The terminal size is in `COLUMNS` and `LINES`.
 - It runs locally and "does not consume API tokens".
 - Updates are debounced at 300ms, and a run that is still in flight is cancelled by a newer one. Keep the script fast.
-- It runs outside the sandbox. Sandboxing covers Bash, PowerShell and Monitor commands, and the docs list the status line command among the things it does not cover. Treat a status line script from someone else like any other script that runs with your rights ([chapter 24](24-security-and-guardrails.md)).
+- It runs outside the sandbox. Sandboxing covers Bash, PowerShell and Monitor commands, and the docs list the status line command among the things it does not cover. Treat a status line script from someone else like any other script that runs with your rights ([chapter 29](29-security-and-guardrails.md)).
 
 ### What the script receives
 
@@ -225,7 +225,7 @@ Rules to know before you edit:
 - **Reserved keys** cannot be rebound: `Ctrl+C`, `Ctrl+D`, `Ctrl+M`, `Ctrl+[`, `Ctrl+I`, `Ctrl+H` and Caps Lock.
 - **Not remappable here:** vim keys, and the word-editing shortcuts such as `Ctrl+W`, for which the file "has no actions".
 
-Know the defaults before you change them: press `?` on an empty prompt to toggle the shortcut help panel. The ones you will meet most are `Ctrl+R` (search command history), `Ctrl+B` (move running commands and agents to the background; tmux users press it twice), `Shift+Tab` (cycle permission modes) and `Esc` twice on an empty prompt (the rewind menu). [Chapter 06](06-cli-slash-commands-and-shortcuts.md) has the full list.
+Know the defaults before you change them: press `?` on an empty prompt to toggle the shortcut help panel. The ones you will meet most are `Ctrl+R` (search command history), `Ctrl+B` (move running commands and agents to the background; tmux users press it twice), `Shift+Tab` (cycle permission modes) and `Esc` twice on an empty prompt (the rewind menu). [Chapter 07](07-cli-slash-commands-and-shortcuts.md) has the full list.
 
 ## Terminal setup, vim mode and voice
 
@@ -317,4 +317,4 @@ These examples describe one developer's machine, surveyed on 2026-11-25. They sh
 
 ---
 
-[← Previous: Plugins and marketplaces](15-plugins-and-marketplaces.md) · [Contents](README.md) · [Next: Explore, plan, implement, verify →](17-explore-plan-implement-verify.md)
+[← Previous: Plugins and marketplaces](17-plugins-and-marketplaces.md) · [Contents](README.md) · [Next: Guide: write a subagent →](19-guide-write-a-subagent.md)

@@ -24,7 +24,7 @@ A quick reference to the commands, keys, files and rules used across this book. 
 - Transcripts are JSONL files under `~/.claude/projects/<project>/`, kept 30 days by default (`cleanupPeriodDays`).
 - `claude -c` skips sessions created with `claude -p`; use `claude -p --continue` for those.
 
-→ [Chapter 05: Install and first session](05-install-and-first-session.md) and [Chapter 09: Plan mode, checkpoints and context management](09-plan-mode-checkpoints-and-context-management.md)
+→ [Chapter 06: Install and first session](06-install-and-first-session.md) and [Chapter 10: Plan mode, checkpoints and context management](10-plan-mode-checkpoints-and-context-management.md)
 
 ## 2. The most useful CLI flags
 
@@ -32,7 +32,6 @@ A quick reference to the commands, keys, files and rules used across this book. 
 |---|---|
 | `-p`, `--print` | Print the response and exit, with no interactive mode |
 | `-c`, `--continue` and `-r`, `--resume` | Load the most recent conversation in this directory; resume by ID or name, or show a picker |
-| `--fork-session` | With `--resume` or `--continue`, create a new session ID |
 | `-n`, `--name` | Display name, shown in `/resume` and the terminal title |
 | `--model` | An alias (`sonnet`, `opus`, `haiku`, `fable`) or a full model name |
 | `--effort` | `low`, `medium`, `high`, `xhigh`, `max` or `ultracode`, for this session |
@@ -52,7 +51,7 @@ A quick reference to the commands, keys, files and rules used across this book. 
 | `--safe-mode`, `--debug`, `--verbose` | Start with all customizations disabled; debug log with a category filter such as `--debug=mcp`; full turn-by-turn output |
 | `--dangerously-skip-permissions` | Same as `--permission-mode bypassPermissions`. Disposable sandboxes only |
 
-→ [Chapter 06: CLI, slash commands and shortcuts](06-cli-slash-commands-and-shortcuts.md)
+→ [Chapter 07: CLI, slash commands and shortcuts](07-cli-slash-commands-and-shortcuts.md)
 
 ## 3. Slash commands by purpose
 
@@ -84,7 +83,7 @@ A command is recognised only at the start of your message. Not every command app
 | | `/loop`, `/schedule` | Repeat a prompt in an open session; manage cloud scheduled tasks |
 | Diagnostics | `/doctor`, `/status`, `/help`, `/debug` | Setup checkup with fixes; version, model and account; command list; debug logging |
 
-→ [Chapter 06: CLI, slash commands and shortcuts](06-cli-slash-commands-and-shortcuts.md)
+→ [Chapter 07: CLI, slash commands and shortcuts](07-cli-slash-commands-and-shortcuts.md)
 
 ## 4. Keyboard shortcuts and input prefixes
 
@@ -108,7 +107,7 @@ A command is recognised only at the start of your message. Not every command app
 | `#` | Not documented today. Say "add this to CLAUDE.md" or use `/memory` |
 | `ultrathink` in a prompt | Deeper reasoning for that turn only. "think hard" is ordinary text |
 
-→ [Chapter 06: CLI, slash commands and shortcuts](06-cli-slash-commands-and-shortcuts.md) and [Chapter 16: Output styles, status line and keybindings](16-output-styles-statusline-keybindings.md)
+→ [Chapter 07: CLI, slash commands and shortcuts](07-cli-slash-commands-and-shortcuts.md) and [Chapter 18: Output styles, status line and keybindings](18-output-styles-statusline-keybindings.md)
 
 ## 5. Permission modes at a glance
 
@@ -123,10 +122,10 @@ A command is recognised only at the start of your message. Not every command app
 
 - **Starting mode:** the `--permission-mode` flag, then `permissions.defaultMode`, then the built-in default. That default is `auto` for interactive sessions (v2.1.283 or later) and `default` for `claude -p` and the Agent SDK.
 - **`Shift+Tab` cycle:** `auto`, `default`, `acceptEdits`, `plan`, then `bypassPermissions` only if it was enabled at launch. `dontAsk` is never in the cycle.
-- **In every mode:** `deny` rules block, `ask` rules prompt (in `dontAsk` they deny), and hooks run.
+- **In every mode:** `deny` rules block, `ask` rules prompt (in `dontAsk` they deny), and hooks run. Each tool call is checked in this order: `PreToolUse` hooks, deny rules, ask rules, the permission mode, allow rules, then a prompt ([chapter 05](05-inside-the-harness.md)).
 - **Not a mode:** the sandbox is a separate operating-system boundary around shell commands, off by default (`/sandbox`).
 
-→ [Chapter 08: Settings and permissions](08-settings-and-permissions.md)
+→ [Chapter 09: Settings and permissions](09-settings-and-permissions.md)
 
 ## 6. Settings scopes and precedence
 
@@ -142,7 +141,7 @@ A command is recognised only at the start of your message. Not every command app
 - `.claude/settings.json` is read from the session's primary working directory, with no parent-directory fallback.
 - Settings files are strict JSON: a comment or a trailing comma is a syntax error. `~/.claude.json` is not a settings scope.
 
-→ [Chapter 08: Settings and permissions](08-settings-and-permissions.md)
+→ [Chapter 09: Settings and permissions](09-settings-and-permissions.md)
 
 ## 7. Permission rule syntax
 
@@ -157,12 +156,12 @@ A command is recognised only at the start of your message. Not every command app
 | `mcp__puppeteer`, `mcp__puppeteer__puppeteer_navigate` | Every tool from one MCP server; one tool |
 | `Agent(Explore)`, `Skill(name)`, `Agent(fork)` | In `deny`: switch off one subagent type, one skill, or forks |
 
-- **Order:** deny, then ask, then allow. The first match decides, and a narrow allow cannot rescue what a broad deny blocks.
+- **Order:** `PreToolUse` hooks → deny → ask → permission mode → allow. Among rules the first match decides, and a narrow allow cannot rescue what a broad deny blocks. A hook's `allow` does not skip the deny and ask steps.
 - **Compound commands** are split on `&&`, `||`, `;`, `|` and newlines; every subcommand must be allowed.
 - **Paths:** use `Read` and `Edit` only. `Write(path)`, `Grep(path)` and `Glob(path)` do not match, and a `.claudeignore` file has no effect.
 - **Limits:** a Bash rule matches text, not intent. A deny on `Bash(rm *)` does not stop `/bin/rm` or `bash -c 'rm ...'`; use a hook or the sandbox for that.
 
-→ [Chapter 08: Settings and permissions](08-settings-and-permissions.md)
+→ [Chapter 09: Settings and permissions](09-settings-and-permissions.md) and [Chapter 05: Inside the harness](05-inside-the-harness.md)
 
 ## 8. Instruction-file load order
 
@@ -182,7 +181,7 @@ A command is recognised only at the start of your message. Not every command app
 - After compaction the project-root `CLAUDE.md`, unscoped rules and auto memory are re-injected from disk. Path-scoped rules and subdirectory files return only when a matching file is touched again.
 - `/memory` or `/context all` shows what loaded. Aim for under 200 lines per file.
 
-→ [Chapter 07: CLAUDE.md and memory](07-claude-md-and-memory.md)
+→ [Chapter 08: CLAUDE.md and memory](08-claude-md-and-memory.md)
 
 ## 9. Context commands, and what `/rewind` does not restore
 
@@ -204,12 +203,11 @@ A command is recognised only at the start of your message. Not every command app
 | Bash only: `sed -i`, a formatter, a code generator, `mv`, `rm` | No. Use git |
 | A subagent | Usually no |
 | You, outside Claude Code | Normally not captured |
-| Symlinked or hard-linked files | No |
 | Databases, APIs, deployments | No. Undo by hand |
 
 A checkpoint is created by every prompt that starts a turn; the 100 most recent in a session are kept. After a full restore, `git status --short` lists what the rewind missed.
 
-→ [Chapter 09: Plan mode, checkpoints and context management](09-plan-mode-checkpoints-and-context-management.md)
+→ [Chapter 10: Plan mode, checkpoints and context management](10-plan-mode-checkpoints-and-context-management.md)
 
 ## 10. The extension surfaces compared
 
@@ -223,9 +221,7 @@ A checkpoint is created by every prompt that starts a turn; the 100 most recent 
 | Plugin | You install and enable it | Its components load as in the rows above | Packaging and sharing the other surfaces |
 | Output style | You, with `/output-style` | For the whole session; still applies after compaction | A different voice or format in every reply |
 
-Of these, only a hook is executed by the harness every time. `CLAUDE.md`, a skill body, a subagent prompt and an output style are text the model reads, and it may decide a line does not apply.
-
-→ [Chapter 07](07-claude-md-and-memory.md), [Chapter 11](11-mcp-in-practice.md), [Chapter 12](12-subagents.md), [Chapter 13](13-skills.md), [Chapter 14](14-hooks.md), [Chapter 15](15-plugins-and-marketplaces.md) and [Chapter 16](16-output-styles-statusline-keybindings.md)
+→ [Chapter 11](11-the-extension-model.md), [Chapter 08](08-claude-md-and-memory.md), [Chapter 13](13-mcp-in-practice.md), [Chapter 14](14-subagents.md), [Chapter 15](15-skills.md), [Chapter 16](16-hooks.md), [Chapter 17](17-plugins-and-marketplaces.md) and [Chapter 18](18-output-styles-statusline-keybindings.md)
 
 ## 11. Hooks: exit codes and the events used most
 
@@ -250,9 +246,9 @@ A timeout or a crash does not block either. Add `onFailure: "block"` (v2.1.295 o
 - **Who reads what:** `hookSpecificOutput.additionalContext` reaches the model; `systemMessage` reaches you.
 - **Matcher:** one string (`Bash`, `Edit|Write`, `*`), never an array; names are case-sensitive. The reference lists 34 events, and `/hooks` shows what is registered.
 
-→ [Chapter 14: Hooks](14-hooks.md)
+→ [Chapter 16: Hooks](16-hooks.md)
 
-## 12. Skill and subagent frontmatter worth remembering
+## 12. Skill and subagent frontmatter, and the authoring commands
 
 | File | Field | What to remember |
 |---|---|---|
@@ -272,7 +268,21 @@ A timeout or a crash does not block either. Add `onFailure: "block"` (v2.1.295 o
 
 Skill field names are lowercase with hyphens (except `when_to_use`); subagent field names are camelCase. In both, an unknown field is ignored without an error. Plugin agents ignore `permissionMode`, `mcpServers` and `hooks`.
 
-→ [Chapter 13: Skills](13-skills.md) and [Chapter 12: Subagents](12-subagents.md)
+### Authoring commands
+
+| You want to | Do this |
+|---|---|
+| Try a subagent without saving it | `claude --agents '<json>'`, session only; a file path works only with `-p` ([19](19-guide-write-a-subagent.md)) |
+| Call a subagent; run a whole session as one | `@agent-<name>` (plugin: `@agent-<plugin>:<name>`); `claude --agent <name>` ([19](19-guide-write-a-subagent.md)) |
+| Create a skill | `mkdir -p .claude/skills/<name>` and write `SKILL.md`; `/reload-skills` if it does not appear. There is no `claude skill` command ([20](20-guide-write-a-skill.md)) |
+| Lint agent, skill or plugin files | `claude plugin validate .claude/agents`, `.claude/skills` or a plugin folder; `--strict` turns warnings into exit 1 ([19](19-guide-write-a-subagent.md), [21](21-guide-build-and-ship-a-plugin.md)) |
+| Audit instructions; see what skills cost | `/doctor prompt-audit <path>` for conflicting or stale instructions; `/skill-doctor` for context cost and usage ([20](20-guide-write-a-skill.md)) |
+| Scaffold a plugin | `claude plugin init <name> --with skills agents hooks`; it writes to `~/.claude/skills/<name>/` ([21](21-guide-build-and-ship-a-plugin.md)) |
+| Load a plugin for one session and iterate | `claude --plugin-dir ./<plugin>`; after an edit, `/reload-plugins`; `/hooks` shows where each hook comes from ([21](21-guide-build-and-ship-a-plugin.md)) |
+| Evaluate a plugin, with and without it | `claude plugin eval init` (`--bare <case>` for a blank template); `claude plugin eval . --runs 3 --threshold 0.8 --max-cost-usd 5` ([21](21-guide-build-and-ship-a-plugin.md)) |
+| Inspect and release | `claude plugin details <name>` for the inventory and always-on token cost; `claude plugin tag --dry-run` for a `<name>--v<version>` git tag ([21](21-guide-build-and-ship-a-plugin.md)) |
+
+→ [Chapter 15: Skills](15-skills.md), [Chapter 14: Subagents](14-subagents.md) and the workshop guides, chapters [19](19-guide-write-a-subagent.md) to [21](21-guide-build-and-ship-a-plugin.md)
 
 ## 13. MCP commands and scopes
 
@@ -297,20 +307,11 @@ Skill field names are lowercase with hyphens (except `when_to_use`); subagent fi
 - **Limits:** a warning at 10,000 tokens; 25,000 tokens kept in the conversation (`MAX_MCP_OUTPUT_TOKENS`); a larger result is saved to a file. Startup timeout `MCP_TIMEOUT`, 30000 ms.
 - **Defaults:** tool search is on, so only tool names and server instructions load at session start. Use HTTP for remote servers and stdio for local ones; SSE is deprecated.
 
-→ [Chapter 11: MCP in practice](11-mcp-in-practice.md) and [Chapter 10: MCP: how the protocol works](10-mcp-how-it-works.md)
+→ [Chapter 13: MCP in practice](13-mcp-in-practice.md) and [Chapter 12: MCP: how the protocol works](12-mcp-how-it-works.md)
 
 ## 14. Headless recipes
 
 ```bash
-# One question, or piped input
-claude -p "What does the auth module do?"
-git log --oneline -20 | claude -p "summarize these recent commits"
-
-# A result a script can parse, with the cost estimate
-out=$(claude -p "Summarize this project" --output-format json)
-echo "$out" | jq -r '.result'
-echo "$out" | jq '.total_cost_usd'
-
 # CI with an exact allowlist
 claude -p "run the test suite" --permission-mode dontAsk --allowedTools "Bash(npm test)" "Read"
 
@@ -333,7 +334,7 @@ claude -p "$PROMPT" --bare --setting-sources user \
 - Put the prompt directly after `-p`. For structured data add `--json-schema` and read `structured_output` with `jq -e`.
 - Exit code `0` means success, but a failure inside the run (missing authentication, for example) is printed as the result on stdout. Check the output, not only the status.
 
-→ [Chapter 22: Headless mode, CI and the Agent SDK](22-headless-ci-and-the-agent-sdk.md)
+→ [Chapter 27: Headless mode, CI and the Agent SDK](27-headless-ci-and-the-agent-sdk.md)
 
 ## 15. Which mechanism for which job
 
@@ -345,16 +346,16 @@ claude -p "$PROMPT" --bare --setting-sources user \
 | A procedure with side effects that only you start | A skill with `disable-model-invocation: true` | Claude cannot decide to run it |
 | Something that must happen, or must never happen, every time | A hook, a deny rule or a managed setting | The harness executes it; the model cannot skip it |
 | A limit on what shell commands can touch | The sandbox | Enforced by the operating system |
-| Access to an external system | An MCP server, or a CLI such as `gh` when one exists | MCP tool definitions and results cost context |
-| Noisy exploration, parallel work, an independent review | A fresh-context subagent | Its tool calls stay out of your context |
+| Access to an external system | A CLI such as `gh` when one exists, taught by a skill if needed; otherwise an MCP server | A CLI costs no listing tokens; MCP definitions and results cost context |
+| Noisy exploration, an independent review, a restricted tool set | A fresh-context subagent (not for a two-line lookup) | Its tool calls stay out of your context; `tools` limits what it can do |
 | A side task that needs what this conversation knows | A fork (`/subtask`) | It starts with a copy of the conversation |
-| The same extensions for a whole team | A plugin in a marketplace | One versioned unit to install |
+| The same extensions for several people or repos | A plugin in a marketplace; keep a one-person helper standalone | One versioned unit to install |
 | Two agents writing at the same time | One worktree per writer | Two writers in one checkout overwrite each other |
 | The same mechanical change across many units | `/batch` or a workflow script | A worktree per unit, bounded concurrency |
 | A run with nobody at the keyboard | `claude -p` or the Agent SDK | Approvals are decided before the run starts |
 | One set of rules for several coding agents | `AGENTS.md` as the canonical source, with thin adapters | Copies drift; pointers do not |
 
-→ [Chapter 13: Skills](13-skills.md), [Chapter 16: Output styles, status line and keybindings](16-output-styles-statusline-keybindings.md) and [Chapter 21: Multi-agent orchestration](21-multi-agent-orchestration.md)
+→ [Chapter 11: The extension model](11-the-extension-model.md) has the full decision guide; also [Chapter 15: Skills](15-skills.md) and [Chapter 26: Multi-agent orchestration](26-multi-agent-orchestration.md)
 
 ## 16. The cost levers
 
@@ -371,13 +372,12 @@ claude -p "$PROMPT" --bare --setting-sources user \
 | Idle spend | Stop `/loop` tasks and background agents you no longer need | They keep making calls |
 | Measurement | `/usage` for cost and the `Prompt cache (main)` line; `/context` for what fills the window | Change one thing, then measure again |
 
-→ [Chapter 25: Cost, usage and observability](25-cost-usage-and-observability.md) and [Chapter 04: Prompt caching, compaction and cost](04-prompt-caching-compaction-and-cost.md)
+→ [Chapter 30: Cost, usage and observability](30-cost-usage-and-observability.md) and [Chapter 04: Prompt caching, compaction and cost](04-prompt-caching-compaction-and-cost.md)
 
 ## 17. First aid when a session goes wrong
 
 | When | Move |
 |---|---|
-| The agent drifts | Press `Esc` at once and redirect |
 | You do not know what is wrong | Look before you guess: `/context`, `/usage`, `/hooks`, `/mcp`, `/doctor` |
 | The last turn went wrong | `/rewind`, or `Esc` twice; then `git status` for what the rewind missed |
 | Two corrections failed, or the same fix keeps coming back | `/clear`, find the root cause, then write a better prompt that carries what you learned |
@@ -387,8 +387,8 @@ claude -p "$PROMPT" --bare --setting-sources user \
 | Claude Code will not start, or the terminal froze | `claude doctor` from the shell; close the terminal, then `claude --resume` |
 | The same problem returns in a later session | Move the fix up a layer: from a prompt to `CLAUDE.md`, then to a hook or a deny rule |
 
-→ [Chapter 27: Troubleshooting: common problems and fixes](27-troubleshooting-common-problems.md)
+→ [Chapter 32: Troubleshooting: common problems and fixes](32-troubleshooting-common-problems.md)
 
 ---
 
-[← Previous: Prompt cookbook and anti-patterns](29-prompt-cookbook-and-anti-patterns.md) · [Contents](README.md) · [Next: Glossary →](B-glossary.md)
+[← Previous: Prompt cookbook and anti-patterns](34-prompt-cookbook-and-anti-patterns.md) · [Contents](README.md) · [Next: Glossary →](B-glossary.md)

@@ -58,7 +58,7 @@ Add a line under `[Unreleased]` in [CHANGELOG.md](CHANGELOG.md) and in the root 
 
 ## Authoring rules
 
-These rules are what keeps 29 chapters reading like one book. `make check-book` enforces the mechanical ones; review enforces the rest.
+These rules are what keeps 34 chapters reading like one book. `make check-book` enforces the mechanical ones; review enforces the rest.
 
 ### One chapter, one file, under 400 lines
 

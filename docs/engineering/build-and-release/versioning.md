@@ -34,7 +34,7 @@ Two cases are easy to get wrong:
 - Every change a reader would notice adds a line under `[Unreleased]` in `docs/CHANGELOG.md`.
 - The root `CHANGELOG.md` is a mirror. Update both in the same commit.
 - Group entries under `Added`, `Changed`, `Fixed` and `Removed`.
-- Write entries for readers: "Corrected the exit code that blocks a tool call in chapter 14", not "updated ch14".
+- Write entries for readers: "Corrected the exit code that blocks a tool call in chapter 16", not "updated ch14".
 
 ## Cutting an edition
 

@@ -41,7 +41,7 @@ The SVG figures and charts are ordinary images and need no Mermaid support. The 
 | A command, flag or setting, fast | [Appendix A, the cheat sheet](../../book/A-cheat-sheet.md) |
 | A starting file to copy | [Appendix C, templates](../../book/C-templates.md) |
 | Where a fact came from | The chapter's Sources section, then [Appendix D](../../book/D-sources.md) |
-| A fix for a symptom | [Chapter 27](../../book/27-troubleshooting-common-problems.md) |
+| A fix for a symptom | [Chapter 32](../../book/32-troubleshooting-common-problems.md) |
 | A study plan | [Appendix E](../../book/E-learning-path-and-exercises.md) |
 
 ## Validating a copy

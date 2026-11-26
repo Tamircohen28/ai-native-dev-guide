@@ -27,11 +27,12 @@ You do not have to read front to back. Choose the row that describes you:
 | You are... | Start at | Then |
 |---|---|---|
 | New to coding agents | [Chapter 1](../../book/01-what-is-ai-native-development.md) | Straight through Parts I and II |
-| Using Claude Code daily, mostly by prompting | [Chapter 7](../../book/07-claude-md-and-memory.md) to [chapter 9](../../book/09-plan-mode-checkpoints-and-context-management.md) | Part III |
-| Already writing skills and hooks | [Part IV](../../book/17-explore-plan-implement-verify.md) | Part V |
-| Rolling this out to a team | Chapters [8](../../book/08-settings-and-permissions.md), [24](../../book/24-security-and-guardrails.md), [25](../../book/25-cost-usage-and-observability.md) and [26](../../book/26-repo-standards-and-team-adoption.md) | The [templates](../../book/C-templates.md) |
-| Stuck on something right now | [Chapter 27](../../book/27-troubleshooting-common-problems.md) | The [cheat sheet](../../book/A-cheat-sheet.md) |
-| Using another tool (Cursor, Codex, Gemini CLI) | [Chapter 23](../../book/23-cross-tool-agents-md-cursor-codex-gemini.md) | Parts I and IV, where most of the ideas carry over |
+| Using Claude Code daily, mostly by prompting | [Chapter 5](../../book/05-inside-the-harness.md), then [chapter 8](../../book/08-claude-md-and-memory.md) to [chapter 10](../../book/10-plan-mode-checkpoints-and-context-management.md) | Part III |
+| Ready to build your own extensions | [Chapter 11](../../book/11-the-extension-model.md) | The workshop guides, chapters [19](../../book/19-guide-write-a-subagent.md) to [21](../../book/21-guide-build-and-ship-a-plugin.md) |
+| Already writing skills and hooks | [Part IV](../../book/22-explore-plan-implement-verify.md) | Part V |
+| Rolling this out to a team | Chapters [9](../../book/09-settings-and-permissions.md), [29](../../book/29-security-and-guardrails.md), [30](../../book/30-cost-usage-and-observability.md) and [31](../../book/31-repo-standards-and-team-adoption.md) | The [templates](../../book/C-templates.md) |
+| Stuck on something right now | [Chapter 32](../../book/32-troubleshooting-common-problems.md) | The [cheat sheet](../../book/A-cheat-sheet.md) |
+| Using another tool (Cursor, Codex, Gemini CLI) | [Chapter 28](../../book/28-cross-tool-agents-md-cursor-codex-gemini.md) | Parts I and IV, where most of the ideas carry over |
 
 The diagram below shows the same choice as a flow.
 
@@ -40,10 +41,10 @@ The diagram below shows the same choice as a flow.
 flowchart TD
     A["Open book/README.md"] --> B{"What do you need?"}
     B -->|"Learn from the start"| C["Chapter 1, then Parts I and II"]
-    B -->|"Get more from daily use"| D["Chapters 7 to 9, then Part III"]
+    B -->|"Get more from daily use"| D["Chapters 5 and 8 to 10, then Part III"]
     B -->|"Scale up: parallel work, CI"| E["Parts IV and V"]
-    B -->|"Team rollout"| F["Chapters 8, 24, 25, 26"]
-    B -->|"Fix a problem now"| G["Chapter 27, then Appendix A"]
+    B -->|"Team rollout"| F["Chapters 9, 29, 30, 31"]
+    B -->|"Fix a problem now"| G["Chapter 32, then Appendix A"]
     C --> H["Appendix E: exercises and self-checks"]
     D --> H
     E --> H

@@ -17,20 +17,20 @@ A field guide to building software *with* coding agents rather than next to them
 
 ## What is in the book
 
-- **29 chapters in six parts**, from tokens and the context window to headless runs, security and cost. Every chapter is one Markdown file you can read on GitHub or offline.
+- **34 chapters in six parts**, from tokens and the context window to headless runs, security and cost, including three hands-on workshop guides that build a subagent, a skill and a plugin. Every chapter is one Markdown file you can read on GitHub or offline.
 - **One fixed chapter shape**: a mental model with a diagram, the mechanics with examples you can copy, a "From the field" section, a symptom-cause-fix table, a checklist, exercises and sources.
 - **Two kinds of evidence, kept apart**: dated official documentation, and one developer's field data from about four weeks of real sessions. Field numbers are labelled as one person's numbers, never as benchmarks.
 - **Five appendices**: a cheat sheet, a glossary, copy-ready templates, the full bibliography, and a level-by-level learning path with a 30-day plan and capstone projects.
-- **53 Mermaid diagrams and 17 SVG figures**: diagrams render inline on GitHub; the charts are static SVG files built from the field data.
+- **62 Mermaid diagrams and 17 SVG figures**: diagrams render inline on GitHub; the charts are static SVG files built from the field data.
 - **A checker that gates every change**: `scripts/check-book.py` verifies chapter length, code fences, local links, images and Mermaid rendering before anything merges.
 
 ## Contents
 
 | Part | What it covers |
 |---|---|
-| [I — Foundations](book/README.md#part-i--foundations) | What AI-native development is, tokens and the context window, the agentic loop, caching and cost |
+| [I — Foundations](book/README.md#part-i--foundations) | What AI-native development is, tokens and the context window, the agentic loop, caching and cost, the harness architecture and what happens on each turn |
 | [II — Claude Code core](book/README.md#part-ii--claude-code-core) | Install and first session, the CLI, `CLAUDE.md` and memory, settings and permissions, steering a long session |
-| [III — Extending the harness](book/README.md#part-iii--extending-the-harness) | The Model Context Protocol in theory and practice, subagents, skills, hooks, plugins, interface customisation |
+| [III — Extending the harness](book/README.md#part-iii--extending-the-harness) | The extension model and how to choose between its pieces, the Model Context Protocol in theory and practice, subagents, skills, hooks, plugins, interface customisation, and workshop guides that build and ship a subagent, a skill and a plugin |
 | [IV — Workflows](book/README.md#part-iv--workflows) | Explore-plan-implement-verify, testing, git and review, parallel work, orchestration, headless and CI, cross-tool setups |
 | [V — Production concerns](book/README.md#part-v--production-concerns) | Security and guardrails, cost and observability, repo standards and team adoption |
 | [VI — Field guide](book/README.md#part-vi--field-guide) | A troubleshooting catalogue, nine case studies, a prompt cookbook with anti-patterns |
@@ -54,7 +54,7 @@ make install
 
 `make install` installs nothing: it checks that the tools the checks use (Python 3, jq, git, and optionally the Mermaid CLI) are present. Nothing is built and nothing runs, because the book is the Markdown under `book/`.
 
-**Read it.** Open [`book/README.md`](book/README.md) and pick a starting point from its "Who this is for" table. New to coding agents: start at chapter 1. Stuck on something right now: go to [chapter 27](book/27-troubleshooting-common-problems.md), then the [cheat sheet](book/A-cheat-sheet.md).
+**Read it.** Open [`book/README.md`](book/README.md) and pick a starting point from its "Who this is for" table. New to coding agents: start at chapter 1. Stuck on something right now: go to [chapter 32](book/32-troubleshooting-common-problems.md), then the [cheat sheet](book/A-cheat-sheet.md).
 
 **Validate it** (only needed when you change something):
 

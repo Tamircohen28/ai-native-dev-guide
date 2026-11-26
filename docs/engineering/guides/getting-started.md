@@ -2,7 +2,7 @@
 
 A walk through one realistic change: correcting a fact in a chapter and adding its source. The same steps apply to any change under `book/`.
 
-The example corrects a statement in chapter 14 and adds one source. Substitute your own chapter and branch name.
+The example corrects a statement in chapter 16 and adds one source. Substitute your own chapter and branch name.
 
 ## 0. Set up once
 
@@ -48,12 +48,12 @@ Use `fix/` for a correction and `feat/` for new content or tooling.
 
 ## 3. Edit the chapter
 
-Open `book/14-hooks.md`. Keep to the chapter skeleton; a correction usually touches one or two of its parts.
+Open `book/16-hooks.md`. Keep to the chapter skeleton; a correction usually touches one or two of its parts.
 
 | If your change is... | Edit this part | Also check |
 |---|---|---|
 | A corrected fact | The core section that states it | The Common problems table and the Checklist, which may repeat it |
-| A new failure mode | Common problems | Chapter 27, which collects problems across the book |
+| A new failure mode | Common problems | Chapter 32, which collects problems across the book |
 | A new example | The relevant core section | That you ran it and printed the output you saw |
 | A new observation from real use | From the field | That it is labelled as field data and carries no private detail |
 | A changed diagram | The Mermaid block | That labels are in double quotes and it still renders |
