@@ -16,6 +16,7 @@ All notable changes to this repository are recorded here. The format follows [Ke
 
 ### Changed
 
+- PDF build: Paged.js 0.4.3 is vendored under scripts/pdf/vendor/ (checksum recorded) instead of installed from npm, removing the deprecated @babel/polyfill and core-js@2 from the dependency tree; npm ci now installs without deprecation warnings.
 - Inline citations: 1,291 links from sourced claims in the 34 chapters to their Sources entries (475 of 508 sources cited); the PDF shows each as a numbered [n].
 - License: the repository moves from MIT to CC BY-NC-SA 4.0 (credit required, non-commercial use only, adaptations allowed under the same license).
 - Chapters 05 to 29 are now 06 to 34. Every link, heading, footer and cross-reference was remapped, and the contents, ladder, cheat sheet, glossary, learning path and sources follow the new numbering.

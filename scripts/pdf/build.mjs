@@ -543,7 +543,9 @@ async function main() {
     body = body.replace(/@@MERMAID_(\d+)@@/g, (_, n) => mermaidBlocks[Number(n)].svg);
 
     const css = fs.readFileSync(path.join(here, "book.css"), "utf8");
-    const pagedJs = pathToFileURL(path.join(root, "node_modules", "pagedjs", "dist", "paged.polyfill.js")).href;
+    // Paged.js is vendored (scripts/pdf/vendor/README.md): the npm package drags in the
+    // deprecated @babel/polyfill and core-js@2, which this self-contained bundle never loads.
+    const pagedJs = pathToFileURL(path.join(here, "vendor", "paged.polyfill.js")).href;
     const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <title>${escapeHtml(BOOK.title)}</title>
