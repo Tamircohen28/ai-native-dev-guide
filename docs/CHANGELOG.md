@@ -6,6 +6,7 @@ All notable changes to this repository are recorded here. The format follows [Ke
 
 ### Added
 
+- NotebookLM packages: `make notebookLM` now builds the PDF first and splits it into `notebookLM/pdf-split/`, one folder per part with the part's title page and one PDF per chapter, plus `00-front-matter/` (`scripts/notebooklm/split_pdf.py`). The structure is read from the PDF's outline; the run fails unless the files, joined in order, match the book page for page.
 - NotebookLM packages: `make notebookLM` (alias `make notebooklm`) writes `notebookLM/`, one folder per section of the book with the sources for one NotebookLM notebook and Video Overview: a generated video outline, the cleaned chapters, a visual-references PDF and PNG figures and diagrams (`scripts/notebooklm/`). The folder is a git-ignored build output.
 - PDF edition: the five appendices are no longer printed (about 50 pages fewer); the contents lists them as links to their files on GitHub, and links to an appendix open it there. External links in each chapter carry numbered citation markers that match a numbered Sources reference list, and the table of contents and body links are styled as links.
 - A PDF edition of the whole book: `make pdf` builds `dist/AI-Native Development.pdf` with a cover (version, commit, license, build time), a table of contents with page numbers, page numbers on every page and PDF metadata (`scripts/pdf/`). The Book PDF workflow rebuilds it on every push to `main` and publishes it on GitHub Pages; pull requests that touch the book build it as an artifact.

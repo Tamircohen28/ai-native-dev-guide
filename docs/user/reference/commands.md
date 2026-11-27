@@ -47,7 +47,7 @@ Run `make agent:check` and `make check-book` before every pull request. The firs
 
 | Target | What it does | Needs |
 |---|---|---|
-| `make notebookLM` | Packages the book for NotebookLM, one notebook and one Video Overview per section, in `notebookLM/` at the repository root. `make notebooklm` is the same target | Node.js 22.12 or later |
+| `make notebookLM` | Packages the book for NotebookLM, one notebook and one Video Overview per section, in `notebookLM/` at the repository root. It runs `make pdf` first and splits that PDF into `notebookLM/pdf-split/`, one PDF per chapter. `make notebooklm` is the same target | Node.js 22.12 or later, Python 3 with `pypdf` |
 | `make clean` | Also removes `notebookLM/` | Nothing |
 
 `notebookLM/` is a build output, like `dist/`: it is git-ignored and every run wipes and rebuilds it. Regenerate it after the book changes, then upload a section's files to its notebook. The generator is `scripts/notebooklm/build.mjs`; `make notebookLM` runs `npm ci` first when `node_modules/` is missing and uses the same pinned Mermaid CLI and puppeteer as `make pdf`.
@@ -64,7 +64,18 @@ Each section folder, `notebookLM/NN-<section>/`, holds:
 | `media/` | PNG versions of the section's figures and Mermaid diagrams at 2x on white. NotebookLM does not accept SVG sources |
 | `README.md` | Not a source: which files to upload, the source count against NotebookLM's per-notebook limit, Video Overview settings and a steering prompt |
 
-`notebookLM/README.md` lists the sections with their chapters, source files, images and word counts. The Markdown output is deterministic for a given commit; `BOOK_COMMIT` and `BOOK_VERSION` override the commit and version it records, as for `make pdf`. A Mermaid block that does not render, an image that does not exist or a section without chapters fails the run.
+`notebookLM/pdf-split/` is the book PDF cut along its table of contents by `scripts/notebooklm/split_pdf.py`. The structure is read from the PDF's own outline (bookmarks), cross-checked against the named destinations its contents page links to, so it follows the book as it changes:
+
+| Path | What it holds |
+|---|---|
+| `00-front-matter/NN-<slug>.pdf` | Everything before Part I, one file per contents entry: the cover and contents, then "About this book" |
+| `NN-<part>/00-part-<part>.pdf` | The part's title page. One folder per part of the printed book, in order, named by number and part title |
+| `NN-<part>/NN-<chapter>.pdf` | One PDF per chapter, named by its number in the book, for example `01-foundations/05-inside-the-harness.pdf` |
+| `99-back-matter/` | Anything printed after the last chapter. Created only when there is such content |
+
+The appendices are online only, so the split has none. Joined in sorted path order, the files are the whole book: the run checks that the page ranges are contiguous and that the concatenation matches the book page for page (extracted text and content-stream length), prints `pdf-split: N files, M pages = full book (M pages) ✓`, and fails otherwise. `python3 scripts/notebooklm/split_pdf.py --check "dist/AI-Native Development.pdf" notebookLM/pdf-split` repeats the check. Each file carries the book's metadata (author, subject, commit, version, license, repository) with its own title. External links work in every file; a link to a page in another file does not.
+
+`notebookLM/README.md` lists the sections with their chapters, source files, images and word counts, and the split folders with their files and pages. The Markdown output is deterministic for a given commit; `BOOK_COMMIT` and `BOOK_VERSION` override the commit and version it records, as for `make pdf`. A Mermaid block that does not render, an image that does not exist or a section without chapters fails the run.
 
 ### Agent and platform targets
 

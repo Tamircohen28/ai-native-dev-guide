@@ -80,10 +80,11 @@ pdf: ## Build the whole book as one PDF: dist/AI-Native Development.pdf
 
 # One NotebookLM notebook (and Video Overview) per section of the book, written to
 # notebookLM/ (git-ignored, rebuilt from scratch on every run). Same Node tools as make pdf.
-notebookLM: ## Package each book section for NotebookLM: notebookLM/<NN-section>/
-	@command -v node >/dev/null 2>&1 || { echo "node is required (Node.js 22.12 or later)"; exit 1; }
-	@test -d node_modules/puppeteer || npm ci
+# It builds the PDF first (make pdf) and splits it into notebookLM/pdf-split/: one folder
+# per part, one PDF per chapter, checked to join back into the whole book.
+notebookLM: pdf ## Package each book section for NotebookLM, and split the book PDF into notebookLM/pdf-split/
 	node scripts/notebooklm/build.mjs
+	python3 scripts/notebooklm/split_pdf.py "$(PDF)" notebookLM/pdf-split --readme notebookLM/README.md
 
 notebooklm: notebookLM ## Lower-case alias for make notebookLM
 
