@@ -30,6 +30,7 @@ import unicodedata
 
 try:
     from pypdf import PdfReader, PdfWriter
+    from pypdf.generic import ArrayObject, FloatObject, NameObject, NullObject, TextStringObject
 except ImportError:
     sys.exit("pypdf is missing: python3 -m pip install -r requirements-pdf.txt")
 
@@ -215,8 +216,66 @@ def verify(book, out_dir):
         if page_fingerprint(p) != page_fingerprint(reader.pages[n]):
             fail(f"page {n + 1} of the concatenation ({os.path.relpath(f, out_dir)}) differs "
                  f"from page {n + 1} of the book")
-    print(f"pdf-split: {len(files)} files, {len(pages)} pages = full book ({total} pages) ✓")
+    # Every named destination must land, at the same page offset, in the file that holds
+    # its target page; otherwise links inside that file break.
+    by_page = named_destinations_by_page(reader)
+    start = ndest = 0
+    for f in files:
+        r = PdfReader(f)
+        have = {}
+        for name, d in r.named_destinations.items():
+            try:
+                have[str(name)] = r.get_destination_page_number(d)
+            except Exception:
+                pass
+        for book_page in range(start, start + len(r.pages)):
+            for name, _ in by_page.get(book_page, []):
+                if have.get(name) != book_page - start:
+                    fail(f"named destination {name} is missing from {os.path.relpath(f, out_dir)} "
+                         f"or points at the wrong page")
+                ndest += 1
+        start += len(r.pages)
+    print(f"pdf-split: {len(files)} files, {len(pages)} pages = full book ({total} pages), "
+          f"{ndest} named destinations kept ✓")
     return files
+
+
+DEST_PARAMS = {  # the parameters each destination type carries after the page, in PDF order
+    "/XYZ": ("left", "top", "zoom"), "/Fit": (), "/FitB": (),
+    "/FitH": ("top",), "/FitBH": ("top",), "/FitV": ("left",), "/FitBV": ("left",),
+    "/FitR": ("left", "bottom", "right", "top"),
+}
+
+
+def named_destinations_by_page(reader):
+    """Map each book page index to the named destinations that point at it.
+
+    Links in the book use named /Dest entries that live in the document catalog, which
+    add_page() does not copy; without re-adding them, even same-chapter links break."""
+    by_page = {}
+    for name, dest in reader.named_destinations.items():
+        try:
+            page = reader.get_destination_page_number(dest)
+        except Exception:
+            continue
+        if page is not None and page >= 0:
+            by_page.setdefault(page, []).append((str(name), dest))
+    return by_page
+
+
+def copy_destinations(writer, by_page, a, b):
+    """Re-create, in writer, every named destination whose target lies on book pages a..b."""
+    n = 0
+    for book_page in range(a, b + 1):
+        for name, dest in by_page.get(book_page, []):
+            typ = str(dest.typ) if dest.typ in DEST_PARAMS else "/XYZ"
+            arr = ArrayObject([writer.pages[book_page - a].indirect_reference, NameObject(typ)])
+            for attr in DEST_PARAMS[typ]:
+                v = getattr(dest, attr, None)
+                arr.append(NullObject() if v is None else FloatObject(v))
+            writer.add_named_destination_array(TextStringObject(name), arr)
+            n += 1
+    return n
 
 
 def write(book, out_dir):
@@ -226,6 +285,7 @@ def write(book, out_dir):
     book_title = str(meta.get("/Title") or BOOK_TITLE_FALLBACK)
     ranges = plan(reader)
     check_ranges(ranges, total)
+    dests_by_page = named_destinations_by_page(reader)
 
     shutil.rmtree(out_dir, ignore_errors=True)
     os.makedirs(out_dir)
@@ -235,6 +295,7 @@ def write(book, out_dir):
         w = PdfWriter()
         for n in range(a, b + 1):
             w.add_page(reader.pages[n])
+        copy_destinations(w, dests_by_page, a, b)
         info = {"/Title": f"{book_title} — {title}"}
         for k in COPY_KEYS:
             if meta.get(k):
